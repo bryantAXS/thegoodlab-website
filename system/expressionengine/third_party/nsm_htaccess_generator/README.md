@@ -1,0 +1,1 @@
+Visit http://expressionengine-addons.com/nsm-htaccess-generator for more information

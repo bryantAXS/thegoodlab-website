@@ -1,0 +1,1 @@
+The file Extensions.php within this folder is copyright EllisLab, Inc. and is used by permission.

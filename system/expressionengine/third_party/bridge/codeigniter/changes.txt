@@ -1,0 +1,36 @@
+
+In the mysql_driver.php and mysqli_driver.php files, the escape_str() methods had stripslashes()
+added to them (just like EE 1.x's DB class) because EE 1.x does not remove slashes from its POST
+data and it was causing problems.
+
+========
+
+- Removed ./system/database/DB_active_rec.php
+
+- Removed ./system/database/DB_forge.php
+
+- Removed all DB Drivers except MySQLi
+
+- Removed ./system/database/mysqli/mysqli_forge.php
+
+- Removed ./system/fonts/
+
+- Removed ./system/scaffolding/
+
+
+=========
+
+Added in ./system/hermes/codeigniter/application/libraries/MY_Config.php
+Added in ./system/hermes/codeigniter/application/libraries/MY_Router.php
+
+Added in ./system/hermes/codeigniter/application/libraries/Extensions.php
+Added in ./system/hermes/codeigniter/application/libraries/Lang.php
+
+
+========
+
+Modified ./system/hermes/codeigniter/application/config/database.php
+	- Added in the $GLOBALS['db_config'] usage to auto load EE 1.x database config
+	
+Modified ./system/hermes/codeigniter/system/libraries/Controller.php
+	- 'lang' => 'Language', ===> 'lang' => 'Lang',
