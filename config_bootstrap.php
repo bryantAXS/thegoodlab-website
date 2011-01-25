@@ -204,8 +204,8 @@ if(isset($config)) {
         'is_site_on' => 'y',
         'site_404' => 'site/four04',
 
-        'webmaster_email' => 'admin@' . NSM_SERVER_NAME,
-        'webmaster_name' => 'Admin',
+        'webmaster_email' => 'info@' . 'thegoodlab.com',
+        'webmaster_name' => 'The Good Lab',
 
         // Localization preferences
         'server_timezone' => 'UP10',
