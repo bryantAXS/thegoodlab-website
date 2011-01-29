@@ -223,7 +223,7 @@ if(isset($config)) {
         'strict_urls' => 'y',
         'save_tmpl_files' => 'y',
         'save_tmpl_revisions' => 'y',
-        'tmpl_file_basepath' => NSM_BASEPATH . '/templates/',
+        'tmpl_file_basepath' => NSM_BASEPATH . '/system/expressionengine/templates/',
 
         // Theme preferences
         'theme_folder_path' => NSM_BASEPATH . '/content/themes/',

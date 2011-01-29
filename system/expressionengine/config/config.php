@@ -12,11 +12,11 @@
 
 $config['app_version'] = '213';
 $config['install_lock'] = "";
-$config['license_number'] = '';
+$config['license_number'] = "";
 $config['debug'] = '1';
-$config['cp_url'] = 'http://starter-ee.local/system/index.php';
-$config['doc_url'] = 'http://expressionengine.com/user_guide/';
-$config['is_system_on'] = 'y';
+$config['cp_url'] = "http://starter-ee.local/system/index.php";
+$config['doc_url'] = "http://expressionengine.com/user_guide/";
+$config['is_system_on'] = "y";
 $config['site_label'] = 'starter-ee';
 $config['cookie_prefix'] = '';
 
@@ -46,7 +46,7 @@ $config['base_url']	= '';
 | variable so that it is blank.
 |
 */
-$config['index_page'] = 'index.php';
+$config['index_page'] = "";
 
 /*
 |--------------------------------------------------------------------------
