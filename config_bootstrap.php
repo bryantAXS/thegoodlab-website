@@ -223,10 +223,10 @@ if(isset($config)) {
         'strict_urls' => 'y',
         'save_tmpl_files' => 'y',
         'save_tmpl_revisions' => 'y',
-        'tmpl_file_basepath' => NSM_BASEPATH . '/system/expressionengine/templates/',
+        'tmpl_file_basepath' => NSM_BASEPATH . '/templates/',
 
         // Theme preferences
-        'theme_folder_path' => NSM_BASEPATH . '/content/themes/',
+        'theme_folder_path' => NSM_BASEPATH . '/themes/',
         'theme_folder_url' => NSM_SITE_URL . '/themes/',
 
         // Tracking preferences
@@ -241,25 +241,25 @@ if(isset($config)) {
         //had to comment this out because it was breaking the member module
         //'profile_trigger' => '--sdjhkj2lffgrerfvmdkndkfisolmfmsd' . time(),
 
-        'prv_msg_upload_path' => NSM_BASEPATH . '/content/uploads/member/pm_attachments',
+        'prv_msg_upload_path' => NSM_BASEPATH . '/uploads/member/pm_attachments',
         'enable_emoticons' => 'n',
 
         'enable_avatars' => 'n',
-        'avatar_path' => NSM_BASEPATH . '/content/uploads/member/avatars/',
+        'avatar_path' => NSM_BASEPATH . '/uploads/member/avatars/',
         'avatar_url' => NSM_SITE_URL . '/uploads/member/avatars/',
         'avatar_max_height' => 100,
         'avatar_max_width' => 100,
         'avatar_max_kb' => 100,
 
         'enable_photos' => 'n',
-        'photo_path' => NSM_BASEPATH . '/content/uploads/member/photos/',
+        'photo_path' => NSM_BASEPATH . '/uploads/member/photos/',
         'photo_url' => NSM_SITE_URL . '/uploads/member/photos/',
         'photo_max_height' => 200,
         'photo_max_width' => 200,
         'photo_max_kb' => 200,
 
         'sig_allow_img_upload' => 'n',
-        'sig_img_path' => NSM_BASEPATH . '/content/uploads/member/signature_attachments/',
+        'sig_img_path' => NSM_BASEPATH . '/uploads/member/signature_attachments/',
         'sig_img_url' => NSM_SITE_URL . '/uploads/member/signature_attachments/',
         'sig_img_max_height' => 80,
         'sig_img_max_width' => 480,
@@ -269,11 +269,11 @@ if(isset($config)) {
         'captcha_font' => 'y',
         'captcha_rand' => 'y',
         'captcha_require_members' => 'n',
-        'captcha_path' => NSM_BASEPATH . '/content/'.NSM_SYSTEM_FOLDER.'/images/captchas/',
+        'captcha_path' => NSM_BASEPATH . '/'.NSM_SYSTEM_FOLDER.'/images/captchas/',
         'captcha_url' => NSM_SITE_URL.'/'.NSM_SYSTEM_FOLDER.'/images/captchas/',
 
         // NSM htaccess Generator
-        'nsm_htaccess_generator_path' => NSM_BASEPATH . "/content/.htaccess",
+        'nsm_htaccess_generator_path' => NSM_BASEPATH . "/.htaccess",
     );
 
     // Build the new config object
