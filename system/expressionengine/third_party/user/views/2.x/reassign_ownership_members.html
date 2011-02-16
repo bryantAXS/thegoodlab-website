@@ -1,0 +1,4 @@
+	<option value="0"><?php echo $this->output(ee()->lang->line('choose_member'));?></option>
+<?php foreach($members as $member_id => $screen_name) : ?>
+	<option value="<?php echo $member_id;?>"><?php echo $this->output($screen_name);?></option>
+<?php endforeach;?>

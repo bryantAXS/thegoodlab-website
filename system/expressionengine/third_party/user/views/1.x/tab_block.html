@@ -1,0 +1,162 @@
+<div id="blockuser_authors" style="display: none; padding:0; margin:0;">
+	<div class="publishTabWrapper">
+		<div class="publishBox">
+			<div class="publishInnerPad">
+			<input type="hidden" name="user_authors_hash" value="<?php echo $hash;?>" />
+			
+<script type="text/javascript">
+// jQuery Functions
+jQuery(function($)
+{
+	$("div#user_authors_assigned ul li a").bind("click", user_authors_delete);
+	
+	$("span#user_authors_search button").click(function(event)
+	{
+		return user_authors_search(event);
+	});
+	
+	$("table#user_authors_table input#browse_authors").keypress(function(event)
+	{
+		if ( event.which == 13 )
+		{
+			return user_authors_search(event);
+		}
+	});
+	
+	function user_authors_search(event)
+	{
+		$("span#user_authors_search").toggleClass("loading");
+		
+		var author = $("table#user_authors_table input[name='browse_authors']").attr("value");
+		var ids = "";
+	
+		$.each($("div#user_authors_assigned ul li a"), function(i,n)
+		{
+			ids += $(n).attr("href") + "||";
+		});
+		
+		$("div#user_authors_results ul").load( 
+			"<?php echo $user_base;?>&method=user_authors_search&no_cache=" + (new Date()).getTime(),
+			{
+				XID: 		"<?php echo $hash;?>",
+				channel_id: "<?php echo $channel_id;?>",
+				entry_id: 	"<?php echo $entry_id;?>",
+				author: 	author,
+				existing: 	ids 
+			},
+			function()
+			{
+				$("span#user_authors_search").toggleClass("loading");
+				$("div#user_authors_results ul li a").
+					unbind("click", user_authors_add).
+					bind("click", user_authors_add);
+			}
+		);
+		
+		return false;
+	}
+	
+	function user_authors_add(event)
+	{
+		$("span#user_authors_search").toggleClass("loading");
+		
+		var li = $(this).parent("li");
+		var author_id = $(this).attr("alt");
+		
+		// alert( author_id );
+		
+		$.post( 
+			"<?php echo $user_base;?>&method=user_authors_add",
+			{
+				XID: 		"<?php echo $hash;?>",
+				hash: 		"<?php echo $hash;?>",
+				entry_id: 	"<?php echo $entry_id;?>",
+				author_id: 	author_id
+			},
+			function(data)
+			{
+				$(li).children("input[type='radio']").show();
+				$("div#user_authors_assigned ul").append($(li));
+				$(li).children("a").unbind("click", user_authors_add)
+				$("div#user_authors_assigned ul li a").
+					unbind("click", user_authors_delete).
+					bind("click", user_authors_delete).
+					html("Remove");
+				$("span#user_authors_search").toggleClass("loading");
+			}
+		);
+		
+		return false;
+	}
+	
+	function user_authors_delete(event)
+	{
+		var answer = confirm("<?php echo $this->output(ee()->lang->line('user_authors_confirm_delete'));?>");
+		
+		if ( ! answer ) {return false;}
+	
+		$("span#user_authors_search").toggleClass("loading")
+		
+		var li = $(this).parent("li");
+		var author_id = $(this).attr("alt");
+	
+		$.post( "<?php echo $user_base?>&method=user_authors_delete",
+				{
+					XID: "<?php echo $hash;?>",
+					hash: "<?php echo $hash;?>",
+					entry_id: "<?php echo $entry_id;?>",
+					author_id: author_id
+				},
+				function(data)
+		{
+			$(li).remove();
+			$("span#user_authors_search").toggleClass("loading")
+		});
+	
+	return false;
+	}
+});
+</script>
+
+
+<table id="user_authors_table" class="clusterBox" cellpadding="0" border="0" cellspacing="0" style="width:99%;">
+	<tr>
+		<td class="publishItemWrapper" width="50%" height="200" valign="top"><br />
+			<h5><?php echo ee()->lang->line('browse_authors');?></h5>
+			
+			<div class='defaultSmall' ><?php echo ee()->lang->line('browse_authors_instructions');?></div>
+
+			<input dir='ltr' style='width:75%' type='text' name='browse_authors' id='browse_authors' value='' size='90' maxlength='100' class='input'  />
+			
+			<span id="user_authors_search"><button><?php echo ee()->lang->line('search');?></button></span>
+			
+			<div id="user_authors_results">
+				<ul></ul>
+			</div>
+		</td>
+		<td class="publishItemWrapper" width="50%" valign="top"><br />
+			<h5><?php echo ee()->lang->line('assigned_authors');?></h5>
+			
+			<div class='defaultSmall'><?php echo ee()->lang->line('assigned_authors_instructions');?></div>
+			<div id="user_authors_assigned">
+				<ul>
+					<?php foreach($assigned_authors as $author_id => $screen_name) : ?>
+					
+						<li>
+							<input type="radio" name="user_authors_principal" value="<?php echo $author_id;?>" <?php echo ($principal_author == $author_id) ? 'checked="checked"' : '';?> />
+						
+							<label for="user_authors_principal"><?php echo $screen_name;?></label>
+						 	(<a href="<?php echo $author_id;?>" alt="<?php echo $author_id;?>"><?php echo ee()->lang->line('remove');?></a>)
+						</li>
+					
+					<?php endforeach;?>
+				</ul>
+			</div>
+		</td>
+	</tr>
+</table>
+				
+			</div>
+		</div>
+	</div>
+</div>

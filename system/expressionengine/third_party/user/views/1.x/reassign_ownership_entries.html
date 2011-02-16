@@ -1,0 +1,14 @@
+<?php if (sizeof($entries) == 0) :?>
+	<tr>
+		<td colspan="2" class="tableCellOne"><?php echo ee()->lang->line('no_results');?></td>
+	</tr>
+<?php else: ?>
+	<?php foreach($entries as $entry_id => $entry_title) : ?>
+		<?php $style = $this->cycle('tableCellTwo', 'tableCellOne'); ?>
+		
+		<tr>
+			<td style="width: 7%;" class="<?php echo $style;?>"><input type="checkbox" name="entry_ids[]" value="<?php echo $entry_id;?>" /></td>	
+			<td class="<?php echo $style;?>"><?php echo $this->output($entry_title);?></td>
+		</tr>
+	<?php endforeach;?>
+<?php endif;?>

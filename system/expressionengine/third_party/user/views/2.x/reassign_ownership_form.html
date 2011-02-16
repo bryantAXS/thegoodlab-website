@@ -1,0 +1,177 @@
+
+<?php $this->load->view('header.html');?>
+
+<div class="clear_left"></div>
+
+<script type="text/javascript">
+
+jQuery(document).ready(function()
+{
+	jQuery('input[name=member_keywords]').keyup(function(event)
+	{
+		jQuery.ajax(
+		{
+			type: "POST",
+			datatype: "html",
+			url: "<?php echo $ajax_find_member;?>",
+			data: jQuery('#reassign_ownership_form').find('input[name=XID],input[name=member_keywords]'),
+			error: function(XMLHttpRequest, textStatus, errorThrown)
+			{
+				alert('Error! ' + errorThrown + ' ' + textStatus);
+			},
+			success: function(msg)
+			{
+				//alert(msg);
+				jQuery('select[name=member_id]').html(msg);
+				
+				// Only one result?  Select it, yo!
+				if (jQuery('select[name=member_id] option').length == 2)
+				{
+					jQuery('select[name=member_id]').val(jQuery(jQuery('select[name=member_id] option')[1]).val());
+					performEntryTitleSearch();
+				}
+			}
+		});
+	});
+	
+	jQuery('input[name=entry_title_keywords]').keyup(function(event)
+	{
+		performEntryTitleSearch();
+	});
+	
+	jQuery('select[name=channel_id],select[name=member_id]').change(function(event)
+	{
+		performEntryTitleSearch();
+	});
+});
+
+var weblogSearchInProgress = 0;
+
+function performEntryTitleSearch()
+{
+	weblogSearchInProgress++;
+	
+	if (weblogSearchInProgress > 1)
+	{
+		return;
+	}
+	
+	jQuery.ajax(
+	{
+		type: "POST",
+		datatype: "html",
+		url: "<?php echo $ajax_find_entries;?>",
+		data: jQuery('#reassign_ownership_form').find('input[name=XID],select[name=member_id],input[name=entry_title_keywords],select[name=channel_id]'),
+		error: function(XMLHttpRequest, textStatus, errorThrown)
+		{
+			alert('Error! ' + errorThrown + ' ' + textStatus);
+		},
+		success: function(msg)
+		{
+			//alert(msg);
+			jQuery('#entries_result').html(msg);
+			
+			if (weblogSearchInProgress > 1)
+			{
+				weblogSearchInProgress = 0;
+				performEntryTitleSearch();
+			}
+			else
+			{
+				weblogSearchInProgress = 0;
+			}
+		}
+	});
+
+}
+
+</script>
+
+<div class="pageContents">
+
+<form action="<?php echo $caller->output($base_uri.'&method=reassign_ownership_confirm');?>" 
+	  method="post" id="reassign_ownership_form" class="">
+	<input type="hidden" name="XID" value="<?php echo $XID_SECURE_HASH;?>" />
+
+	<h3 class="accordion ui-accordion-header ui-helper-reset ui-state-active ui-corner-top"
+		style="padding-left:10px; margin-bottom:0;">
+		<?php echo $this->lang->line('find_members_text');?>
+	</h3>
+
+	<table id="entries" class="mainTable padTable" border="0" cellspacing="0" cellpadding="0">	
+		<tbody>
+			<tr>
+				<td style="width: 25%;">
+					<label for="member_keywords"><?php echo $this->lang->line('member_search');?>: </label>
+				</td>
+				<td>
+					<?php 
+						$form_fields['member_keywords']->setAttribute('autocomplete', 'off');
+						echo $form_fields['member_keywords']->output();?>
+				</td>
+			</tr>
+			
+			<tr class="odd">
+				<td style="width: 25%;">
+					<label for="member_keywords"><?php echo $this->lang->line('choose_member');?>: </label>
+				</td>
+				<td>
+					<?php echo $form_fields['member_id']->output();?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div class="clearfix shun"></div>
+	
+	<h3 class="accordion ui-accordion-header ui-helper-reset ui-state-active ui-corner-top"
+		style="padding-left:10px; margin-bottom:0;">
+		<?php echo $this->lang->line('find_entries_text');?>
+	</h3>
+	
+	<table id="entries" class="mainTable padTable" border="0" cellspacing="0" cellpadding="0">		
+		<tbody>
+			<tr>
+				<td style="width: 25%;">
+					<label for="entry_title_keywords"><?php echo $this->lang->line('entry_title_keywords');?>: </label>
+				</td>
+				<td>
+					<?php echo $form_fields['entry_title_keywords']->output();?>
+				</td>
+			</tr>
+			<tr class="odd">
+				<td style="width: 25%;">
+					<label for="channels"><?php echo $this->lang->line('channel');?>: </label>
+				</td>
+				<td>
+					<?php echo $form_fields['channel_id']->output();?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div class="clearfix shun"></div>
+	
+	<h3 class="accordion ui-accordion-header ui-helper-reset ui-state-active ui-corner-top"
+		style="padding-left:10px; margin-bottom:0;">
+		<?php echo $this->lang->line('choose_entries');?>
+	</h3>
+	
+	<table id="entries" class="mainTable padTable" border="0" cellspacing="0" cellpadding="0">		
+		<tbody id="entries_result">
+			<tr>
+				<td colspan="2"><?php echo $this->lang->line('no_results');?></td>
+			</tr>
+		</tbody>
+	</table>
+
+	<p>
+		<input type="submit" name="submit" 
+				value="<?php echo $this->lang->line('assign_to_member');?>" class="submit"  />
+	</p>
+
+</form>
+
+</div>
+
+<?php $this->load->view('footer.html');?>

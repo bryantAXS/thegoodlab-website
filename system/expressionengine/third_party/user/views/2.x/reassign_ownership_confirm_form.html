@@ -1,0 +1,22 @@
+
+<?php $this->load->view('header.html');?>
+
+<div class="clear_left"></div>
+	
+	<div class="pageContents">
+	
+		<form action="<?php echo $caller->output($base_uri.'&method=process_reassign_ownership');?>" method="post" id="reassign_ownership_confirm_form">
+			<input type="hidden" name="XID" value="<?php echo $XID_SECURE_HASH;?>" />
+			
+			<?php foreach($hidden_form_fields as $field) : ?>
+				<?php echo $field->output();?>
+			<?php endforeach;?>
+			
+			<p class="shun"><?php echo $reassign_question;?></p>
+			
+			<p><input type="submit" name="submit" value="<?php echo $this->lang->line('reassign');?>" class="submit"  /></p>
+		</form>
+	
+	</div>
+
+<?php $this->load->view('footer.html');?>

@@ -1,0 +1,36 @@
+<?php echo $this->view('header.html');?>
+	
+	<form action='<?php echo $form_url;?>' method='post'>
+		<input type="hidden" name="XID" value="{XID_SECURE_HASH}" />
+	
+		<input type="hidden" name="run_update" value="y" />
+		
+		<div class='tableHeading'><?php echo ee()->lang->line('update_user_module'); ?></div>
+		
+		<table border='0'  cellspacing='0' cellpadding='0' style='width:100%;'  class='tableBorder' >
+			<thead>
+				<tr>
+					<td style='width:50%;' class="tableHeadingAlt"><?php echo ee()->lang->line('update_user_module');?></td>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr>
+					<td valign="top" style="width: 25%;" class="tableCellTwo">
+						<div class='itemWrapper' >
+							<p><strong><?php echo ee()->lang->line('user_update_message'); ?></strong></p>
+						</div>
+			
+						<div class='itemWrapper' >
+							<input  type='submit' class='submit' value='<?php echo ee()->lang->line('update');?>'  />
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class='clearfix' >&nbsp;</div>
+		
+	</form>
+	
+<?php echo $this->view('footer.html'); ?>

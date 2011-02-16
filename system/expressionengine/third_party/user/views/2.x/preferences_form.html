@@ -1,0 +1,254 @@
+<?php $this->load->view('header.html');?>
+
+<div class="pageContents">
+
+<form id="user_accordion" action="<?php echo $caller->output($base_uri.'&method=update_preferences');?>" method="post">
+	<input type="hidden" name="XID" value="<?php echo $XID_SECURE_HASH;?>" />
+
+	<div> 
+		<!-- general prefs accordion -->
+		<h3 class="accordion"><?=$lang_general_preferences?></h3> 
+		<div style="padding: 5px 1px; display: block; overflow: auto;" 
+			 class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" 
+			 role="tabpanel"> 
+			<table class="mainTable padTable" border="0" cellspacing="0" cellpadding="0">			
+				
+				<tbody>
+					
+					<!-- email is username -->
+					<tr class="odd" style="width: 35%;">
+						<td valign="top">
+							<label for="email_is_username">
+								<?=$lang_email_is_username?>
+							</label>
+							<div class="subtext">
+								<?=$lang_email_is_username_subtext?>
+							</div>
+						</td>
+						<td valign="top" style="width: 65%;">
+							<label 	for="email_is_username_yes">Yes</label>
+							<input 	type="radio" name="email_is_username" 
+									value="y" id="email_is_username_yes" 
+									<?php if ($emiun) echo 'checked="checked"'; ?> style="width:20px;" /> &nbsp; 
+							
+							<label 	for="email_is_username_no">No</label>
+							<input 	type="radio" name="email_is_username" 
+									value="n" id="email_is_username_no" 
+									<?php if ( ! $emiun) echo 'checked="checked"'; ?> style="width:20px;" /> 
+							
+						</td>
+					</tr>
+					
+					<!-- screen name override -->
+					<tr class="even">
+						<td valign="top">
+							<label for="screen_name_override">
+								<?=$lang_screen_name_override?>
+							</label>
+							<div class="subtext">
+								<?=$lang_screen_name_override_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<input type="text" dir="ltr" style="width:90%" 
+								   name="screen_name_override" value="<?=$pref_screen_name_override?>" 
+								   size="35" class="input" />
+						</td>
+					</tr>
+					
+					<!-- category groups -->
+					<tr class="odd">
+						<td valign="top">
+							<label for="category_groups">
+								<?=$lang_category_groups?>
+							</label>
+							<div class="subtext">
+								<?=$lang_category_groups_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<select class="select" name="category_groups[]" 
+									multiple="multiple" size="5" style="width:50%; padding:5px;">
+								<?php foreach ($category_groups AS $group_data): ?>
+									<option value="<?=$group_data['group_id']?>" <?php 
+										if ($group_data['selected']) echo 'selected="selected"';?> >
+										<?=$group_data['group_name']?>
+									</option>
+								<?php endforeach;?>	
+							</select>
+						</td>
+					</tr>
+					
+					
+					<tr class="odd">
+						<td valign="top">
+							<label for="key_expiration">
+								<?=$lang_key_expiration?>
+							</label>
+							<div class="subtext">
+								<?=$lang_key_expiration_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<input type="text" dir="ltr" style="width:90%" 
+								   name="key_expiration" value="<?=$pref_key_expiration?>" 
+								   size="35" class="input">
+						</td>
+					</tr>
+					
+				</tbody>
+			</table>
+		</div> 
+
+
+		<!-- email prefs accordian -->
+		<h3 class="accordion"><?=$lang_email_notifications?></h3> 
+		<div style="padding: 5px 1px; display: block; overflow: auto;" 
+			 class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" 
+			 role="tabpanel">
+			<table class="mainTable padTable" border="0" cellspacing="0" cellpadding="0">			
+				<tbody>
+					<tr class="even">
+						<td valign="top" style="width: 35%;">
+							<label for="welcome_email_subject"><?=$lang_welcome_email_subject?></label>
+						</td>
+						<td valign="top" style="width: 65%;">
+							<input 	type="text" dir="ltr" 
+									style="width:90%" name="welcome_email_subject" 
+									value="<?=$pref_welcome_email_subject?>" size="35" class="input" />
+						</td>
+					</tr>
+					
+					<tr class="odd">
+						<td valign="top">
+							<label for="welcome_email_content">
+								<?=$lang_welcome_email_content?>
+							</label>
+							<div class="subtext">
+								<?=$lang_welcome_email_content_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<textarea dir="ltr" style="width:100%" 
+									  cols="90" rows="15" 
+									  name="welcome_email_content" id="welcome_email_content" 
+									  class="textarea"><?=$pref_welcome_email_content?></textarea>
+						</td>
+					</tr>
+					
+					<tr class="even">
+						<td valign="top">
+							<label for="member_update_admin_notification_emails">
+								<?=$lang_member_update_admin_notification_emails?>
+							</label>
+						</td>
+						<td valign="top">
+							<textarea 	dir="ltr" style="width:100%" 
+										cols="90" rows="2" 
+										name="member_update_admin_notification_emails" 
+										id="member_update_admin_notification_emails" 
+										class="textarea"><?=$pref_member_update_admin_notification_emails?></textarea>
+						</td>
+					</tr>
+					
+					<tr class="odd">
+						<td valign="top">
+							<label for="member_update_admin_notification_template">
+								<?=$lang_member_update_admin_notification_template?>
+							</label>
+							<div class="subtext">
+								<?=$lang_member_update_admin_notification_template_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<textarea 	dir="ltr" style="width:100%" 
+										cols="90" rows="15" 
+										name="member_update_admin_notification_template" 
+										id="member_update_admin_notification_template" 
+										class="textarea"><?=$pref_member_update_admin_notification_template?></textarea>
+						</td>
+					</tr>
+					
+					<tr class="even">
+						<td valign="top">
+							<label for="user_forgot_username_message">
+								<?=$lang_user_forgot_username_message?>
+							</label>
+							<div class="subtext">
+								<?=$lang_user_forgot_username_message_subtext?>
+							</div>
+						</td>
+						<td valign="top">
+							<textarea 	dir="ltr" style="width:100%" 
+										cols="90" rows="15" 
+										name="user_forgot_username_message" 
+										id="user_forgot_username_message" 
+										class="textarea"><?=$pref_user_forgot_username_message?></textarea>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+		</div>
+
+		<!-- multiple authors accordion -->
+		<h3 class="accordion"><?=$lang_multiple_authors?></h3> 
+		<div style="padding: 5px 1px; display: block; overflow: auto;" 
+			 class="ui-accordion-content ui-helper-reset ui-widget-content ui-corner-bottom ui-accordion-content-active" 
+			 role="tabpanel">
+
+			<input type="hidden" name="name" value="user_authors" />
+				
+			<h4><?php echo ee()->lang->line('user_authors_instructions');?></h4>
+			<div class="clear_left shun"></div>
+			
+			<table class="mainTable padTable" 
+				   border='0'  
+				   cellspacing='0' 
+				   cellpadding='0' 
+				   style='margin-top: 5px; width:100%; border:none;' >
+				<thead>
+					<tr>
+						<th style="width:35%"><?php echo ee()->lang->line('channels');?></th>
+						<th style="width:65%"><?php echo ee()->lang->line('user_authors_publish_tab_label');?></th>
+					</tr>
+				</thead>	
+				<tbody>
+					<?php foreach($channels as $channel_id => $channel_data) : ?>
+						<?php $style = $caller->cycle('odd', 'even');?>
+						<tr  class='<?php echo $style;?>' >
+							<td>
+								<div class='default' ><?php echo $channel_data['site_label'];?> :: <?php 
+									echo $channel_data['channel_title'];?></div>
+								</td>
+							<td>
+								<input dir='ltr' style='width:30%' type='text' 
+									   name='channel_id[<?php echo $channel_id;?>]' 
+									   id='channel_id<?php echo $channel_id;?>' 
+									   value='<?php echo $caller->output($channel_data['tab_label']);?>' 
+									   size='' maxlength='' class=''  />
+							</td>
+						</tr>
+					<?php endforeach; ?>
+				</tbody>
+			</table>
+		</div>
+
+
+
+	</div><!-- end accordian-->
+
+		<p>
+			<input type="submit" name="submit" value="<?php echo $this->lang->line('update');?>" class="submit"  />
+		</p>
+
+	</form>
+
+</div>
+
+<script type='text/javascript'>
+	jQuery(function($){
+		$("#user_accordion").accordion({autoHeight: false, header: "h3"}); 
+	});
+</script>
+
+<?php $this->load->view('footer.html');?>

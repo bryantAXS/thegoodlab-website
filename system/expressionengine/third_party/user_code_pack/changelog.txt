@@ -1,0 +1,5 @@
+Solspace - User Code Pack - Change Log
+
+
+1.0.0 (December 9, 2010)
+ - Initial release.

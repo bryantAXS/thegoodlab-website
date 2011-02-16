@@ -1,0 +1,173 @@
+
+<?php $this->view('header.html');?>
+
+<script type="text/javascript">
+
+jQuery(document).ready(function()
+{
+	jQuery('input[name=member_keywords]').keyup(function(event)
+	{
+		jQuery.ajax(
+		{
+			type: "POST",
+			datatype: "html",
+			url: "<?php echo $ajax_find_member;?>",
+			data: jQuery('#reassign_ownership_form').find('input[name=XID],input[name=member_keywords]'),
+			error: function(XMLHttpRequest, textStatus, errorThrown)
+			{
+				alert('Error! ' + errorThrown + ' ' + textStatus);
+			},
+			success: function(msg)
+			{
+				//alert(msg);
+				jQuery('select[name=member_id]').html(msg);
+				
+				// Only one result?  Select it, yo!
+				if (jQuery('select[name=member_id] option').length == 2)
+				{
+					jQuery('select[name=member_id]').val(jQuery(jQuery('select[name=member_id] option')[1]).val());
+					entryTitleSearch();
+				}
+			}
+		});
+	});
+	
+	jQuery('input[name=entry_title_keywords]').keyup(function(event)
+	{
+		entryTitleSearch();
+	});
+	
+	jQuery('select[name=channel_id],select[name=member_id]').change(function(event)
+	{
+		entryTitleSearch();
+	});
+});
+
+var weblogSearchTimer = undefined;
+
+function entryTitleSearch()
+{
+	if ( weblogSearchTimer != undefined )
+	{
+		clearTimeout(weblogSearchTimer);
+	}
+	
+	weblogSearchTimer = setTimeout(function()
+	{
+		weblogSearchTimer = undefined;
+		performEntryTitleSearch()
+	},
+	250);
+}
+
+function performEntryTitleSearch()
+{
+	jQuery.ajax(
+	{
+		type: "POST",
+		datatype: "html",
+		url: "<?php echo $ajax_find_entries;?>",
+		data: jQuery('#reassign_ownership_form').find('input[name=XID],select[name=member_id],input[name=entry_title_keywords],select[name=channel_id]'),
+		error: function(XMLHttpRequest, textStatus, errorThrown)
+		{
+			alert('Error! ' + errorThrown + ' ' + textStatus);
+		},
+		success: function(msg)
+		{
+			//alert(msg);
+			jQuery('#entries_result').html(msg);
+		}
+	});
+
+}
+
+</script>
+
+<form action="<?php echo $caller->output($this->base.'&method=reassign_ownership_confirm');?>" method="post" id="reassign_ownership_form">
+	<input type="hidden" name="XID" value="{XID_SECURE_HASH}" />
+	
+		<table id="member_search" style="width:100%;" class="tableBorder" border="0" cellspacing="0" cellpadding="0">
+		<thead>
+			<tr>
+				<td colspan="2" class="tableHeadingAlt"><?php echo ee()->lang->line('find_members_text');?></td>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<tr>
+				<td style="width: 25%;" class="tableCellOneBold">
+					<label for="member_keywords"><?php echo ee()->lang->line('member_search');?>: </label>
+				</td>
+				<td class="tableCellOne">
+					<?php 
+						$form_fields['member_keywords']->setAttribute('autocomplete', 'off');
+						echo $form_fields['member_keywords']->output();
+					?>
+				</td>
+			</tr>
+			
+			<tr class="">
+				<td style="width: 25%;" class="tableCellTwoBold">
+					<label for="member_keywords"><?php echo ee()->lang->line('choose_member');?>: </label>
+				</td>
+				<td class="tableCellTwo">
+					<?php echo $form_fields['member_id']->output();?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div class='clearfix' >&nbsp;</div>
+	
+	<table id="entries_search" style='width:100%;' class='tableBorder' border="0" cellspacing="0" cellpadding="0">
+		<thead>
+			<tr>
+				<td colspan="2" class="tableHeadingAlt"><?php echo ee()->lang->line('find_entries_text');?></td>
+			</tr>
+		</thead>
+		
+		<tbody>
+			<tr>
+				<td style="width: 25%;" class="tableCellOneBold">
+					<label for="entry_title_keywords"><?php echo ee()->lang->line('entry_title_keywords');?>: </label>
+				</td>
+				<td class="tableCellOne">
+					<?php echo $form_fields['entry_title_keywords']->output();?>
+				</td>
+			</tr>
+			<tr class="">
+				<td style="width: 25%;" class="tableCellTwoBold">
+					<label for="channels"><?php echo ee()->lang->line('channel');?>: </label>
+				</td>
+				<td class="tableCellTwo">
+					<?php echo $form_fields['channel_id']->output();?>
+				</td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div class='clearfix' >&nbsp;</div>
+	
+	<table id="entries" style='width:100%;'  class='tableBorder' border="0" cellspacing="0" cellpadding="0">
+		<thead>
+			<tr>
+				<td colspan="2" class="tableHeadingAlt"><?php echo ee()->lang->line('choose_entries');?></td>
+			</tr>
+		</thead>
+		
+		<tbody id="entries_result">
+			<tr>
+				<td colspan="2" class="tableCellOne"><?php echo ee()->lang->line('no_results');?></td>
+			</tr>
+		</tbody>
+	</table>
+	
+	<div class="clearfix"></div>
+
+	<div class="itemWrapperTop">
+		<input type="submit" name="submit" value="<?php echo ee()->lang->line('assign_to_member');?>" class="submit"  />
+	</div>
+
+</form>
+
+<?php $this->view('footer.html');?>

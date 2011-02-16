@@ -1,0 +1,42 @@
+#user_authors_results, #user_authors_assigned
+{
+	margin: 5px 0 0 0;
+	border: 1px solid #ccc;
+	height: 150px;
+}
+
+#user_authors_results
+{
+	overflow: auto;
+}
+
+#user_authors_assigned ul
+{
+	margin: 3px 0 0 0;
+	padding: 0;
+}
+
+table#user_authors_table ul {
+	list-style:none;
+	margin: 3px 0 0 0;
+	padding:0 5px 5px 5px;
+	height: auto;
+	overflow: auto;
+}
+
+table#user_authors_table ul li {
+	padding: 2px 0;
+}
+
+table#user_authors_table div#user_authors_assigned ul {
+	height: 150px;
+}
+
+span#user_authors_search
+{
+	padding: 0 0 0 26px;
+}
+
+span.loading {
+	background: transparent url({THEME_FOLDER}user_themes/default/images/spinner.gif) no-repeat 5px 50%;
+}

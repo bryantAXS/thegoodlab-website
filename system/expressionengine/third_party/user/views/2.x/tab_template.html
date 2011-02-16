@@ -1,0 +1,87 @@
+<style type="text/css">
+	#solspace_user_choices,
+	#solspace_user_authors {
+		width:	47%;
+	}
+	
+	#solspace_user_choices p,
+	#solspace_user_authors p {
+		margin-bottom:10px;
+	}
+	
+	.solspace_chose,
+	.solspace_chosen{
+		float:right;
+		margin-top:-2px;
+		cursor:pointer;
+	} 
+	.solspace_user_choice {
+		padding:7px;
+		margin-bottom:10px;
+		width: 250px;
+	}
+	
+	.solspace_primary {
+		width:16px;
+		height:16px;
+		float:left;
+		margin-top:-2px;
+		cursor:pointer;
+		margin-right:10px;
+	}
+	
+	#solspace_user_choices {
+		border-color:#D1D5DE;
+		padding:10px 10px 0 10px;
+		float:left;
+	}
+	
+	#solspace_user_authors{
+		border-color:#D1D5DE;
+		padding:10px 10px 0 10px;
+		float:right;
+	}
+	
+	#solspace_user_search {
+		margin-bottom:10px;
+	}
+	
+	#solspace_user_not_found {
+		display:none;
+	}
+</style>
+<div id="solspace_user_choices" class="ui-widget ui-widget-content ui-corner-all">
+	<h4><?=$lang_browse_authors?></h4>
+	<p><?=$lang_choose_author_instructions?></p>
+	<input type="text" class="input" id="solspace_user_search" style="width:75%;" maxlength='100'/>
+	<button id="solspace_user_search_button" class="submit"><?=$lang_search?></button>
+	<div id="solspace_user_not_found"><p><?=$lang_no_matching_authors?></p></div>
+	<div id="solspace_user_authors_results">
+	</div>	
+</div>
+<div id="solspace_user_authors" class="ui-widget ui-widget-content ui-corner-all">
+	<h4><?=$lang_assigned_authors?></h4>
+	<p><?=$lang_assigned_authors_instructions?></p>
+	<div class="holder">	
+	<?php if (! empty($current_authors)): 
+			foreach($current_authors AS $author):?>
+			<div id="solspace_uid_<?=$author['author_id']?>" class="solspace_user_choice ui-state-default ui-corner-all">
+				<?php if ($author['principal'] != 'y'):?>
+				<div class="solspace_primary ui-state-default ui-corner-all">
+					<span class="ui-icon ui-icon-radio-on"></span>
+				</div>
+				<?php else:?>
+					<div class="solspace_primary ui-state-default ui-corner-all">
+						<span class="ui-icon ui-icon-bullet"></span>
+					</div>	
+				<?php endif;?>
+				<?=$author['screen_name']?>
+				<div class="solspace_chosen ui-state-default ui-corner-all">
+					<span class="ui-icon ui-icon-circle-close"></span>
+				</div>
+			</div>
+	<?php 	endforeach;
+		  endif;?>	
+	</div>
+	<div class="clearfix"></div>
+</div>

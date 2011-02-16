@@ -1,0 +1,14 @@
+Solspace - Code Pack module - Change Log
+
+
+1.1.1 (December 11, 2010)
+ - Added conditionals to detect EE1 vs EE2 to make Code Packs smarter.
+ - Modified Code Pack to now insert new template groups at the bottom of the list of groups.
+ - Updated and enhanced Code Pack module CP area (in EE 2.x) to conform completely to native EE styling.
+ - Fixed an error where duplicate index files were sometimes being inserted into template groups.
+
+1.1.0 (October 21, 2010)
+ - Updated module for EE 2.x compatibility.
+
+1.0.0 (December 29, 2009)
+ - Initial release.

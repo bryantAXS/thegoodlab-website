@@ -1,0 +1,36 @@
+
+<?php $this->view('header.html');?>
+	
+	<form action="<?php echo $caller->output($this->base.'&method=process_reassign_ownership');?>" method="post" id="reassign_ownership_confirm_form">
+	
+		<?php foreach($hidden_form_fields as $field) : ?>
+			<?php echo $field->output();?>
+		<?php endforeach;?>
+				
+		<table border='0'  cellspacing='0' cellpadding='0' style='width:100%;'  class='tableBorder' >
+			<thead>
+				<tr>
+					<td style='width:50%;' class="tableHeadingAlt"><?php echo ee()->lang->line('reassign_ownership_confirm');?></td>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<tr>
+					<td valign="top" style="width: 25%;" class="tableCellTwo">
+						<div class='itemWrapper' >
+							<p><strong><?php echo $reassign_question;?></strong></p>
+						</div>
+			
+						<div class='itemWrapper' >
+							<input  type='submit' class='submit' value='<?php echo ee()->lang->line('reassign');?>'  />
+						</div>
+					</td>
+				</tr>
+			</tbody>
+		</table>
+		
+		<div class='clearfix' >&nbsp;</div>
+		
+	</form>
+
+<?php $this->view('footer.html');?>

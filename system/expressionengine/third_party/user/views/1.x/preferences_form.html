@@ -1,0 +1,81 @@
+
+<?php $this->view('header.html');?>
+
+
+<form action="<?php echo $this->base.AMP.'method=update_preferences';?>" method="post">
+	<input type="hidden" name="XID" value="{XID_SECURE_HASH}" />
+
+		<table border='0'  cellspacing='0' cellpadding='0' style='width:100%;'  class='tableBorder' >
+			<thead>
+				<tr>
+					<td style='width:50%;' class="tableHeadingAlt"><?php echo ee()->lang->line('user_preference');?></td>
+					<td style='width:50%;' class="tableHeadingAlt"><?php echo ee()->lang->line('user_setting');?></td>
+				</tr>
+			</thead>
+			
+			<tbody>
+				<?php foreach($form_fields as $field_name => $field) : ?>
+					<?php $style = $this->cycle('tableCellOne', 'tableCellTwo'); ?>
+					<tr>
+						<td valign="top" style="width: 25%;" class="<?php echo $style;?>Bold">
+							<label for="<?php echo $field_name;?>"><?php echo ee()->lang->line($field_name);?></label>
+							
+							<?php if (ee()->lang->line($field_name.'_subtext') != $field_name.'_subtext') : ?>
+								<div class="subtext"><?php echo ee()->lang->line($field_name.'_subtext');?></div>
+							<?php endif; ?>
+							
+						</td>
+						<td valign="top" style="width: 75%;" class="<?php echo $style;?>Bold">
+							<?php if (is_array($field)) : ?>
+								<?php foreach($field as $subfield_name => $subfield) : ?>
+									<p>
+										<?php echo $subfield->output(); ?> &nbsp; 
+										<label for="<?php echo $field_name.'_'.$subfield_name;?>"><?php echo ee()->lang->line($subfield_name);?></label>
+									</p>
+								<?php endforeach;?>
+							<?php else: ?>
+								<?php echo $field->output(); ?>
+							<?php endif;?>
+						</td>
+					</tr>
+				<?php endforeach; ?>
+			</tbody>
+		</table>
+		
+	<div class='clearfix' >&nbsp;</div>
+
+	<div>
+		<input type="hidden" name="name" value="user_authors" />
+	</div>
+	
+	<table class="tableBorder" border='0'  cellspacing='0' cellpadding='0' style='margin-top: 5px; width:100%;' >
+		<thead>
+			<tr>
+				<th style="text-align:left; width:50%" class="tableHeadingAlt"><?php echo ee()->lang->line('channels');?></th>
+				<th style="text-align:left; width:50%" class="tableHeadingAlt"><?php echo ee()->lang->line('user_authors_publish_tab_label');?></th>
+			</tr>
+		</thead>
+	
+		<tbody>
+			<?php foreach($channels as $channel_id => $channel_data) : ?>
+				<?php $style = $caller->cycle('tableCellOne', 'tableCellTwo');?>
+				<tr>
+					<td valign="top" class="<?php echo $style;?>Bold"  style='width:45%;'>
+						<label><?php echo $channel_data['site_label'];?> :: <?php echo $channel_data['channel_title'];?></label>
+						</td>
+					<td  class='<?php echo $style;?>' >
+						<input dir='ltr' style='width:30%' type='text' name='channel_id[<?php echo $channel_id;?>]' id='channel_id<?php echo $channel_id;?>' value='<?php echo $caller->output($channel_data['tab_label']);?>' size='' maxlength='' class=''  />
+					</td>
+				</tr>
+			<?php endforeach; ?>
+		</tbody>
+	</table>
+	<div class='clearfix' >&nbsp;</div>
+	<div class='itemWrapper'>
+		<input type="submit" name="submit" value="<?php echo ee()->lang->line('update');?>" class="submit"  />
+	</div>
+
+</form>
+
+
+<?php $this->view('footer.html');?>
