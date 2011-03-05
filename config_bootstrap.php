@@ -241,26 +241,26 @@ if(isset($config)) {
         //had to comment this out because it was breaking the member module
         //'profile_trigger' => '--sdjhkj2lffgrerfvmdkndkfisolmfmsd' . time(),
 
-        'prv_msg_upload_path' => NSM_BASEPATH . '/uploads/member/pm_attachments',
+        'prv_msg_upload_path' => NSM_BASEPATH . '/images/uploads/member/pm_attachments',
         'enable_emoticons' => 'n',
 
         'enable_avatars' => 'n',
-        'avatar_path' => NSM_BASEPATH . '/uploads/member/avatars/',
-        'avatar_url' => NSM_SITE_URL . '/uploads/member/avatars/',
+        'avatar_path' => NSM_BASEPATH . '/images/avatars/',
+        'avatar_url' => NSM_SITE_URL . '/images/avatars/',
         'avatar_max_height' => 100,
         'avatar_max_width' => 100,
         'avatar_max_kb' => 100,
 
         'enable_photos' => 'n',
-        'photo_path' => NSM_BASEPATH . '/uploads/member/photos/',
-        'photo_url' => NSM_SITE_URL . '/uploads/member/photos/',
+        'photo_path' => NSM_BASEPATH . '/images/member_photos/',
+        'photo_url' => NSM_SITE_URL . '/images/member_photos/',
         'photo_max_height' => 200,
         'photo_max_width' => 200,
         'photo_max_kb' => 200,
 
         'sig_allow_img_upload' => 'n',
-        'sig_img_path' => NSM_BASEPATH . '/uploads/member/signature_attachments/',
-        'sig_img_url' => NSM_SITE_URL . '/uploads/member/signature_attachments/',
+        'sig_img_path' => NSM_BASEPATH . '/images/signature_attachments/',
+        'sig_img_url' => NSM_SITE_URL . '/images/signature_attachments/',
         'sig_img_max_height' => 80,
         'sig_img_max_width' => 480,
         'sig_img_max_kb' => 30,
