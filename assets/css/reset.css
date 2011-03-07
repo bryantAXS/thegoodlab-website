@@ -1,0 +1,145 @@
+/*****************************
+RESETS
+*****************************/
+html, body, div, span, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+abbr, address, cite, code,
+del, dfn, em, img, ins, kbd, q, samp,
+small, strong, sub, sup, var,
+b, i,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, figure, footer, header, 
+hgroup, menu, nav, section, menu,
+time, mark, audio, video, a {
+  margin:0;
+  padding:0;
+  border:0;
+  outline:0;
+  font-size:100%;
+  vertical-align:baseline;
+  background:transparent;
+}  
+body { line-height: 1 }                
+html { -webkit-font-smoothing: antialiased; }
+article, aside, figure, footer, header, 
+hgroup, nav, section { display:block; }
+nav ul { list-style:none }
+blockquote, q { quotes:none }
+blockquote:before, blockquote:after,
+q:before, q:after { content:''; content:none }
+:focus { outline: 0;}
+ins { background-color:#ff9; color:#000; text-decoration:none }
+mark { background-color:#ff9; color:#000; font-style:italic; font-weight:bold }
+del { text-decoration: line-through }
+abbr[title], dfn[title] { border-bottom:1px dotted #000; cursor:help }
+table { border-collapse:collapse; border-spacing:0 }
+hr { display:block; height:1px; border:0; border-top:1px solid #ccc; margin:1em 0; padding:0 }
+input, select { vertical-align:middle }
+code, pre { font-family: "Courier New", monospace, serif; font-size: 1em }
+input[type="radio"] { vertical-align: text-bottom }
+input[type="checkbox"] { vertical-align: bottom; *vertical-align: baseline }
+.ie6 input { vertical-align: text-bottom }
+label, input[type=button], input[type=submit], button { cursor: pointer }
+button {  width: auto; overflow: visible }
+button::-moz-focus-inner{padding:0;border:none }
+.ie7 img { -ms-interpolation-mode: bicubic }
+/* END RESET CSS */
+
+/*****************************
+START YOUR CSS HERE
+*****************************/
+
+/*****************************
+MISCELLANEOUS
+*****************************/
+/* Accessible focus treatment: people.opera.com/patrickl/experiments/keyboard/test */
+a:active { outline: none; }
+a:focus { outline: thin dotted; }
+
+pre { 
+  padding: 15px; 
+  /* www.pathf.com/blogs/2008/05/formatting-quoted-code-in-blog-posts-css21-white-space-pre-wrap/ */
+  white-space: pre; /* CSS2 */
+  white-space: pre-wrap; /* CSS 2.1 */
+  white-space: pre-line; /* CSS 3 (and 2.1 as well, actually) */
+  word-wrap: break-word; /* IE */
+}
+
+/* Hide for both screenreaders and browsers */
+.hidden { display:none; visibility:hidden; } 
+/* Hide only visually, but have it available for screenreaders  */
+.visuallyhidden { position:absolute !important;    
+  clip: rect(1px 1px 1px 1px); /* IE6, IE7 */
+  clip: rect(1px, 1px, 1px, 1px); }
+/* Hide visually and from screenreaders, but maintain layout */
+.invisible { visibility: hidden; }
+
+.has-layout{
+  overflow:hidden;
+  zoom:1;
+}
+.has-layout-auto{
+  overflow:auto;
+  zoom:1;
+}
+
+/* >> The Magnificent CLEARFIX << */
+.clearfix:after { content: "."; display: block; height: 0; clear: both; visibility: hidden; }
+.clearfix { display: inline-block; }
+* html .clearfix { height: 1%; } /* Hides from IE-mac \*/
+.clearfix { display: block; }
+
+.alignLeft{text-align:left}
+.alignCenter{text-align:center}
+.alignRight{text-align:right}
+
+.left{float:left}
+.none{float:none}
+.right{float:right}
+.clear{clear:both}
+
+.mt0{margin-top:0 !important;}.mt5{margin-top:5px !important;}.mt10{margin-top:10px !important;}.mt15{margin-top:15px !important;}.mt20{margin-top:20px !important;}.mt25{margin-top:25px !important;}.mt30{margin-top:30px !important;}.mt35{margin-top:35px !important;}.mt40{margin-top:40px !important;}.mt50{margin-top:50px !important;}.mt75{margin-top:75px !important;}.mt100{margin-top:100px !important;}.mt150{margin-top:150px !important;}.mt200{margin-top:200px !important;}
+.mr0{margin-right:0 !important;}.mr2{margin-right:2px;}.mr5{margin-right:5px !important;}.mr10{margin-right:10px !important;}.mr15{margin-right:15px !important;}.mr20{margin-right:20px !important;}.mr25{margin-right:25px !important;}.mr30{margin-right:30px !important;}.mr35{margin-right:35px !important;}.mr40{margin-right:40px !important;}.mr50{margin-right:50px !important;}.mr75{margin-right:75px !important;}.mr100{margin-right:100px !important;}
+.mb0{margin-bottom:0 !important;}.mb5{margin-bottom:5px !important;}.mb10{margin-bottom:10px !important;}.mb15{margin-bottom:15px !important;}.mb20{margin-bottom:20px !important;}.mb25{margin-bottom:25px !important;}.mb30{margin-bottom:30px !important;}.mb35{margin-bottom:35px !important;}.mb40{margin-bottom:40px !important;}.mb50{margin-bottom:50px !important;}.mb75{margin-bottom:75px !important;}.mb100{margin-bottom:100px !important;}
+.ml0{margin-left:0 !important;}.ml5{margin-left:5px !important;}.ml10{margin-left:10px !important;}.ml15{margin-left:15px !important;}.ml20{margin-left:20px !important;}.ml25{margin-left:25px !important;}.ml30{margin-left:30px !important;}.ml35{margin-left:35px !important;}.ml40{margin-left:40px !important;}.ml50{margin-left:50px !important;}.ml75{margin-left:75px !important;}.ml100{margin-left:100px !important;}
+
+.pt0{margin-top:0 !important;}.pt5{margin-top:5px !important;}.pt10{margin-top:10px !important;}.pt15{margin-top:15px !important;}.pt20{margin-top:20px !important;}.pt25{margin-top:25px !important;}.pt30{margin-top:30px !important;}.pt35{margin-top:35px !important;}.pt40{margin-top:40px !important;}.pt50{margin-top:50px !important;}.pt75{margin-top:75px !important;}.pt100{margin-top:100px !important;}.pt150{margin-top:150px !important;}.pt200{margin-top:200px !important;}
+.pr0{margin-right:0 !important;}.pr2{margin-right:2px;}.pr5{margin-right:5px !important;}.pr10{margin-right:10px !important;}.pr15{margin-right:15px !important;}.pr20{margin-right:20px !important;}.pr25{margin-right:25px !important;}.pr30{margin-right:30px !important;}.pr35{margin-right:35px !important;}.pr40{margin-right:40px !important;}.pr50{margin-right:50px !important;}.pr75{margin-right:75px !important;}.pr100{margin-right:100px !important;}
+.pb0{margin-bottom:0 !important;}.pb5{margin-bottom:5px !important;}.pb10{margin-bottom:10px !important;}.pb15{margin-bottom:15px !important;}.pb20{margin-bottom:20px !important;}.pb25{margin-bottom:25px !important;}.pb30{margin-bottom:30px !important;}.pb35{margin-bottom:35px !important;}.pb40{margin-bottom:40px !important;}.pb50{margin-bottom:50px !important;}.pb75{margin-bottom:75px !important;}.pb100{margin-bottom:100px !important;}
+.pl0{margin-left:0 !important;}.pl5{margin-left:5px !important;}.pl10{margin-left:10px !important;}.pl15{margin-left:15px !important;}.pl20{margin-left:20px !important;}.pl25{margin-left:25px !important;}.pl30{margin-left:30px !important;}.pl35{margin-left:35px !important;}.pl40{margin-left:40px !important;}.pl50{margin-left:50px !important;}.pl75{margin-left:75px !important;}.pl100{margin-left:100px !important;}
+
+/*****************************
+PRINT STYLES 
+inlined to avoid http request
+*****************************/
+@media print {
+  * { background: transparent !important; color: #444 !important; text-shadow: none !important; }
+  a, a:visited { color: #444 !important; text-decoration: underline; }
+  a:after { content: " (" attr(href) ")"; } 
+  abbr:after { content: " (" attr(title) ")"; }
+  .ir a:after { content: ""; }  /* Don't show links for images */
+  pre, blockquote { border: 1px solid #999; page-break-inside: avoid; }
+  img { page-break-inside: avoid; }
+  @page { margin: 0.5cm; }
+  p, h2, h3 { orphans: 3; widows: 3; }
+  h2, h3{ page-break-after: avoid; }
+}
+/*****************************
+MOBILE STYLES
+*****************************/
+@media all and (orientation:portrait) { 
+  /* Style adjustments for portrait mode goes here */
+  
+}
+@media all and (orientation:landscape) { 
+  /* Style adjustments for landscape mode goes here */
+  
+}
+/* Grade-A Mobile Browsers (Opera Mobile, iPhone Safari, Android Chrome)  
+   Consider this: www.cloudfour.com/css-media-query-for-mobile-is-fools-gold/ */
+@media screen and (max-device-width: 480px) {
+  /* Prevent iOS, WinMobile from adjusting font size */
+  html { -webkit-text-size-adjust:none; -ms-text-size-adjust:none; } 
+}

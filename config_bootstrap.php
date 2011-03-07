@@ -61,7 +61,7 @@ if (NSM_ENV == 'local') {
         'hostname' => '127.0.0.1',
         'username' => 'root',
         'password' => '',
-        'database' => 'starter_ee',
+        'database' => 'thegoodlab',
     );
     $env_global_vars = array(
         'global:cm_subscriber_list_slug' => ''

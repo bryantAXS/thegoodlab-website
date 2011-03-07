@@ -37,13 +37,11 @@ class Json
 	{
 		$this->entries_initialize();
 		
-		//if xhr is set in the json tag call, we only execute if this page has been called via a xhhtp request
 		if ($this->EE->TMPL->fetch_param('xhr') == 'yes' && ! $this->EE->input->is_ajax_request())
 		{
 			return '';
 		}
 		
-		//get the fields property in the json tag
 		if ($this->EE->TMPL->fetch_param('fields'))
 		{
 			$fields = explode('|', $this->EE->TMPL->fetch_param('fields'));
@@ -147,8 +145,8 @@ class Json
 				
 				foreach ($this->entries_custom_fields as &$field)
 				{
-//					$entry[$field['field_name']] = $this->replace_tag($entry, $field, $entry['field_id_'.$field['field_id']])
-					
+//					$entry[$field['field_name']] = $this->replace_tag($entry, $field, $entry['field_id_'.$field['field_id']]);
+
 					if (isset($entry[$field['field_name']]) && is_callable(array($this, 'entries_'.$field['field_type'])))
 					{
 						$entry[$field['field_name']] = call_user_func(array($this, 'entries_'.$field['field_type']), $entry['entry_id'], $field, $entry[$field['field_name']]);
@@ -180,25 +178,22 @@ class Json
 	
 	private function entries_channel_sql()
 	{
-		
-		//if the channel module is not loaded, load it
 		if (empty($this->channel))
 		{
 			require_once PATH_MOD.'channel/mod.channel'.EXT;
 			
-			//instantiate a new channel class
 			$this->channel = new Channel;
 		}
 		
 		$this->channel->initialize();
-    
+
 		$this->channel->uri = ($this->channel->query_string != '') ? $this->channel->query_string : 'index.php';
 
 		if ($this->channel->enable['custom_fields'] == TRUE)
 		{
 			$this->channel->fetch_custom_channel_fields();
 		}
-	  
+
 		$save_cache = FALSE;
 
 		if ($this->EE->config->item('enable_sql_caching') == 'y')
@@ -427,4 +422,4 @@ class Json
 	}
 }
 /* End of file pi.json.php */ 
-/* Location: ./system/expressionengine/third_party/json/pi.json.php */
+/* Location: ./system/expressionengine/third_party/json/pi.json.php */ 

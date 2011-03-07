@@ -17,11 +17,13 @@ $config['debug'] = '1';
 $config['cp_url'] = "http://starter-ee.local/system/index.php";
 $config['doc_url'] = "http://expressionengine.com/user_guide/";
 $config['is_system_on'] = "y";
-$config['site_label'] = 'starter-ee';
+$config['site_label'] = 'The Good Lab';
 $config['cookie_prefix'] = '';
 
+$config['allow_extensions'] = "y";
 
 // END EE config items
+
 
 /*
 |--------------------------------------------------------------------------

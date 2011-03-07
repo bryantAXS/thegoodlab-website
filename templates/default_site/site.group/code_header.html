@@ -29,39 +29,37 @@
 		</style>
 	<![endif]-->
 	
-	<title>{site_name}{if embed:page_title} - {embed:page_title}{/if}}</title>
-	<meta name="description" content="" />
-	<meta name="author" content="" />
+	<title>{site_name}{if embed:page_title} - {embed:page_title}{/if}</title>
+  <meta name="description" content="" /> 
+  <meta name="keywords" content="" />
 
 	{!--  Mobile Viewport --}
-	<meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" />
+  <!-- <meta name="viewport" content="width=device-width; initial-scale=1.0; maximum-scale=1.0;" /> -->
 
 	{!-- Place favicon.ico and apple-touch-icon.png in the root of your domain and delete these references --}
-	<link rel="shortcut icon" href="/favicon.ico" />
-	<link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+	<link rel="shortcut icon" href="/assets/images/favicon.ico" />
+	<link rel="apple-touch-icon" href="/assets/apple-touch-icon.png" />
 
 	{!-- CSS : implied media="all" --}
-	<link rel="stylesheet" href="css/global.css?v=1" />
+	<link rel="stylesheet" href="/assets/css/global.css?v=1" />
 	
 	{!-- asynchronous google analytics: change the UA-XXXXX-X to be your site's ID. --}
-	<script>
-	/*<![CDATA[*/
-		var _gaq = [['_setAccount', 'UA-XXXXX-X'], ['_trackPageview']];
-		(function(d, t) {
-			var g = d.createElement(t),
-			s = d.getElementsByTagName(t)[0];
-			g.async = true;
-			g.src = '//www.google-analytics.com/ga.js';
-			s.parentNode.insertBefore(g, s);
-			})(document, 'script');
-	/*]]>*/
-	</script>
-	
+  <script>
+  /*<![CDATA[*/
+    /*
+    var _gaq = [['_setAccount', 'UA-XXXXX-X'], ['_trackPageview']];
+    (function(d, t) {
+      var g = d.createElement(t),
+      s = d.getElementsByTagName(t)[0];
+      g.async = true;
+      g.src = '//www.google-analytics.com/ga.js';
+      s.parentNode.insertBefore(g, s);
+      })(document, 'script');
+      */
+  /*]]>*/
+  </script>
 	
 	{!-- Modernizr (Must be at top) --}
-	<script src="js/modernizr-1.6.min.js"></script>
+	<script src="/assets/js/modernizr-1.6.min.js"></script>
 	
-	
-
 </head>
-<body>
