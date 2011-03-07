@@ -44,7 +44,7 @@ if(!defined('NSM_ENV')) {
     // Set the environment
     if ( strstr( NSM_SERVER_NAME, '.local' ) ) define('NSM_ENV', 'local');
     //elseif( strstr( NSM_SERVER_NAME, 'dev.' ) ) define('NSM_ENV', 'development');
-    //elseif( strstr( NSM_SERVER_NAME, 'stage.' ) ) define('NSM_ENV', 'staging');
+    elseif( strstr( NSM_SERVER_NAME, 'thegoodlab.thegoodlab.com' ) ) define('NSM_ENV', 'staging');
     //elseif( strstr( NSM_SERVER_NAME, 'm.' ) ) define('NSM_ENV', 'mobile');
     else define('NSM_ENV', 'production');
 }
@@ -78,10 +78,10 @@ elseif(NSM_ENV == 'development') {
 }
 elseif(NSM_ENV == 'staging') {
     $env_db_config = array(
-        'hostname' => '',
-        'database' => '',
-        'username' => '',
-        'password' => '',
+        'hostname' => 'localhost',
+        'database' => 'thegoodlab',
+        'username' => 'root',
+        'password' => '_barclay7!',
     );
     $env_global_vars = array(
         'global:cm_subscriber_list_slug' => ''
