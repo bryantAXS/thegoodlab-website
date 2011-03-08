@@ -80,7 +80,7 @@ elseif(NSM_ENV == 'staging') {
     $env_db_config = array(
         'hostname' => 'localhost',
         'database' => 'thegoodlab',
-        'username' => 'root',
+        'username' => 'bryantjoseph',
         'password' => '_barclay7!',
     );
     $env_global_vars = array(
