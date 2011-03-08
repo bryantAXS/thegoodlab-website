@@ -62,10 +62,10 @@ header nav li a{
   color:#fff;
   text-decoration:none;
   /**/
-  -webkit-transition: color 400ms ease;
-  -moz-transition: color 400ms ease;
-  -o-transition: color 400ms ease;
-  transition: color 400ms ease;
+  -webkit-transition: color 500ms ease;
+  -moz-transition: color 500ms ease;
+  -o-transition: color 500ms ease;
+  transition: color 500ms ease;
 }
 header nav li a:hover{
   color:#14ffa3;
@@ -78,11 +78,30 @@ header nav li span{
 }
 header ul#dots{
   float:right;
-  margin-top:10px;
+  margin-top:12px;
 }
 header ul#dots li{
   float:left;
   margin-left:10px;
+  position:relative;
+}
+header ul#dots li img{
+  /**/
+  opacity:0.7;
+  filter:alpha(opacity=70);
+}
+
+/*T W I T T E R  C O N T A I N E R*/
+#twitter-container{
+  background:transparent url('/assets/images/bg-twitter.png') repeat-y left top;
+  height:200px;
+  left:-390px;
+  position:absolute;
+  top:0;
+  width:312px;
+}
+#content-container{
+  position:relative;
 }
 
 /* H O M E */
@@ -158,7 +177,7 @@ header ul#dots li{
   color:#fff;
   font-family:ProximaNovaRegular;
   font-size:14px;
-  margin-top:30px;
+  margin-top:22px;
   padding-top:25px;
 }
 .work-container.first{

@@ -2,6 +2,7 @@
 <body>
   
   <div id='content-container' class='inside'>
+    
     <header class='clearfix'>
       <a href='javascript:;'><h1>The Good Lab</h1></a>
       <nav>
@@ -13,9 +14,18 @@
         </ul>
       </nav>
       <ul id='dots' class='has-layout'>
-        <li><img src='/assets/images/dot.png' /></li>
-        <li><img src='/assets/images/dot.png' /></li>
-        <li><img src='/assets/images/dot.png' /></li>
+        <li><a target="_blank" href='mailto:hello@thegoodlab.com'><img src='/assets/images/icon-mail.png' /></a></li>
+        <li><a target="_blank" href='http://www.twitter.com/thegoodlab'><img src='/assets/images/icon-twitter.png' /></a></li>
+        {exp:channel:entries
+          channel="fun_links"
+          disable="categories|category_fields|member_data|pagination|trackbacks"
+          dynamic="off"
+          order="random"
+          limit="1"
+        }
+        <li><a target="_blank" href='{fun_link_url}'><img src='/assets/images/icon-question.png' /></a></li>
+        {/exp:channel:entries}
+        
       </ul>
     </header>
     <div class='dotted-line'>&nbsp;</div>

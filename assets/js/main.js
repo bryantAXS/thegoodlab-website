@@ -41,6 +41,7 @@ var Work_Pagination = function(){
   //get the offset number
   self.$offset = $('#work-offset');
   self.offset = Number(self.$offset.val());
+  self.first_id = $('#work-first-id').val() ? $('#work-first-id').val() : false;
   
   //get the total number of results we are going to be moving through
   self.total_results = Number($('#work-total-results').val());
@@ -70,8 +71,16 @@ Work_Pagination.prototype.get_project = function(offset){
   
   var self = this;
   
+  //build url
+  var url = '/lib/get_work/' + offset;
+  if(self.first_id){
+    //if we got sent here via a permalink, we don't want the next item we go to to be the same page, so lets skip it
+    url += '/' + self.first_id;
+    self.first_id = false;
+  }
+  
   $.ajax({
-    url: '/lib/get_work/' + offset,
+    url: url,
     type: 'POST',
     dataType: 'json',
     complete: function(xhr, textStatus) {
@@ -123,6 +132,12 @@ $(document).ready(function(){
     var $el = $(this);
     $el.find('div').animate({opacity: 0},500);
   });
+  
+  $('header ul#dots li img').bind('mouseenter',function(){
+    $(this).animate({opacity:'0.95'});
+  }).bind('mouseleave',function(){
+    $(this).animate({opacity:'0.7'});
+  })
   
   //init galleries drawn on page
   var $galleries = $('.work-gallery')

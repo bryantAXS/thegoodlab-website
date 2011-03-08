@@ -3,12 +3,15 @@
   {exp:channel:entries
     channel="work"
     disable="categories|category_fields|member_data|pagination|trackbacks"
+    {if segment_2 == ""}
     dynamic="off"
+    {/if}
     limit="1"
     require_entry="yes"
     sort="asc"
   }
   
+  <input id='work-first-id' type='hidden' value='{entry_id}' />
   <input id='work-offset' type='hidden' value='0' />
   <input id='work-total-results' type='hidden' value='{exp:query sql="SELECT COUNT(entry_id) as work_count
   FROM exp_channel_titles
