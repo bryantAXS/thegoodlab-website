@@ -97,10 +97,15 @@ elseif(NSM_ENV == 'mobile') {
     $env_config['tmpl_file_basepath'] = NSM_BASEPATH . '/templates_mobile/';
 }
 else {
-    $env_global_vars = array(
-        'global:cm_subscriber_list_slug' => '',
-        'global:google_analytics_key' => 'XX-XXXX'
-    );
+  $env_db_config = array(
+      'hostname' => 'localhost',
+      'database' => 'thegoodlab',
+      'username' => 'bryantjoseph',
+      'password' => '_barclay7!',
+  );
+  $env_global_vars = array(
+      'global:cm_subscriber_list_slug' => ''
+  );
 }
 
 // Config bootsrap... GO!

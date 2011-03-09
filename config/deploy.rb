@@ -1,7 +1,18 @@
 set :user,        "root"
 
-set :application, "thegoodlab.thegoodlab.com"
-set :domain,      "thegoodlab.thegoodlab.com"
+if !ENV['env'].nil? then
+  set(:env, ENV['env'])
+else
+  set(:env, 'staging')
+end
+
+if !env.nil? && env == "production" then
+ set :application, "thegoodlab.com"
+ set :domain,      "thegoodlab.com"
+else   # add more as needed 
+ set :application, "thegoodlab.thegoodlab.com"
+ set :domain,      "thegoodlab.thegoodlab.com"
+end
 
 set :repository,  "git@github.com:bryantAXS/thegoodlab.git"
 set :deploy_to,   "/var/www/#{domain}"
