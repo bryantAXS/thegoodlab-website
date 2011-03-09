@@ -219,12 +219,16 @@ header ul#dots li img{
 .work-gallery{
   float:left;
   height:288px;
+  overflow:hidden;
   width:380px;
 }
 .work-copy-container{
   float:left;
   padding:15px 15px;
   width:290px;
+}
+.work-slider-container ul.work-gallery{
+  height:281px\9;
 }
 .work-slider-container ul li{
   font-family:CallunaItalic;

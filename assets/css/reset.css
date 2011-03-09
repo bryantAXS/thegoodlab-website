@@ -56,7 +56,6 @@ MISCELLANEOUS
 *****************************/
 /* Accessible focus treatment: people.opera.com/patrickl/experiments/keyboard/test */
 a:active { outline: none; }
-a:focus { outline: thin dotted; }
 
 pre { 
   padding: 15px; 

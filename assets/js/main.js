@@ -108,7 +108,7 @@ Work_Pagination.prototype.swap_projects = function(new_markup){
   var $new_galleries = $new_markup.find('.work-gallery');
   
   var work_gallery = new Work_Gallery();
-  work_gallery.init_galleries($new_galleries);
+  //work_gallery.init_galleries($new_galleries);
   
   var $container = $('.work-container');
   $container.animate({'opacity':'0'},{
@@ -117,7 +117,10 @@ Work_Pagination.prototype.swap_projects = function(new_markup){
       $container.remove();
       $('#content-container').append($new_markup);
       $new_markup.animate({'opacity':'1'},{
-        'duration': 500
+        duration: 500
+        ,complete:function(){
+          work_gallery.init_galleries($new_galleries);
+        }
       });
     }
   });

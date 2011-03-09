@@ -11,7 +11,10 @@
     sort="asc"
   }
   
+  {if segment_2}
   <input id='work-first-id' type='hidden' value='{entry_id}' />
+  {/if}
+  
   <input id='work-offset' type='hidden' value='0' />
   <input id='work-total-results' type='hidden' value='{exp:query sql="SELECT COUNT(entry_id) as work_count
   FROM exp_channel_titles
