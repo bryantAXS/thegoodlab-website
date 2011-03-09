@@ -99,7 +99,7 @@ elseif(NSM_ENV == 'mobile') {
 else {
   $env_db_config = array(
       'hostname' => 'localhost',
-      'database' => 'thegoodlab',
+      'database' => 'thegoodlab_prod',
       'username' => 'bryantjoseph',
       'password' => '_barclay7!',
   );
