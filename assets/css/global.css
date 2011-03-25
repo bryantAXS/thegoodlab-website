@@ -200,6 +200,12 @@ header ul#dots li img{
   line-height:22px;
   margin-top:15px;
 }
+.main-work-copy p{
+  line-height:22px;
+}
+.main-work-copy p a{
+  color:#14ffa3;
+}
 .work-slider-container{
   height:281px;
   margin-top:25px;

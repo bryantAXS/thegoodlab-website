@@ -43,7 +43,11 @@ task :create_symlinks, :roles => :web do
   run "ln -s #{shared_path}/uploads #{current_release}/uploads"
   run "ln -s #{shared_path}/zb #{current_release}/zb"
 end
- 
+
+task :set_permissions, :roles => :web do
+  run "chmod -R 777 #{deploy_to}/current/images/uploads"
+end
+
 # Let's run the task immediately after the deployment is finalised.
- 
-after "deploy:finalize_update", :create_symlinks
+#after "deploy:finalize_update", :create_symlinks
+after "deploy:symlink", :set_permissions
