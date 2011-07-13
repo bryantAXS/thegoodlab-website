@@ -14,7 +14,10 @@ $lang = array(
 'nav_content'	   				=> 'Content',
 'nav_publish'	   				=> 'Publish',
 'nav_edit'						=> 'Edit',
-'nav_files'	   					=> 'File Manager',
+'nav_files'	   					=> 'Files',
+	'nav_file_manager'				=> 'File Manager',
+	'nav_batch_upload'				=> 'Batch Upload',
+	'nav_sync_files'				=> 'Synchronize Files',
 
 'nav_files_short_desc'			=> 'Upload, edit, and delete Files',
 'nav_edit_short_desc'			=> 'Edit Entries',
@@ -22,6 +25,8 @@ $lang = array(
 'nav_design'	   				=> 'Design',
 	'nav_create_group'				=> 'Create Group',
 	'nav_create_template'			=> 'Create Template',
+	'nav_edit_template_group' 		=> 'Edit Template Group', 
+	'nav_edit_template_group_more'  => '...see more',
 'nav_templates'					=> 'Templates',
 	'nav_edit_templates'		 	=> 'Edit',
 	'nav_snippets'					=> 'Snippets',
@@ -77,7 +82,7 @@ $lang = array(
 'nav_user_banning_short_desc'	=> 'Manage Banning Preferences and Banned Visitors',
 'nav_activate_pending_members'	=> 'Activate Pending',
 'nav_activate_pending_members_short_desc'	=> 'Moderate Pending Members',
-'nav_custom_member_fields'		=> 'Custom Member Fields',
+'nav_custom_member_fields'		=> 'Member Fields',
 'nav_custom_member_fields_short_desc'	=> 'Create, edit, and delete Custom Member Fields',
 'nav_member_config'				=> 'Preferences',
 'nav_member_config_short_desc'	=> 'Manage Membership Preferences ',
@@ -89,16 +94,20 @@ $lang = array(
 	'nav_channels_short_desc'	=> 'Create, edit, and delete Channels',
 	'nav_category_management'			=> 'Categories',
 	'nav_category_management_short_desc'	=> 'Create, edit, and delete Categories',
-	'nav_field_group_management'			=> 'Custom Fields',
-	'nav_field_group_management_short_desc'	=> 'Create, edit, and delete Custom Fields',
-	'nav_status_group_management'		=> 'Custom Status Groups',
-	'nav_status_group_management_short_desc'	=> 'Create, edit, and delete  Custom Status Groups',
+	'nav_field_group_management'			=> 'Channel Fields',
+	'nav_field_group_management_short_desc'	=> 'Create, edit, and delete Channel Fields',
+	'nav_status_group_management'		=> 'Statuses',
+	'nav_status_group_management_short_desc'	=> 'Create, edit, and delete Statuses',
 	'nav_global_channel_preferences'	=> 'Global Preferences',
 	'nav_global_channel_preferences_short_desc'	=> 'Manage Global Channel Preferences',
 
 'nav_admin_content'				=> 'Content Administration',
 	'nav_file_upload_preferences'		=> 'File Upload Preferences',
 	'nav_file_upload_preferences_short_desc'	=> 'Create, edit, and delete File Upload Preferences',
+	'nav_file_watermark_preferences'		=> 'Watermark Preferences',
+	'nav_file_upload_preferences_short_desc'	=> 'Create, edit, and delete File Watermark Preferences',
+	'nav_file_manager_short_desc'		=> 'File Upload Preferences',
+	'nav_file_watermark_preferences_short_desc' => 'Watermark Preferences',
 	'nav_default_ping_servers'			=> 'Default Ping Servers',
 	'nav_default_ping_servers_short_desc'	=> 'Create, edit, and delete  Default Ping Servers',
 	'nav_default_html_buttons'			=> 'Default HTML Buttons',
@@ -295,9 +304,6 @@ $lang = array(
 'required_fields' =>
 'Indicates required fields',
 
-'please_consult_manual' => 
-'Please consult the user guide.',
-
 'login' => 
 'Login',
 
@@ -355,6 +361,9 @@ $lang = array(
 
 'save' =>
 'Save',
+
+'sync' =>
+'Synchronize',
 
 'cancel' =>
 'Cancel',

@@ -1,10 +1,10 @@
-<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 /**
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -25,27 +25,13 @@
 class Tools_model extends CI_Model {
 
 	/**
-	 * Get Recount Batch Total
-	 *
-	 * @access	public
-	 * @return	string
-	 */
-	function get_recount_batch_total()
-	{
-		return $this->config->item('recount_batch_total');
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Get Search and Replace Options
 	 *
 	 * This method populates the dropdown field on the search and replace form
 	 *
-	 * @access	public
-	 * @return	mixed
+	 * @return	array
 	 */
-	function get_search_replace_options()
+	public function get_search_replace_options()
 	{
 		$options = array();
 			
@@ -137,11 +123,9 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Control Panel Log
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */
-
-	function get_cp_log($limit = 50, $offset = 0, $order = array())
+	public function get_cp_log($limit = 50, $offset = 0, $order = array())
 	{
 		$this->db->select('cp_log.*, sites.site_id, sites.site_label');
 		$this->db->from('cp_log');
@@ -169,10 +153,9 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Search Log
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */
-	function get_search_log($limit = 50, $offset = 0, $order = array())
+	public function get_search_log($limit = 50, $offset = 0, $order = array())
 	{
 		$this->db->select('search_log.*, sites.site_id, sites.site_label');
 		$this->db->from('search_log');
@@ -191,6 +174,7 @@ class Tools_model extends CI_Model {
 		}
 
 		$this->db->limit($limit, $offset);
+		
 		return $this->db->get();
 	}
 
@@ -199,12 +183,11 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Throttle Log
 	 *
-	 * @access	public
 	 * @param	int		maximum page loads
 	 * @param	int		lockout time
 	 * @return	mixed
 	 */
-	function get_throttle_log($max_page_loads = 10, $lockout_time = 30, $limit = 50, $offset = 0, $order = array())
+	public function get_throttle_log($max_page_loads = 10, $lockout_time = 30, $limit = 50, $offset = 0, $order = array())
 	{
 		$this->db->select('ip_address, hits, locked_out, last_activity');
 		$this->db->from('throttle');
@@ -223,6 +206,7 @@ class Tools_model extends CI_Model {
 		}
 
 		$this->db->limit($limit, $offset);
+		
 		return $this->db->get();
 	}
 	
@@ -231,11 +215,10 @@ class Tools_model extends CI_Model {
 	/**
 	 * Blacklist IP addresses
 	 *
-	 * @access	public
 	 * @param	mixed	list of ips
 	 * @return	int		inserted count
 	 */
-	function blacklist_ips($naughty = array())
+	public function blacklist_ips($naughty = array())
 	{
 		// Get all previously blacklisted ips
 		$this->db->select('blacklisted_value');
@@ -265,11 +248,10 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Email Logs
 	 *
-	 * @access	public
 	 * @param	int
 	 * @return	mixed
 	 */
-	function get_email_logs($group_id = FALSE, $limit = 50, $offset = 0, $order = array())
+	public function get_email_logs($group_id = FALSE, $limit = 50, $offset = 0, $order = array())
 	{
 		$this->db->select('cache_id, member_id, member_name, recipient_name, cache_date, subject');
 		$this->db->from('email_console_cache');
@@ -297,17 +279,16 @@ class Tools_model extends CI_Model {
 	 *
 	 * Returns an array of language files
 	 *
-	 * @access	public
 	 * @return	array
 	 */
-	function get_language_filelist($language_directory = 'english')
+	public function get_language_filelist($language_directory = 'english')
 	{
 		$this->load->helper('file');
 		
 		$path = APPPATH.'language/'.$language_directory;
-		$ext_len = strlen(EXT);
+		$ext_len = strlen('.php');
 
-		$filename_end = '_lang'.EXT;
+		$filename_end = '_lang.php';
 		$filename_end_len = strlen($filename_end);
 
 		$languages = array();
@@ -316,14 +297,19 @@ class Tools_model extends CI_Model {
 
 		foreach ($language_files as $file)
 		{
-			if (substr($file, -$filename_end_len) && substr($file, -$ext_len) == EXT)
+			if ($file == 'email_data.php')
+			{
+				continue; 
+			}
+			
+			if (substr($file, -$filename_end_len) && substr($file, -$ext_len) == '.php')
 			{
 				$languages[] = $file;
 			}
 		}
 		
 		sort($languages);
-		
+
 		return $languages;
 	}
 
@@ -334,12 +320,11 @@ class Tools_model extends CI_Model {
 	 *
 	 * Returns an array of language variables in the file
 	 *
-	 * @access	public
 	 * @param	string	the language file to return
 	 * @param	string	the folder to save the new file to
 	 * @return	array
 	 */
-	function get_language_list($language_file = '', $dest_folder = 'translations')
+	public function get_language_list($language_file = '', $dest_folder = 'translations')
 	{
 		if ($language_file == '')
 		{
@@ -391,25 +376,15 @@ class Tools_model extends CI_Model {
 	/**
 	 * Delete Upload Preferences
 	 *
-	 * @access	public
+	 * @deprecated Deprecated since 2.2
 	 * @param	int
 	 * @return	string
 	 */
-	function delete_upload_preferences($id = '')
+	public function delete_upload_preferences($id = '')
 	{
-		$this->db->where('upload_id', $id);
-		$this->db->delete('upload_no_access');
+		$this->load->model('file_upload_preferences_model');
 
-		// get the name we're going to delete so that we can return it when we're done
-		$this->db->select('name');
-		$this->db->where('id', $id);
-		$deleting = $this->db->get('upload_prefs');
-
-		// ok, now remove the pref
-		$this->db->where('id', $id);
-		$this->db->delete('upload_prefs');
-
-		return $deleting->row('name');
+		return $this->file_upload_preferences_model->delete_upload_preferences($id);
 	}
 
 	// --------------------------------------------------------------------
@@ -417,58 +392,15 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Upload Preferences
 	 *
-	 * @access	public
+	 * @deprecated Deprecated since 2.2
 	 * @param	int
 	 * @return	mixed
 	 */
-	function get_upload_preferences($group_id = NULL, $id = '')
+	public function get_upload_preferences($group_id = NULL, $id = NULL)
 	{
-		// for admins, no specific filtering, just give them everything
-		if ($group_id == 1)
-		{
-			// there a specific upload location we're looking for?
-			if ($id != '')
-			{
-				$this->db->where('id', $id);
-			}
-
-			$this->db->from('upload_prefs');
-			$this->db->where('site_id', $this->config->item('site_id'));
-			$this->db->order_by('name');
-
-			$upload_info = $this->db->get();
-		}
-		else
-		{
-			// non admins need to first be checked for restrictions
-			// we'll add these into a where_not_in() check below
-			$this->db->select('upload_id');
-			$no_access = $this->db->get_where('upload_no_access', array('member_group'=>$group_id));
-
-			if ($no_access->num_rows() > 0)
-			{
-				$denied = array();
-				foreach($no_access->result() as $result)
-				{
-					$denied[] = $result->upload_id;
-				}
-				$this->db->where_not_in('id', $denied);
-			}
-
-			// there a specific upload location we're looking for?
-			if ($id != '')
-			{
-				$this->db->where('id', $id);
-			}
-
-			$this->db->from('upload_prefs');
-			$this->db->where('site_id', $this->config->item('site_id'));
-			$this->db->order_by('name');
-
-			$upload_info = $this->db->get();
-		}
-
-		return $upload_info;
+		$this->load->model('file_upload_preferences_model');
+		
+		return $this->file_upload_preferences_model->get_upload_preferences($group_id, $id);
 	}
 	
 	// --------------------------------------------------------------------
@@ -476,103 +408,15 @@ class Tools_model extends CI_Model {
 	/**
 	 * Get Files
 	 *
-	 * @access	public
+	 * @deprecated Deprecated since 2.2
 	 * @param	int
 	 * @return	mixed
 	 */
-	function get_files($directories = array(), $allowed_types = array(), $full_server_path = '', $hide_sensitive_data = FALSE, $get_dimensions = FALSE)
+	public function get_files($directories = array(), $allowed_types = array(), $full_server_path = '', $hide_sensitive_data = FALSE, $get_dimensions = FALSE, $files_array = array())
 	{
-		$files = array();
-
-		if ( ! is_array($directories))
-		{
-			$directories = array($directories);
-		}
+		$this->load->model('file_model');
 		
-		if ( ! is_array($allowed_types))
-		{
-			$allowed_types = array($allowed_types);
-		}
-	
-		$this->load->helper('file');
-		$this->load->helper('string');
-		$this->load->helper('text');
-		$this->load->helper('directory');
-		$this->load->library('encrypt');
-
-		if (count($directories) == 0)
-		{
-			return $files;
-		}
-
-		foreach ($directories as $key => $directory)
-		{
-			$directory_files = get_dir_file_info($directory); //, array('name', 'server_path', 'size', 'date'));
-
-			if ($allowed_types[$key] == 'img')
-			{
-				$allowed_type = array('image/gif','image/jpeg','image/png');
-			}
-			elseif ($allowed_types[$key] == 'all')
-			{
-				$allowed_type = array();
-			}
-
-			$dir_name_length = strlen(reduce_double_slashes($directory)); // used to create relative paths below
-
-			if ($directory_files)
-			{
-				foreach ($directory_files as $file)
-				{
-					if ($full_server_path != '')
-					{
-						$file['relative_path'] = $full_server_path; // allow for paths to be passed into this function
-					}
-
-					$file['short_name'] = ellipsize($file['name'], 16, .5);
-
-					$file['relative_path'] = reduce_double_slashes($file['relative_path']);
-
-					$file['encrypted_path'] = rawurlencode($this->encrypt->encode($file['relative_path'].$file['name'], $this->session->sess_crypt_key));
-
-					$file['mime'] = get_mime_by_extension($file['name']);
-
-					if ($get_dimensions)
-					{
-						if (function_exists('getimagesize')) 
-						{
-							if ($D = @getimagesize($file['relative_path'].$file['name']))
-							{
-								$file['dimensions'] = $D[3];
-							}
-						}
-						else
-						{
-							// We can't give dimensions, so return a blank string
-							$file['dimensions'] = '';
-						}
-					}
-
-					// Add relative directory path information to name
-					$file['name'] = substr($file['relative_path'], $dir_name_length).$file['name'];
-
-					// Don't include server paths - useful for ajax requests
-					if ($hide_sensitive_data)
-					{
-						unset($file['relative_path'], $file['server_path']);
-					}
-
-					if (count($allowed_type) == 0 OR in_array($file['mime'], $allowed_type))
-					{
-						$files[] = $file;
-					}
-				}
-			}
-		}
-
-		sort($files);
-
-		return $files;
+		return $this->file_model->get_raw_files($directories, $allowed_types, $full_server_path, $hide_sensitive_data, $get_dimensions, $files_array);
 	}
 
 	// --------------------------------------------------------------------
@@ -582,10 +426,9 @@ class Tools_model extends CI_Model {
 	 *
 	 * Fetches image width, height, and type
 	 *
-	 * @access	public
 	 * @return	string	filepath
 	 */
-	function image_properties($file)
+	public function image_properties($file)
 	{
 		if (function_exists('getimagesize')) 
 		{
@@ -613,10 +456,9 @@ class Tools_model extends CI_Model {
 	 *
 	 * Fetches various stats for the database
 	 *
-	 * @access	public
 	 * @return	array
 	 */
-	function get_sql_info()
+	public function get_sql_info()
 	{
 		$this->load->helper('number');
 		
@@ -688,10 +530,9 @@ class Tools_model extends CI_Model {
 	 *
 	 * Runs a STATUS query on the database, returns query object
 	 *
-	 * @access	public
 	 * @return	object
 	 */
-	function get_table_status()
+	public function get_table_status()
 	{
 		$this->load->helper('number');
 		

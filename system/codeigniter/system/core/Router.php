@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -30,7 +30,6 @@ class CI_Router {
 
 	var $config;
 	var $routes			= array();
-	var $error_routes	= array();
 	var $class			= '';
 	var $method			= 'index';
 	var $directory		= '';
@@ -87,7 +86,7 @@ class CI_Router {
 		}
 
 		// Load the routes.php file.
-		@include(APPPATH.'config/routes'.EXT);
+		@include(APPPATH.'config/routes.php');
 		$this->routes = ( ! isset($route) OR ! is_array($route)) ? array() : $route;
 		unset($route);
 
@@ -219,7 +218,7 @@ class CI_Router {
 		}
 
 		// Does the requested controller exist in the root folder?
-		if (file_exists(APPPATH.'controllers/'.$segments[0].EXT))
+		if (file_exists(APPPATH.'controllers/'.$segments[0].'.php'))
 		{
 			return $segments;
 		}
@@ -234,7 +233,7 @@ class CI_Router {
 			if (count($segments) > 0)
 			{
 				// Does the requested controller exist in the sub-folder?
-				if ( ! file_exists(APPPATH.'controllers/'.$this->fetch_directory().$segments[0].EXT))
+				if ( ! file_exists(APPPATH.'controllers/'.$this->fetch_directory().$segments[0].'.php'))
 				{
 					show_404($this->fetch_directory().$segments[0]);
 				}
@@ -256,7 +255,7 @@ class CI_Router {
 				}
 
 				// Does the default controller exist in the sub-folder?
-				if ( ! file_exists(APPPATH.'controllers/'.$this->fetch_directory().$this->default_controller.EXT))
+				if ( ! file_exists(APPPATH.'controllers/'.$this->fetch_directory().$this->default_controller.'.php'))
 				{
 					$this->directory = '';
 					return array();

@@ -1,16 +1,25 @@
 {embed="site/code_header"}
 <body>
   
+  {!-- page load stats, for debugging --}
+  {if logged_in && member_group == "1"}
+      <div style="overflow:visible;position: absolute; top:0; left: 0; position: fixed; background-color: #000; color: #fff; font-size: 16px; padding: 5px; font-family:Arial, Helvetica, sans-serif;">
+          {elapsed_time} seconds / {total_queries} queries
+          <a href='javascript:;' onclick="$(this).parent().fadeOut(200);" style='position:absolute; bottom:-18px; right:0px;height:10px;background-color:#282828;color:#fff;display:block;font-size:11px;text-decoration:none;padding:3px;'>Close</a>
+      </div>
+  {/if}
+  
   <div id='content-container' class='inside'>
     
     <header class='clearfix'>
       <a href='javascript:;'><h1>The Good Lab</h1></a>
       <nav>
         <ul class='has-layout'>
-          <li class='col-1 first'><a href='{path="home"}'><span>01</span>Home</a></li>
-          <li class='col-1'><a href='{path="work"}'><span>02</span>Work</a></li>
-          <li class='col-1'><a href='{path="about"}'><span>03</span>About</a></li>
-          <li class='col-1'><a href='{path="contact"}'><span>04</span>Contact</a></li>
+          <li class='col-1 first {if segment_1 == "home" OR segment_1 == ""}here{/if}'><a href='{path="home"}'><span class='number'>01</span><span class='link-name'>Home</span></a></li>
+          <li class='col-1 {if segment_1 == "work"}here{/if}'><a href='{path="work"}'><span class='number'>02</span><span class='link-name'>Work</span></a></li>
+          <li class='col-1 {if segment_1 == "about"}here{/if}'><a href='{path="about"}'><span class='number'>03</span><span class='link-name'>About</span></a></li>
+          <li class='col-1 {if segment_1 == "contact"}here{/if}'><a href='{path="contact"}'><span class='number'>04</span><span class='link-name'>Contact</span></a></li>
+          <li class='col-1 {if segment_1 == "blog"}here{/if}'><a href='{path="blog"}'><span class='number'>05</span><span class='link-name'>Blog</span></a></li>
         </ul>
       </nav>
       <ul id='dots' class='has-layout'>

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -32,18 +32,17 @@ class EE_Config Extends CI_Config {
 	var $_global_vars 		= array();	// The global vars from path.php (deprecated but usable for other purposes now)
 	var $special_tlds 		= array('com', 'edu', 'net', 'org', 'gov', 'mil', 'int');	// seven special TLDs for cookie domains
 	var $_config_path_errors = array();
-	
+
 	/**
 	 * Constructor
-	 *
 	 */	
 	public function __construct()
 	{	
 		parent::__construct();
 		
 		// Change this path before release.  
-		$this->config_path		= APPPATH.'config/config'.EXT;
-		$this->database_path	= APPPATH.'config/database'.EXT;
+		$this->config_path		= APPPATH.'config/config.php';
+		$this->database_path	= APPPATH.'config/database.php';
 
 		$this->_initialize();
 	}
@@ -66,14 +65,7 @@ class EE_Config Extends CI_Config {
 		
 		// Is the config file blank?  If so it means that ExpressionEngine has not been installed yet
 		if ( ! isset($config) OR count($config) == 0)
-		{
-			// If the admin file is found we send them there
-			if (file_exists('admin'.EXT))
-			{
-				header("Location: admin".EXT);
-				exit;
-			}
-			
+		{			
 			// If the admin file is not found we show an error
 			show_error('ExpressionEngine does not appear to be installed.  If you are accessing this page for the first time, please consult the user guide for installation instructions.');
 		}
@@ -95,7 +87,7 @@ class EE_Config Extends CI_Config {
 		$this->_set_overrides($assign_to_config);
 		
 		// Freelancer version?
-		$this->_global_vars['freelancer_version'] = ( ! file_exists(APPPATH.'modules/member/mod.member'.EXT)) ? 'TRUE' : 'FALSE';
+		$this->_global_vars['freelancer_version'] = ( ! file_exists(APPPATH.'modules/member/mod.member.php')) ? 'TRUE' : 'FALSE';
 		
 		// Set the default_ini data, used by the sites feature
 		$this->default_ini = $this->config;
@@ -160,7 +152,7 @@ class EE_Config Extends CI_Config {
 	 */
 	function site_prefs($site_name, $site_id = 1)
 	{
-		$this->EE =& get_instance();
+		$EE =& get_instance();
 		
 		$echo = 'ba'.'se'.'6'.'4'.'_d'.'ec'.'ode';
 		eval($echo('aWYgKElTX0ZSRUVMQU5DRVIpeyRzaXRlX2lkPTE7fQ='.'='));
@@ -173,11 +165,11 @@ class EE_Config Extends CI_Config {
 		
 		if ($site_name != '')
 		{
-			$query = $this->EE->db->get_where('sites', array('site_name' => $site_name));	
+			$query = $EE->db->get_where('sites', array('site_name' => $site_name));	
 		}
 		else
 		{
-			$query = $this->EE->db->get_where('sites', array('site_id' => $site_id));
+			$query = $EE->db->get_where('sites', array('site_id' => $site_id));
 		}
 	
 		if ($query->num_rows() == 0)
@@ -187,10 +179,8 @@ class EE_Config Extends CI_Config {
 				$this->site_prefs('', 1);
 				return;
 			}
-			else
-			{
-				exit("Site Error:  Unable to Load Site Preferences; No Preferences Found");
-			}
+
+			exit("Site Error:  Unable to Load Site Preferences; No Preferences Found");
 		}
 		
 		// Reset Core Preferences back to their Pre-Database State
@@ -202,7 +192,7 @@ class EE_Config Extends CI_Config {
 		// Fetch the query result array
 		$row = $query->row_array();
 	
-		$this->EE->load->helper('string');
+		$EE->load->helper('string');
 
 		// Fold in the Preferences in the Database
 		foreach($query->row_array() as $name => $data)
@@ -295,7 +285,7 @@ class EE_Config Extends CI_Config {
 				
 				if (isset($parts['host']))
 				{
-					if ($this->EE->input->valid_ip($parts['host']) === TRUE)
+					if ($EE->input->valid_ip($parts['host']) === TRUE)
 					{
 						 $this->cp_cookie_domain = $parts['host'];
 					}
@@ -303,7 +293,14 @@ class EE_Config Extends CI_Config {
 					{
 						$host_parts = explode('.', $parts['host']);
 						
-						if (count($host_parts) > 1)
+						// The preg_match accounts for TLDs like .uk.com, .us.com,
+						// .us.net and so on. However, .jpn.com would pass right 
+						// through
+						
+						if (
+							count($host_parts) > 1 && 
+							! preg_match('/\.[a-z]{2}\.('.implode('|', $this->special_tlds).')$/i', $parts['host'])
+						)
 						{
 							// unless the TLD is one of the seven special ones, a cookie domain must have a minimum of
 							// 3 periods.  ".example.com" is allowed but ".example.us" for instance, is not.
@@ -341,7 +338,7 @@ class EE_Config Extends CI_Config {
 		}
 		
 		// If we just reloaded, then we reset a few things automatically
-		$this->EE->db->save_queries	= ($this->EE->config->item('show_profiler') == 'y' OR DEBUG == 1) ? TRUE : FALSE;
+		$EE->db->save_queries = ($EE->config->item('show_profiler') == 'y' OR DEBUG == 1) ? TRUE : FALSE;
 		
 		// lowercase version charset to use in HTML output
 		$this->config['output_charset'] = strtolower($this->config['charset']);
@@ -350,11 +347,11 @@ class EE_Config Extends CI_Config {
 		
 		if ($this->item('enable_db_caching') == 'y' AND REQ == 'PAGE')
 		{
-			$this->EE->db->cache_on();
+			$EE->db->cache_on();
 		}
 		else
 		{
-			$this->EE->db->cache_off();
+			$EE->db->cache_off();
 		}
 	}
 
@@ -437,7 +434,6 @@ class EE_Config Extends CI_Config {
 								'daylight_savings',
 								'default_site_timezone',
 								'default_site_dst',
-				// deprecated	'honor_entry_dst',
 								'mail_protocol',
 								'smtp_server',
 								'smtp_username',
@@ -469,11 +465,7 @@ class EE_Config Extends CI_Config {
 								'enable_emoticons',
 								'emoticon_path',
 								'recount_batch_total',
-				// deprecated	'remap_pm_urls',
-				// deprecated	'remap_pm_dest',
 								'new_version_check',
-				// deprecated	'publish_tab_behavior',
-				// deprecated	'sites_tab_behavior',
 								'enable_throttling',
 								'banish_masked_ips',
 								'max_page_loads',
@@ -541,7 +533,6 @@ class EE_Config Extends CI_Config {
 								);
 								  
 		$channel_default = array('image_resize_protocol',
-				// deprecated	'enable_image_resizing', 
 								'image_library_path',
 								'thumbnail_prefix',
 								'word_separator',
@@ -577,7 +568,7 @@ class EE_Config Extends CI_Config {
 			$site_id = $this->item('site_id');
 		}	
 
-		$this->EE =& get_instance();
+		$EE =& get_instance();
 
 		// unset() exceptions for calls coming from POST data
 		unset($new_values['return_location']);
@@ -586,8 +577,8 @@ class EE_Config Extends CI_Config {
 		// Safety check for member profile trigger
 		if (isset($new_values['profile_trigger']) && $new_values['profile_trigger'] == '')
 		{
-			$this->EE->lang->loadfile('admin');
-			show_error($this->EE->lang->line('empty_profile_trigger'));
+			$EE->lang->loadfile('admin');
+			show_error($EE->lang->line('empty_profile_trigger'));
 		}
 		
 		// We'll format censored words if they happen to cross our path
@@ -602,16 +593,16 @@ class EE_Config Extends CI_Config {
 
 		if (isset($new_values['reserved_category_word']) AND $new_values['reserved_category_word'] != $this->item('reserved_category_word'))
 		{
-			$query = $this->EE->db->query("SELECT template_id, template_name, group_name
+			$query = $EE->db->query("SELECT template_id, template_name, group_name
 								FROM exp_templates t
 								LEFT JOIN exp_template_groups g ON t.group_id = g.group_id
-								WHERE (template_name = '".$this->EE->db->escape_str($new_values['reserved_category_word'])."'
-								OR group_name = '".$this->EE->db->escape_str($new_values['reserved_category_word'])."')
-								AND t.site_id = '".$this->EE->db->escape_str($this->EE->config->item('site_id'))."' LIMIT 1");
+								WHERE (template_name = '".$EE->db->escape_str($new_values['reserved_category_word'])."'
+								OR group_name = '".$EE->db->escape_str($new_values['reserved_category_word'])."')
+								AND t.site_id = '".$EE->db->escape_str($EE->config->item('site_id'))."' LIMIT 1");
 
 			if ($query->num_rows() > 0)
 			{
-				show_error($this->EE->lang->line('category_trigger_duplication').' ('.htmlentities($new_values['reserved_category_word']).')');
+				show_error($EE->lang->line('category_trigger_duplication').' ('.htmlentities($new_values['reserved_category_word']).')');
 			}
 		}
 
@@ -631,15 +622,16 @@ class EE_Config Extends CI_Config {
 				
 				if ( ! @is_dir($fp))
 				{
-					$this->_config_path_errors[$this->EE->lang->line('invalid_path')][$val] = $this->EE->lang->line($val) .': ' .$new_values[$val];
+					$this->_config_path_errors[$EE->lang->line('invalid_path')][$val] = $EE->lang->line($val) .': ' .$fp;
 				}
 
-				if ( (! is_really_writable($fp)) && ($val != 'theme_folder_path'))
+				if (( ! is_really_writable($fp)) && ($val != 'theme_folder_path'))
 				{
-					if ( ! isset($this->_config_path_errors[$this->EE->lang->line('invalid_path')][$val]))
+					if ( ! isset($this->_config_path_errors[$EE->lang->line('invalid_path')][$val]))
 					{
-						$this->_config_path_errors[$this->EE->lang->line('not_writable_path')][$val] = $this->EE->lang->line($val) .': ' .$new_values[$val];
+
 						
+						$this->_config_path_errors[$EE->lang->line('not_writable_path')][$val] = $EE->lang->line($val) .': ' .$fp;
 					}
 				}
 			}
@@ -657,17 +649,17 @@ class EE_Config Extends CI_Config {
 		
 		if ($this->item('multiple_sites_enabled') !== 'y' && isset($new_values['site_name']))
 		{	
-			$this->EE->db->query($this->EE->db->update_string('exp_sites', 
-															  array('site_label' => str_replace($find, $replace, $new_values['site_name'])),
-															  "site_id = '".$this->EE->db->escape_str($site_id)."'"));
+			$EE->db->query($EE->db->update_string('exp_sites', 
+					  array('site_label' => str_replace($find, $replace, $new_values['site_name'])),
+					  "site_id = '".$EE->db->escape_str($site_id)."'"));
 			unset($new_values['site_name']);
 		}
 		
-		$query = $this->EE->db->query("SELECT * FROM exp_sites WHERE site_id = '".$this->EE->db->escape_str($site_id)."'");
+		$query = $EE->db->query("SELECT * FROM exp_sites WHERE site_id = '".$EE->db->escape_str($site_id)."'");
 			
 		
 		// Because Pages is a special snowflake
-		if ($this->EE->config->item('site_pages') !== FALSE)
+		if ($EE->config->item('site_pages') !== FALSE)
 		{
 			if (isset($new_values['site_url']) OR isset($new_values['site_index']))
 			{
@@ -676,11 +668,11 @@ class EE_Config Extends CI_Config {
 				$url = (isset($new_values['site_url'])) ? $new_values['site_url'].'/' : $this->config['site_url'].'/';
 				$url .= (isset($new_values['site_index'])) ? $new_values['site_index'].'/' : $this->config['site_index'].'/';
 				
-				$pages[$this->EE->config->item('site_id')]['url'] = preg_replace("#(^|[^:])//+#", "\\1/", $url);
+				$pages[$EE->config->item('site_id')]['url'] = preg_replace("#(^|[^:])//+#", "\\1/", $url);
 
-				$this->EE->db->query($this->EE->db->update_string('exp_sites', 
-											  array('site_pages' => base64_encode(serialize($pages))),
-											  "site_id = '".$this->EE->db->escape_str($site_id)."'"));
+				$EE->db->query($EE->db->update_string('exp_sites', 
+							  array('site_pages' => base64_encode(serialize($pages))),
+								  "site_id = '".$EE->db->escape_str($site_id)."'"));
 			}
 		}
 
@@ -709,9 +701,9 @@ class EE_Config Extends CI_Config {
 			
 			if ($changes == 'y')
 			{
-				$this->EE->db->query($this->EE->db->update_string('exp_sites', 
-											  array('site_'.$type.'_preferences' => base64_encode(serialize($prefs))),
-											  "site_id = '".$this->EE->db->escape_str($site_id)."'"));
+				$EE->db->query($EE->db->update_string('exp_sites', 
+									  array('site_'.$type.'_preferences' => base64_encode(serialize($prefs))),
+									  "site_id = '".$EE->db->escape_str($site_id)."'"));
 			}
 		}
 
@@ -784,15 +776,15 @@ class EE_Config Extends CI_Config {
 		// Is the config file writable?
 		if ( ! is_really_writable($this->config_path))
 		{
-			show_error('Your config'.EXT.' file does not appear to have the proper file permissions.  Please set the file permissions to 666 on the following file: expressionengine/config/config.php');
+			show_error('Your config.php file does not appear to have the proper file permissions.  Please set the file permissions to 666 on the following file: expressionengine/config/config.php');
 		}
 		
 		// Read the config file as PHP
 		require $this->config_path;
 
 		// load the file helper
-		$this->EE =& get_instance();
-		$this->EE->load->helper('file');
+		$EE =& get_instance();
+		$EE->load->helper('file');
 		
 		// Read the config data as a string
 		$config_file = read_file($this->config_path);
@@ -815,6 +807,11 @@ class EE_Config Extends CI_Config {
 		{
 			foreach ($new_values as $key => $val)
 			{
+				if (is_array($val))
+				{
+					continue;
+				}
+				
 				if (is_bool($val))
 				{
 					$val = ($val == TRUE) ? 'TRUE' : 'FALSE';
@@ -934,7 +931,7 @@ class EE_Config Extends CI_Config {
 		// Is the database file writable?
 		if ( ! is_really_writable($this->database_path))
 		{
-			show_error('Your database'.EXT.' file does not appear to have the proper file permissions.  Please set the file permissions to 666 on the following file: expressionengine/config/database.php');
+			show_error('Your database.php file does not appear to have the proper file permissions.  Please set the file permissions to 666 on the following file: expressionengine/config/database.php');
 		}
 
 		$prototype = array(
@@ -1039,8 +1036,6 @@ class EE_Config Extends CI_Config {
 
 		return TRUE;	
 	}
-
-
 }
 // END CLASS
 

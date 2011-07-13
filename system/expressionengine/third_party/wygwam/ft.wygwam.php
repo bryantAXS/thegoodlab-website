@@ -1,6 +1,5 @@
 <?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
-
 require_once PATH_THIRD.'wygwam/config.php';
 require_once PATH_THIRD.'wygwam/helper.php';
 
@@ -24,7 +23,7 @@ class Wygwam_ft extends EE_Fieldtype {
 	 */
 	function Wygwam_ft()
 	{
-		parent::EE_Fieldtype();
+		parent::__construct();
 
 		$this->helper = new Wygwam_Helper();
 
@@ -130,7 +129,7 @@ class Wygwam_ft extends EE_Fieldtype {
 
 		$r[] = array(
 			lang('wygwam_editor_config', 'wygwam_config'),
-			$config_setting
+			$config_setting . NBS.NBS . ' <a href="'.BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=wygwam'.AMP.'method=configs">'.lang('wygwam_edit_configs').'</a>'
 		);
 
 		// -------------------------------------------
@@ -255,6 +254,8 @@ class Wygwam_ft extends EE_Fieldtype {
 					foreach ($query->result_array() as $row)
 					{
 						$data = $row['data'];
+						$data = $this->_replace_file_tags($data);
+
 						$convert = FALSE;
 
 						// Auto <br /> and XHTML
@@ -274,6 +275,8 @@ class Wygwam_ft extends EE_Fieldtype {
 						// Save the new field data
 						if ($convert)
 						{
+							$data = $this->_replace_file_urls($data);
+
 							$this->EE->db->query($this->EE->db->update_string('exp_channel_data',
 								array(
 									'field_id_'.$field_id => $data,
@@ -311,9 +314,17 @@ class Wygwam_ft extends EE_Fieldtype {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Compare File URLs
+	 */
+	private function _cmp_file_urls($a, $b)
+	{
+		return -(strcmp(strlen($a), strlen($b)));
+	}
+
+	/**
 	 * Fetch File Tags
 	 */
-	private function _fetch_file_tags()
+	private function _fetch_file_tags($sort = FALSE)
 	{
 		if (! isset($this->cache['file_tags']))
 		{
@@ -322,6 +333,11 @@ class Wygwam_ft extends EE_Fieldtype {
 
 			if ($file_paths = $this->EE->functions->fetch_file_paths())
 			{
+				if ($sort)
+				{
+					uasort($file_paths, array(&$this, '_cmp_file_urls'));
+				}
+
 				foreach ($file_paths as $id => $url)
 				{
 					$tags[] = LD.'filedir_'.$id.RD;
@@ -347,9 +363,61 @@ class Wygwam_ft extends EE_Fieldtype {
 	/**
 	 * Replace File Paths
 	 */
-	private function _replace_file_paths($data)
+	private function _replace_file_urls($data)
 	{
 		$tags = $this->_fetch_file_tags();
+		return str_replace($tags[1], $tags[0], $data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Compare Page URLs
+	 */
+	private function _cmp_page_urls($a, $b)
+	{
+		return -(strcmp(strlen($a[4]), strlen($b[4])));
+	}
+
+	/**
+	 * Fetch Page Tags
+	 */
+	private function _fetch_page_tags($sort = FALSE)
+	{
+		$tags = array();
+		$urls = array();
+
+		$page_data = $this->helper->get_all_page_data(FALSE);
+
+		if ($sort)
+		{
+			usort($page_data, array(&$this, '_cmp_page_urls'));
+		}
+
+		foreach ($page_data as $page)
+		{
+			$tags[] = LD.'page_'.$page[0].RD;
+			$urls[] = $page[4];
+		}
+
+		return array($tags, $urls);
+	}
+
+	/**
+	 * Replace Page Tags
+	 */
+	private function _replace_page_tags($data)
+	{
+		$tags = $this->_fetch_page_tags();
+		return str_replace($tags[0], $tags[1], $data);
+	}
+
+	/**
+	 * Replace Page URLs
+	 */
+	private function _replace_page_urls($data)
+	{
+		$tags = $this->_fetch_page_tags(TRUE);
 		return str_replace($tags[1], $tags[0], $data);
 	}
 
@@ -408,40 +476,110 @@ class Wygwam_ft extends EE_Fieldtype {
 			unset($config['contentsCss']);
 		}
 
+		// extraPlugins
+		$config['extraPlugins'] = (isset($config['extraPlugins']) && $config['extraPlugins'] ? $config['extraPlugins'].',' : '') . 'wygwam,embedmedia,readmore';
+
 		// -------------------------------------------
-		//  CKFinder Config
+		//  File Browser Config
 		// -------------------------------------------
 
-		if ($config['upload_dir'])
+		$user_group = $this->EE->session->userdata('group_id');
+		$upload_dir = isset($config['upload_dir']) ? $config['upload_dir'] : NULL;
+		$upload_prefs = $this->EE->tools_model->get_upload_preferences($user_group, $upload_dir);
+
+		// before doing anything, make sure that the user has access to any upload directories
+		// (taking into account the upload directory setting)
+		if ($upload_prefs->num_rows())
 		{
-			$this->EE->db->select('server_path, url, allowed_types, max_size, max_height, max_width');
-			$query = $this->EE->db->get_where('upload_prefs', array('id' => $config['upload_dir']));
+			$file_browser = isset($this->settings['file_browser']) ? $this->settings['file_browser'] : 'ee';
 
-			if ($query->num_rows())
+			switch ($file_browser)
 			{
-				$row = $query->row_array();
+				case 'ckfinder':
 
-				if (! isset($_SESSION)) @session_start();
-				if (! isset($_SESSION['wygwam_'.$config['upload_dir']])) $_SESSION['wygwam_'.$config['upload_dir']] = array();
-				$sess =& $_SESSION['wygwam_'.$config['upload_dir']];
+					// CKFinder can only pull files from a single upload directory, so make sure it's set
+					if (! $upload_dir) break;
 
-				$sess['p'] = (substr($row['server_path'], 0, 1) == '/' ? '' : FCPATH) . $row['server_path'];
-				$sess['u'] = $row['url'];
-				$sess['t'] = $row['allowed_types'];
-				$sess['s'] = $row['max_size'];
-				$sess['w'] = $row['max_width'];
-				$sess['h'] = $row['max_height'];
+					$upload_prefs = $upload_prefs->row_array();
 
-				$config['filebrowserImageBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?Type=Images&id='.$config['upload_dir'];
-				$config['filebrowserImageUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images&id='.$config['upload_dir'];
+					if (! isset($_SESSION)) @session_start();
+					if (! isset($_SESSION['wygwam_'.$config['upload_dir']])) $_SESSION['wygwam_'.$config['upload_dir']] = array();
+					$sess =& $_SESSION['wygwam_'.$config['upload_dir']];
 
-				if ($row['allowed_types'] == 'all')
-				{
-					$config['filebrowserBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?id='.$config['upload_dir'];
-					$config['filebrowserUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files&id='.$config['upload_dir'];
-					$config['filebrowserFlashBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?Type=Flash&id='.$config['upload_dir'];
-					$config['filebrowserFlashUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash&id='.$config['upload_dir'];
-				}
+					// add the FCPATH if this is a relative path
+					if (! preg_match('/^(\/|\\\|[a-zA-Z]+:)/', $upload_prefs['server_path']))
+					{
+						$upload_prefs['server_path'] = FCPATH . $upload_prefs['server_path'];
+					}
+
+					$sess['p'] = $upload_prefs['server_path'];
+					$sess['u'] = $upload_prefs['url'];
+					$sess['t'] = $upload_prefs['allowed_types'];
+					$sess['s'] = $upload_prefs['max_size'];
+					$sess['w'] = $upload_prefs['max_width'];
+					$sess['h'] = $upload_prefs['max_height'];
+
+					$config['filebrowserImageBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?Type=Images&id='.$config['upload_dir'];
+					$config['filebrowserImageUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Images&id='.$config['upload_dir'];
+
+					if ($upload_prefs['allowed_types'] == 'all')
+					{
+						$config['filebrowserBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?id='.$config['upload_dir'];
+						$config['filebrowserUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Files&id='.$config['upload_dir'];
+						$config['filebrowserFlashBrowseUrl'] = $this->helper->theme_url().'lib/ckfinder/ckfinder.html?Type=Flash&id='.$config['upload_dir'];
+						$config['filebrowserFlashUploadUrl'] = $this->helper->theme_url().'lib/ckfinder/core/connector/php/connector.php?command=QuickUpload&type=Flash&id='.$config['upload_dir'];
+					}
+
+					break;
+
+				case 'assets':
+
+					// make sure Assets is actually installed
+					// (otherwise, just use the EE File Manager)
+					if (array_key_exists('assets', $this->EE->addons->get_installed()))
+					{
+						// include sheet resources
+						if (! class_exists('Assets_helper'))
+						{
+							require PATH_THIRD.'assets/helper.php';
+						}
+
+						$assets_helper = new Assets_helper;
+						$assets_helper->include_sheet_resources();
+
+						// if no upload directory was set, just default to "all"
+						if (! $upload_dir) $upload_dir = '"all"';
+
+						$config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadAssetsSheet(params, '.$upload_dir.', "any"); }';
+						$config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, '.$upload_dir.', "image"); }';
+						$config['filebrowserFlashBrowseFunc'] = 'function(params) { Wygwam.loadAssetsSheet(params, '.$upload_dir.', "flash"); }';
+
+						break;
+					}
+
+				default:
+
+					// if no upload directory was set, just default to "all"
+					if (! $upload_dir) $upload_dir = '"all"';
+
+					$config['filebrowserBrowseFunc']      = 'function(params) { Wygwam.loadEEFileBrowser(params, '.$upload_dir.', "any"); }';
+					$config['filebrowserImageBrowseFunc'] = 'function(params) { Wygwam.loadEEFileBrowser(params, '.$upload_dir.', "image"); }';
+
+			}
+		}
+
+		// add any site page data to wygwam config
+		if ($pages = $this->helper->get_all_page_data())
+		{
+			$this->EE->lang->loadfile('wygwam');
+			$site_page_string = lang('wygwam_site_page');
+
+			foreach ($pages as $page)
+			{
+				$config['link_types'][$site_page_string][] = array(
+			            'label' => $page[2],
+			            'url'   => $page[4]
+				);
 			}
 		}
 
@@ -497,7 +635,24 @@ class Wygwam_ft extends EE_Fieldtype {
 			$this->helper->include_theme_js('lib/ckeditor/ckeditor.js');
 			$this->helper->include_theme_js('scripts/wygwam.js');
 			$this->helper->include_theme_css('styles/wygwam.css');
-			$this->helper->insert_js('Wygwam.themeUrl = "'.$this->helper->theme_url().'";');
+
+			$js = 'Wygwam.themeUrl = "'.$this->helper->theme_url().'";'
+			    . 'Wygwam.ee2plus = '.(version_compare(APP_VER, '2.2', '>=') ? 'true' : 'false').';';
+
+			// Save the upload directory URLs
+			$filedirs = $this->EE->tools_model->get_upload_preferences(1);
+
+			if ($filedirs->num_rows())
+			{
+				foreach ($filedirs->result() as $filedir)
+				{
+					$filedir_urls[$filedir->id] = $filedir->url;
+				}
+
+				$js .= 'Wygwam.filedirUrls = '.$this->EE->javascript->generate_json($filedir_urls, TRUE).';';
+			}
+
+			$this->helper->insert_js($js);
 
 			$this->cache['included_configs'] = array();
 		}
@@ -519,7 +674,10 @@ class Wygwam_ft extends EE_Fieldtype {
 		// convert file tags to URLs
 		$data = $this->_replace_file_tags($data);
 
-		return '<div class="wygwam"><textarea id="'.$id.'" name="'.$this->field_name.'">'.$data.'</textarea></div>';
+		// convert site page tags to URLs
+		$data = $this->_replace_page_tags($data);
+
+		return '<div class="wygwam"><textarea id="'.$id.'" name="'.$this->field_name.'" rows="10">'.$data.'</textarea></div>';
 	}
 
 	/**
@@ -548,7 +706,10 @@ class Wygwam_ft extends EE_Fieldtype {
 		// convert file tags to URLs
 		$data = $this->_replace_file_tags($data);
 
-		return '<textarea name="'.$this->cell_name.'">'.$data.'</textarea>';
+		// convert site page tags to URLs
+		$data = $this->_replace_page_tags($data);
+
+		return '<textarea name="'.$this->cell_name.'" rows="10">'.$data.'</textarea>';
 	}
 
 	/**
@@ -557,6 +718,36 @@ class Wygwam_ft extends EE_Fieldtype {
 	function display_var_field($data)
 	{
 		return $this->display_field($data);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Validate
+	 */
+	function validate($data)
+	{
+		// is this a required field?
+		if ($this->settings['field_required'] == 'y' && ! $data)
+		{
+			return lang('required');
+		}
+
+		return TRUE;
+	}
+
+	/**
+	 * Validate Cell
+	 */
+	function validate_cell($data)
+	{
+		// is this a required cell?
+		if ($this->settings['col_required'] == 'y' && ! $data)
+		{
+			return lang('col_required');
+		}
+
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -589,7 +780,10 @@ class Wygwam_ft extends EE_Fieldtype {
 		$data = str_replace('&quot;', '"', $data);
 
 		// Convert file URLs to tags
-		$data = $this->_replace_file_paths($data);
+		$data = $this->_replace_file_urls($data);
+
+		// Convert page URLs to tags
+		$data = $this->_replace_page_urls($data);
 
 		return $data;
 	}
@@ -613,28 +807,90 @@ class Wygwam_ft extends EE_Fieldtype {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Pre Process
+	 */
+	function pre_process($data)
+	{
+		$data = $this->_replace_page_tags($data);
+
+		$this->EE->load->library('typography');
+		$tmp_encode_email = $this->EE->typography->encode_email;
+		$this->EE->typography->encode_email = FALSE;
+
+		$data = $this->EE->typography->parse_type($data, array(
+			'text_format'   => 'none',
+			'html_format'   => 'all',
+			'auto_links'    => (isset($this->row['channel_auto_link_urls']) ? $this->row['channel_auto_link_urls'] : 'n'),
+			'allow_img_url' => (isset($this->row['channel_allow_img_urls']) ? $this->row['channel_allow_img_urls'] : 'y')
+		));
+
+		$this->EE->typography->encode_email = $tmp_encode_email;
+
+		// use normal quotes
+		$data = str_replace('&quot;', '"', $data);
+
+		return $data;
+	}
+
+	/**
 	 * Replace Tag
 	 */
 	function replace_tag($data)
 	{
-		return $this->EE->typography->parse_type(
-			$this->EE->functions->encode_ee_tags($data),
-			array(
-				'text_format'   => 'none',
-				'html_format'   => 'all',
-				'auto_links'    => $this->row['channel_auto_link_urls'],
-				'allow_img_url' => $this->row['channel_allow_img_urls']
-			)
-		);
+		// strip out the {read_more} tag
+		$data = str_replace('<!--read_more-->', '', $data);
+
+		return $data;
 	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Replace Has Excerpt Tag
+	 */
+	function replace_has_excerpt($data)
+	{
+		return (strpos($data, '<!--read_more-->') !== FALSE) ? 'y' : '';
+	}
+
+	/**
+	 * Replace Excerpt Tag
+	 */
+	function replace_excerpt($data)
+	{
+		if (($read_more_tag_pos = strpos($data, '<!--read_more-->')) !== FALSE)
+		{
+			$data = substr($data, 0, $read_more_tag_pos);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Replace Extended Tag
+	 */
+	function replace_extended($data)
+	{
+		if (($read_more_tag_pos = strpos($data, '<!--read_more-->')) !== FALSE)
+		{
+			$data = substr($data, $read_more_tag_pos + 16);
+		}
+		else
+		{
+			$data = '';
+		}
+
+		return $data;
+	}
+
+	// --------------------------------------------------------------------
 
 	/**
 	 * Display Variable Tag
 	 */
 	function display_var_tag($data)
 	{
-		die($data);
-		return $this->replace_tag($data);
+		return $this->replace_tag($this->pre_process($data));
 	}
 }
 

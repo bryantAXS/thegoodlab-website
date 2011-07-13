@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -28,8 +28,10 @@ class Moblog_mcp {
 	var $status_array 		= array();
 	var $field_array  		= array();
 	var $author_array 		= array();
+	var $image_dim_array	= array();
+	var $upload_loc_array	= array();
+	
 	var $default_template 	= '';
-
 	var $default_channel_cat	= '';
 
 
@@ -221,17 +223,31 @@ EOT;
 		}
 
 		// Fetch Upload Directories
+		// @pk marker - remove
+		
+		$this->upload_loc_array = array('0' => $this->EE->lang->line('none'));
+		$this->image_dim_array = array('0' => $this->EE->lang->line('none'));
 		
 		$upload_array = array('0' => $this->EE->lang->line('none'));
 		
 		$this->EE->load->model('tools_model');
 		$query = $this->EE->tools_model->get_upload_preferences($this->EE->session->userdata['group_id']);
 		
+		
+		$this->EE->load->model('file_model');
+		$sizes_q = $this->EE->file_model->get_dimensions_by_dir_id(1);
+		$sizes = array();
+		
 		foreach ($query->result_array() as $row)
 		{
+			$sizes[$row['id']] = array('0' => '----');
 			$upload_array[$row['id']] = $row['name'];
 		}
 		
+		foreach ($sizes_q->result() as $size)
+		{
+			$sizes[$size->upload_location_id][$size->id] = $size->title;
+		}
 
 		// Options Matrix - Whoa.
 
@@ -252,7 +268,6 @@ EOT;
 																'none'),
 						'moblog_sticky_entry'		=> 'n',
 						'moblog_allow_overrides'	=> 'y',
-						'moblog_upload_directory'	=> array($upload_array, '1'),
 						'moblog_template'			=> $this->default_template,	// textarea
 
 						// moblog_email_settings
@@ -268,20 +283,15 @@ EOT;
 						'moblog_ignore_text'		=> '',	// textarea
 						
 						// moblog_image_settings
-						'moblog_image_width'		=> '0',
-						'moblog_image_height'		=> '0',
-						'moblog_resize_image'		=> 'n',
-						'moblog_resize_width'		=> '0',
-						'moblog_resize_height'		=> '0',
-						'moblog_create_thumbnail'	=> 'n',
-						'moblog_thumbnail_width'	=> '0',
-						'moblog_thumbnail_height'	=> '0'
+						'moblog_upload_directory'	=> array(array('none'=> $this->EE->lang->line('none')), '0'),
+						'moblog_image_size'			=> array(array('none'=> $this->EE->lang->line('none')), '0'),
+						'moblog_thumb_size'			=> array(array('none'=> $this->EE->lang->line('none')), '0')
 						);
 
 
 		// Filtering Javascript
 		
-		$this->filtering_menus('moblog_create');
+		$this->_filtering_menus('moblog_create');
 		$this->EE->javascript->compile();
 
 
@@ -298,10 +308,7 @@ EOT;
 		$this->EE->form_validation->set_rules('moblog_email_password',		'lang:moblog_email_password',	'required');
 		$this->EE->form_validation->set_rules('moblog_time_interval',		'lang:moblog_time_interval',	'required');
 		$this->EE->form_validation->set_rules('moblog_enabled',				'lang:moblog_enabled',			'required|enum[y,n]');
-		$this->EE->form_validation->set_rules('moblog_upload_directory',	'lang:moblog_upload_directory',	'required');
-		$this->EE->form_validation->set_rules('moblog_resize_image',		'lang:moblog_resize_image',		'required');
-		$this->EE->form_validation->set_rules('moblog_create_thumbnail',	'lang:moblog_create_thumbnail',	'required');
-
+		
 		// All the non-required fields...sighs
 		$this->EE->form_validation->set_rules('moblog_valid_from',			'lang:moblog_valid_from',		'prep_list[,]|valid_emails');
 		
@@ -310,18 +317,17 @@ EOT;
 		$this->EE->form_validation->set_rules('field_id',					'lang:field_id',				'');
 		$this->EE->form_validation->set_rules('status',						'lang:status',					'');
 		$this->EE->form_validation->set_rules('author_id',					'lang:author_id',				'');
-		$this->EE->form_validation->set_rules('moblog_image_width',			'lang:moblog_image_width',		'is_natural');
-		$this->EE->form_validation->set_rules('moblog_image_height',		'lang:moblog_image_height',		'is_natural');
-		$this->EE->form_validation->set_rules('moblog_resize_width',		'lang:moblog_resize_width',		'is_natural');
-		$this->EE->form_validation->set_rules('moblog_resize_height',		'lang:moblog_resize_height',	'is_natural');
-		$this->EE->form_validation->set_rules('moblog_thumbnail_width',		'lang:moblog_thumbnail_width',	'is_natural');
-		$this->EE->form_validation->set_rules('moblog_thumbnail_height',	'lang:moblog_thumbnail_height',	'is_natural');
+
 		$this->EE->form_validation->set_rules('moblog_subject_prefix',		'lang:moblog_subject_prefix',	'');
 		$this->EE->form_validation->set_rules('moblog_ignore_text',			'lang:moblog_ignore_text',		'');
 		$this->EE->form_validation->set_rules('moblog_template',			'lang:moblog_template',			'');
 		$this->EE->form_validation->set_rules('ping[]',						'lang:ping',					'');
 		$this->EE->form_validation->set_rules('moblog_allow_overrides',		'lang:moblog_allow_overrides',	'enum[y,n]');
 		$this->EE->form_validation->set_rules('moblog_sticky_entry',		'lang:moblog_sticky_entry',		'enum[y,n]');
+		
+		$this->EE->form_validation->set_rules('moblog_upload_directory',	'lang:moblog_upload_directory',	'required');
+		$this->EE->form_validation->set_rules('moblog_image_size',			'lang:moblog_image_size',		'is_natural');
+		$this->EE->form_validation->set_rules('moblog_thumb_size',			'lang:moblog_thumb_size',		'is_natural');
 		
 		$this->EE->form_validation->set_error_delimiters('<p class="notice">', '</p>');
 
@@ -333,6 +339,8 @@ EOT;
 		// Data
 		
 		$data = array('author_id' => $this->EE->session->userdata['member_id']);
+		
+		$form_data['moblog_upload_directory'] = array($upload_array, '');
 		
 		if (($basis != '' && $basis != 'none') OR ($id != '' && is_numeric($id)))
 		{
@@ -374,14 +382,10 @@ EOT;
 						'moblog_auth_required'		=> $row['moblog_auth_required'] ,
 						'moblog_auth_delete'		=> $row['moblog_auth_delete'] ,
 						'moblog_upload_directory'	=> $row['moblog_upload_directory'] ,
-						'moblog_image_width'		=> $row['moblog_image_width'] ,
-						'moblog_image_height'		=> $row['moblog_image_height'] ,
-						'moblog_resize_image'		=> $row['moblog_resize_image'] ,
-						'moblog_resize_width'		=> $row['moblog_resize_width'] ,
-						'moblog_resize_height'		=> $row['moblog_resize_height'] ,
-						'moblog_create_thumbnail'	=> $row['moblog_create_thumbnail'] ,
-						'moblog_thumbnail_width'	=> $row['moblog_thumbnail_width'] ,
-						'moblog_thumbnail_height'	=> $row['moblog_thumbnail_height'] ,
+
+						'moblog_image_size'			=> $row['moblog_image_size'],
+						'moblog_thumb_size'			=> $row['moblog_thumb_size'],
+						
 						'moblog_email_type'			=> $row['moblog_email_type'] ,
 						'moblog_email_address'		=> base64_decode($row['moblog_email_address'] ),
 						'moblog_email_server'		=> $row['moblog_email_server'] ,
@@ -405,6 +409,37 @@ EOT;
 			
 			if ($row['moblog_channel_id'] != 0 && array_key_exists($row['moblog_channel_id'], $this->channel_array))
 			{
+				// Upload Locations
+				if ( ! isset($this->upload_loc_array[$data['moblog_upload_directory']]))
+				{
+					$data['moblog_upload_directory'] = '0';
+				}
+
+				$form_data['moblog_upload_directory'] = array($this->upload_loc_array, $data['moblog_upload_directory']);
+
+				// Image Dimensions
+				$size_options = $this->image_dim_array[$data['moblog_upload_directory']];
+				
+				if ( ! isset($size_options[$data['moblog_image_size']]))
+				{
+					$data['moblog_image_size'] = 0;
+				}
+				if ( ! isset($size_options[$data['moblog_thumb_size']]))
+				{
+					$data['moblog_thumb_size'] = 0;
+				}
+				
+				$form_data['moblog_image_size'] = array(
+					$size_options,
+					$data['moblog_image_size']
+				);
+				
+				$form_data['moblog_thumb_size'] = array(
+					$size_options,
+					$data['moblog_thumb_size']
+				);
+				
+				
 				$form_data['channel_id'][1] = $row['moblog_channel_id'];
 				
 				$new_array = array('none'=> $this->EE->lang->line('none'));
@@ -531,10 +566,8 @@ EOT;
 
 			return $this->EE->load->view('update', $vars, TRUE);
 		}
-		else
-		{
-			$this->update_moblog();
-		}
+		
+		$this->update_moblog();
 	}
 
 	// --------------------------------------------------------------------
@@ -548,7 +581,7 @@ EOT;
 	 * @access	public
 	 * @return	void
 	 */
-	function filtering_menus($form_name)
+	function _filtering_menus($form_name)
 	{
 		// In order to build our filtering options we need to gather 
 		// all the channels, categories and custom statuses
@@ -834,8 +867,87 @@ $('select[name=channel_id]').change(function() {
 	changemenu(this.value);
 });
 
+MAGIC;
+		
+		// And same idea for file upload dirs and dimensions
+		$this->upload_loc_array = array('0' => $this->EE->lang->line('none'));
+		$this->image_dim_array = array('0' => $this->upload_loc_array);
+		
+		// Fetch Upload Directories
+		
+		$this->EE->load->model('tools_model');
+		$this->EE->load->model('file_model');
+		
+		$sizes_q = $this->EE->file_model->get_dimensions_by_dir_id();
+		$sizes_array = array();
+		
+		foreach ($sizes_q->result_array() as $row)
+		{
+			$sizes_array[$row['upload_location_id']][$row['id']] = $row['title'];
+		}
+		
+		$upload_q = $this->EE->tools_model->get_upload_preferences($this->EE->session->userdata['group_id']);
+		
+		foreach ($upload_q->result_array() as $row)
+		{
+			$this->image_dim_array[$row['id']] = array('0' => $this->lang->line('none'));
+			$this->upload_loc_array[$row['id']] = $row['name'];
+			
+			// Get sizes
+			if (isset($sizes_array[$row['id']]))
+			{
+				foreach ($sizes_array[$row['id']] as $id => $title)
+				{
+					$this->image_dim_array[$row['id']][$id] = $title;
+				}
+			}
+		}
+		
+		$upload_info = $this->EE->javascript->generate_json($this->image_dim_array, TRUE);
+		
+		$javascript .= <<<MAGIC
+
+// An object to represent our channels
+var upload_info = $upload_info;
+
+var empty_select =  '<option value="0">$none_text</option>';
+var spaceString = new RegExp('!-!', "g");
+
+// We prep the magic array as soon as we can, basically
+// converting everything into option elements
+(function(undefined) {
+	jQuery.each(upload_info, function(key, options) {
+
+		var html = '';
+
+		// add option fields
+		jQuery.each(options, function(k, v) {
+			
+			html += '<option value="' + k + '">' + v.replace(spaceString, String.fromCharCode(160)) + "</option>";
+		});
+		
+		if (html) {
+			upload_info[key] = html;
+		}
+	});	
+})();
+
+// Change the submenus
+// Gets passed the channel id
+function upload_changemenu(index)
+{
+	$('select[name=moblog_image_size]').empty().append(upload_info[index]);
+	$('select[name=moblog_thumb_size]').empty().append(upload_info[index]);
+}
+
+$('select[name=moblog_upload_directory]').change(function() {
+	upload_changemenu(this.value);
+});
 
 MAGIC;
+
+		
+		
 		$this->EE->javascript->output($javascript);
 	}
 
@@ -937,14 +1049,10 @@ MAGIC;
 						'moblog_auth_required'		=> $_POST['moblog_auth_required'],
 						'moblog_auth_delete'		=> $_POST['moblog_auth_delete'],
 						'moblog_upload_directory'	=> $_POST['moblog_upload_directory'],
-						'moblog_image_width'		=> ( ! isset($_POST['moblog_image_width'])) ? '0' : $_POST['moblog_image_width'],
-						'moblog_image_height'		=> ( ! isset($_POST['moblog_image_height'])) ? '0' : $_POST['moblog_image_height'],
-						'moblog_resize_image'		=> $_POST['moblog_resize_image'],
-						'moblog_resize_width'		=> ( ! isset($_POST['moblog_resize_width'])) ? '0' : $_POST['moblog_resize_width'],
-						'moblog_resize_height'		=> ( ! isset($_POST['moblog_resize_height'])) ? '0' : $_POST['moblog_resize_height'],
-						'moblog_create_thumbnail'	=> $_POST['moblog_create_thumbnail'],
-						'moblog_thumbnail_width'	=> ( ! isset($_POST['moblog_thumbnail_width'])) ? '0' : $_POST['moblog_thumbnail_width'],
-						'moblog_thumbnail_height'	=> ( ! isset($_POST['moblog_thumbnail_height'])) ? '0' : $_POST['moblog_thumbnail_height'],
+						
+						'moblog_image_size'			=> $_POST['moblog_image_size'],
+						'moblog_thumb_size'			=> $_POST['moblog_thumb_size'],
+						
 						'moblog_email_type'			=> $_POST['moblog_email_type'],
 						'moblog_email_address'		=> base64_encode($_POST['moblog_email_address']),
 						'moblog_email_server'		=> $_POST['moblog_email_server'],
@@ -1077,7 +1185,7 @@ MAGIC;
 		
 		if ( ! class_exists('Moblog'))
 		{
-			require PATH_MOD.'moblog/mod.moblog'.EXT;
+			require PATH_MOD.'moblog/mod.moblog.php';
 		}
 		
 		$MP = new Moblog();

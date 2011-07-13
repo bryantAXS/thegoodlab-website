@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		EllisLab Dev Team
- * @copyright	Copyright (c) 2006 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2006 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -58,7 +58,7 @@ class CI_Driver_Library {
 						// loves me some nesting!
 						foreach (array(ucfirst($child_class), strtolower($child_class)) as $class)
 						{
-							$filepath = $path.'libraries/'.$this->lib_name.'/drivers/'.$child_class.EXT;
+							$filepath = $path.'libraries/'.$this->lib_name.'/drivers/'.$child_class.'.php';
 
 							if (file_exists($filepath))
 							{

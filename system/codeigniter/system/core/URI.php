@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -28,8 +28,9 @@
  */
 class CI_URI {
 
-	var	$keyval			= array();
 	var $uri_string;
+
+	var	$keyval			= array();
 	var $segments		= array();
 	var $rsegments		= array();
 
@@ -67,7 +68,7 @@ class CI_URI {
 			// can be unreliable in some environments
 			if (is_array($_GET) && count($_GET) == 1 && trim(key($_GET), '/') != '')
 			{
-				$this->uri_string = key($_GET);
+				$this->_set_uri_string(key($_GET));
 				return;
 			}
 
@@ -76,7 +77,7 @@ class CI_URI {
 			$path = (isset($_SERVER['PATH_INFO'])) ? $_SERVER['PATH_INFO'] : @getenv('PATH_INFO');
 			if (trim($path, '/') != '' && $path != "/".SELF)
 			{
-				$this->uri_string = $path;
+				$this->_set_uri_string($path);
 				return;
 			}
 
@@ -84,7 +85,7 @@ class CI_URI {
 			$path =  (isset($_SERVER['QUERY_STRING'])) ? $_SERVER['QUERY_STRING'] : @getenv('QUERY_STRING');
 			if (trim($path, '/') != '')
 			{
-				$this->uri_string = $path;
+				$this->_set_uri_string($path);
 				return;
 			}
 
@@ -93,31 +94,44 @@ class CI_URI {
 			if (trim($path, '/') != '' && $path != "/".SELF)
 			{
 				// remove path and script information so we have good URI data
-				$this->uri_string = $path;
+				$this->_set_uri_string($path);
 				return;
 			}
 
 			// We've exhausted all our options...
 			$this->uri_string = '';
+			return;
 		}
-		else
+
+		// Not auto - we'll use their choice
+		$uri = strtoupper($this->config->item('uri_protocol'));
+
+		if ($uri == 'REQUEST_URI')
 		{
-			$uri = strtoupper($this->config->item('uri_protocol'));
-
-			if ($uri == 'REQUEST_URI')
-			{
-				$this->uri_string = $this->_parse_request_uri();
-				return;
-			}
-
-			$this->uri_string = (isset($_SERVER[$uri])) ? $_SERVER[$uri] : @getenv($uri);
+			$path = $this->_parse_request_uri();
+			$this->_set_uri_string($path);
+			return;
 		}
 
+		$path = (isset($_SERVER[$uri])) ? $_SERVER[$uri] : @getenv($uri);
+		$this->_set_uri_string($path);
+	}
+	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Set the URI String
+	 *
+	 * @access	public
+	 * @return	string
+	 */
+	function _set_uri_string($str)
+	{
+		// Filter out control characters
+		$str = remove_invisible_characters($str, FALSE);
+		
 		// If the URI contains only a slash we'll kill it
-		if ($this->uri_string == '/')
-		{
-			$this->uri_string = '';
-		}
+		$this->uri_string = ($str == '/') ? '' : $str;
 	}
 
 	// --------------------------------------------------------------------
@@ -561,7 +575,6 @@ class CI_URI {
 	{
 		return $this->uri_string;
 	}
-
 
 	// --------------------------------------------------------------------
 

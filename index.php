@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -12,22 +12,42 @@
 
 /*
  * --------------------------------------------------------------------
- *  SYSTEM PATH
+ *  System Path
  * --------------------------------------------------------------------
  *
  * The following variable contains the server path to your
  * ExpressionEngine "system" folder.  By default the folder is named
- * "system" but it can be renamed for increased security.  If you
- * have changed the name of the system folder please indicate the
- * new name here, and include the server path.  The path can be a
- * simple relative path or it can be a full server path.
+ * "system" but it can be renamed or moved for increased security.
+ * Indicate the new name and/or path here. The path can be relative
+ * or it can be a full server path.
+ *
+ * http://expressionengine.com/user_guide/installation/best_practices.html
  * 
  */
 	$system_path = './system';
 
+
 /*
  * --------------------------------------------------------------------
- *  ERROR REPORTING OVERRIDE
+ *  Multiple Site Manager
+ * --------------------------------------------------------------------
+ *
+ * Uncomment the following variables if you are using the Multiple
+ * Site Manager: http://expressionengine.com/user_guide/cp/sites
+ *
+ * Set the Short Name of the site this file will display, the URL of
+ * this site's admin.php file, and the main URL of the site (without
+ * index.php) 
+ *
+ */
+//	$assign_to_config['site_name']  = 'domain2_short_name';
+//	$assign_to_config['cp_url'] = 'http://domain2.com/admin.php';
+//	$assign_to_config['site_url'] = 'http://domain2.com';
+
+
+/*
+ * --------------------------------------------------------------------
+ *  Error Reporting
  * --------------------------------------------------------------------
  *
  * PHP and database errors are normally displayed dynamically based
@@ -46,6 +66,7 @@
  * 
  */
 	$debug = 0;
+
 
 /*
  * --------------------------------------------------------------------
@@ -72,13 +93,6 @@
 //	$assign_to_config['site_404'] = '';
 //	$assign_to_config['global_vars'] = array(); // This array must be associative
 
-/**
- * If you are running the Multiple Site Manager, uncomment and assign the following variables 
- * See http://expressionengine.com/user_guide/cp/sites/domainsetup.html
- */
-//	$assign_to_config['site_name'] = '';
-//	$assign_to_config['cp_url'] = '';
-//	$assign_to_config['site_url'] = '';
 
 /*
  * --------------------------------------------------------------------
@@ -163,28 +177,6 @@
 	else
 	{
 		error_reporting(0);	
-	}
-
-/*
- * --------------------------------------------------------------------
- *  Is the request a URL redirect redirect?
- * --------------------------------------------------------------------
- *
- * All external links that appear in the ExpressionEngine control panel
- * are redirected to this index.php file first, before being sent to the
- * final destination, so that the location of the control panel will not 
- * end up in the referrer logs of other sites.
- *
- */	
-	if (isset($_GET['URL'])) 
-	{ 
-		if ( ! file_exists(APPPATH.'libraries/Redirect'.EXT))
-		{
-			exit('Some components appear to be missing from your ExpressionEngine installation.');	
-		}
-		require(APPPATH.'libraries/Redirect'.EXT);
-
-		exit();  // We halt system execution since we're done
 	}
 
 /*

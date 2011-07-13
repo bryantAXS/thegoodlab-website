@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -60,12 +60,12 @@ if ( ! function_exists('form_open'))
 		// CSRF
 		if ($CI->config->item('csrf_protection') === TRUE)
 		{
-			$hidden[$CI->security->csrf_token_name] = $CI->security->csrf_hash;
+			$hidden[$CI->security->get_csrf_token_name()] = $CI->security->get_csrf_hash();
 		}
 
 		if (is_array($hidden) AND count($hidden) > 0)
 		{
-			$form .= sprintf("\n<div class=\"hidden\">%s</div>", form_hidden($hidden));
+			$form .= sprintf("<div style=\"display:none\">%s</div>", form_hidden($hidden));
 		}
 
 		return $form;
@@ -1016,7 +1016,6 @@ if ( ! function_exists('_attributes_to_string'))
  * Determines what the form validation class was instantiated as, fetches
  * the object and returns it.
  *
- * @access	private
  * @return	mixed
  */
 if ( ! function_exists('_get_validation_object'))
@@ -1025,22 +1024,20 @@ if ( ! function_exists('_get_validation_object'))
 	{
 		$CI =& get_instance();
 
-		// We set this as a variable since we're returning by reference
+		// We set this as a variable since we're returning by reference.
 		$return = FALSE;
-
-		if ( ! isset($CI->load->_ci_classes) OR  ! isset($CI->load->_ci_classes['form_validation']))
+		
+		if (FALSE !== ($object = $CI->load->is_loaded('form_validation')))
 		{
-			return $return;
+			if ( ! isset($CI->$object) OR ! is_object($CI->$object))
+			{
+				return $return;
+			}
+			
+			return $CI->$object;
 		}
-
-		$object = $CI->load->_ci_classes['form_validation'];
-
-		if ( ! isset($CI->$object) OR ! is_object($CI->$object))
-		{
-			return $return;
-		}
-
-		return $CI->$object;
+		
+		return $return;
 	}
 }
 

@@ -18,7 +18,7 @@ $lang = array(
 'Select display criteria for PUBLISH page',
 
 'field_type_options' =>
-'Custom Field Options',
+'Field Options',
 
 'limit' =>
 'limit',
@@ -96,7 +96,7 @@ $lang = array(
 'Populate the menu manually',
 
 'field_populate_from_channel' =>
-'Populate the menu from another custom field',
+'Populate the menu from another channel field',
 
 'select_channel_for_field' =>
 'Select the field you wish to pre-populate from:',
@@ -151,6 +151,9 @@ $lang = array(
 
 'alpha' =>
 'Alphabetical',
+
+'id' =>
+'ID',
 
 'channel_id' =>
 'ID',
@@ -240,10 +243,10 @@ $lang = array(
 'There are no Member Groups available that permit publishing',
 
 'status_updated' =>
-'Status has been updated',
+'Status updated',
 
 'status_deleted' =>
-'Status has been deleted',
+'Status deleted',
 
 'can_edit_status' =>
 'Can access status',
@@ -279,7 +282,7 @@ $lang = array(
 'Edit Group Preferences',
 
 'edit_group_assignments' => 
-'Edit Group Assignments',
+'Group Assignments',
 
 'duplicate_channel_prefs' =>
 'Duplicate existing channel\'s preferences',
@@ -386,8 +389,8 @@ $lang = array(
 'edit_channel' => 
 'Edit Channel',
 
-'channel_name' => 
-'Channel Name',
+'channel_full_name' => 
+'Full Name',
 
 'new_channel' => 
 'New Channel',
@@ -518,6 +521,37 @@ $lang = array(
 'assign_channels' =>
 'Choose which channel(s) you want this group assigned to',
 
+
+//----------------------------
+// Generic Phrases
+//----------------------------
+
+'group'=>
+'Group',
+
+'group_name' =>
+'Group Name',
+
+'new_group_name' =>
+'New Group Name: ',
+
+
+'total_fields' =>
+'Total Fields',
+
+'rename' =>
+'Rename',
+
+'rename_group' =>
+'Rename Group',
+
+'delete' =>
+'Delete',
+
+'delete_group' =>
+'Delete Group',
+
+
 //----------------------------
 // Category Administration
 //----------------------------
@@ -551,9 +585,6 @@ $lang = array(
 
 'edit_group_name' => 
 'Edit Group',
-
-'delete_group' => 
-'Delete Group',
 
 'category_group_created' => 
 'Category Group Created:',
@@ -613,7 +644,7 @@ $lang = array(
 'Custom Category Fields',
 
 'manage_custom_fields' =>
-'Manage Custom Fields',
+'Manage Category Fields',
 
 'delete_cat_field' =>
 'Delete Category Field',
@@ -663,8 +694,16 @@ $lang = array(
 'can_delete_categories' =>
 'Can Delete Categories',
 
+'exclude_from_channels_or_publish' =>
+'Exclude from Channel or Field Category Assignment?',
+'exclude_from_publish' 		=> 'Channel Assignment',
+'exclude_from_files'		=> 'File Assignment',
+
 'no_member_groups_available' =>
 'There are no member groups allowed to %x categories.  You may assign these privileges using the member group editor: ',
+
+'member_group' => 
+'Member Group',
 
 'member_groups' => 
 'Member Groups',
@@ -677,22 +716,19 @@ $lang = array(
 //----------------------------
 
 'field_settings' =>
-'Custom Field Settings',
+'Field Settings',
 
 'field_group' =>
-'Custom Field Group',
+'Channel Field Group',
 
 'field_groups' =>
 'Field Groups',
 
-'field_group_name' =>
-'Field Group Name',
-
 'custom_fields' =>
-'Custom Fields',
+'Channel Field Groups',
 
 'no_field_group_message' =>
-'There are currently no custom channel fields',
+'There are currently no channel fields',
 
 'create_new_field_group' =>
 'Create a New Channel Field Group',
@@ -701,10 +737,10 @@ $lang = array(
 'New Field Group',
 
 'add_edit_fields' => 
-'Add/Edit Custom Fields',
+'Add/Edit Fields',
 
 'edit_field_group_name' =>
-'Edit Field Group',
+'Rename',
 
 'delete_field_group' =>
 'Delete Field Group',
@@ -734,7 +770,7 @@ $lang = array(
 'Field Order',
 
 'create_new_custom_field' =>
-'Create a New Custom Field',
+'Create a New Channel Field',
 
 'field_id' =>
 'Field ID',
@@ -743,13 +779,13 @@ $lang = array(
 'Field Label',
 
 'field_name' =>
-'Field Name',
+'Short Name',
 
 'field_name_cont' =>
 'Single word, no spaces. Underscores and dashes allowed',
 
 'field_type' =>
-'Field Type',
+'Type',
 
 'field_max_length' =>
 'Maxlength',
@@ -865,29 +901,32 @@ $lang = array(
 'field_group_deleted' =>
 'Field group Deleted:',
 
-'field_group' =>
-'Field Group',
-
 'delete_field_group_confirmation' =>
-'Are you sure you want to permanently delete this custom field group?',
+'Are you sure you want to permanently delete this Channel Field Group?',
 
 'delete_field_confirmation' =>
-'Are you sure you want to permanently delete this custom field?',
+'Are you sure you want to permanently delete this Channel Field?',
 
 'channel_entries_will_be_deleted' =>
-'All channel entries contained in the above field(s) will be permanently deleted.',
+'All channel entries containing the above field(s) will be permanently deleted.',
 
 'field_content_text' =>
-'Field Content:',
+'Field Content',
 
 'field_content_file' =>
-'File Type:',
+'File Type',
+
+'allowed_dirs_file' =>
+'Allowed Directory',
 
 'type_numeric' =>
 'Number',
 
 'type_integer' =>
 'Integer',
+
+'type_decimal' =>
+'Decimal',
 
 'type_file' =>
 'File',
@@ -900,9 +939,6 @@ $lang = array(
 //----------------------------
 
 'status_group' =>
-'Status Group',
-
-'status_groups' =>
 'Status Groups',
 
 'no_status_group_message' =>
@@ -910,12 +946,6 @@ $lang = array(
 
 'create_new_status_group' =>
 'Create New Status Group',
-
-'edit_status_group' =>
-'Edit Status Group',
-
-'name_of_status_group' =>
-'Name of Status Group',
 
 'taken_status_group_name' => 
 'This status group name is already taken.',
@@ -939,13 +969,13 @@ $lang = array(
 'Add/Edit Statuses',
 
 'edit_status_group_name' => 
-'Edit Status Group',
+'Rename',
 
 'delete_status_group' => 
 'Delete Status Group',
 
 'delete_status_group_confirmation' =>
-'Are you sure you want to permanently delete this status group?',
+'Are you sure you want to permanently delete this Status Group?',
 
 'status_group_deleted' => 
 'Status Group Deleted:',
@@ -977,116 +1007,6 @@ $lang = array(
 'delete_status_confirmation' =>
 'Are you sure you want to delete the following status?',
 
-'edit_file_upload_preferences' =>
-'Edit File Upload Preferences',
-
-'new_file_upload_preferences' =>
-'New File Upload Preferences',
-
-'new_file_upload_created' =>
-'New File Upload Created',
-
-'file_upload_preferences' =>
-'File Upload Preferences',
-
-'no_upload_prefs' =>
-'There are currently no file upload preferences',
-
-'please_add_upload' =>
-'There are currently no upload directories available. Please add one or more upload directories to use the File field type.',
-
-'create_new_upload_pref' =>
-'Create New Upload Destination',
-
-'upload_pref_name' =>
-'Descriptive name of upload directory',
-
-'new_file_upload_preferences' =>
-'New File Upload Destination',
-
-'server_path' =>
-'Server Path to Upload Directory',
-
-'url_to_upload_dir' =>
-'URL of Upload Directory',
-
-'allowed_types' =>
-'Allowed File Types',
-
-'max_size' =>
-'Maximum File Size (in bytes)',
-
-'max_height' =>
-'Maximum Image Height (in pixels)',
-
-'max_width' =>
-'Maximum Image Width',
-
-'properties' =>
-'Image Properties',
-
-'pre_format' =>
-'Image Pre Formatting',
-
-'post_format' =>
-'Image Post Formatting',
-
-'no_upload_dir_name' =>
-'You must submit a name for your upload directory',
-
-'no_upload_dir_path' =>
-'You must submit the path to your upload directory',
-
-'no_upload_dir_url' =>
-'You must submit the URL to your upload directory',
-
-'duplicate_dir_name' =>
-'The name of your directory is already taken',
-
-'delete_upload_preference' =>
-'Delete Upload Preference',
-
-'delete_upload_pref_confirmation' =>
-'Are you sure you want to permanently delete this preference?',
-
-'upload_pref_deleted' =>
-'Upload Preference Deleted:',
-
-'current_upload_prefs' =>
-'Current Preferences',
-
-'restrict_to_group' =>
-'Restrict file uploading to select member groups',
-
-'restrict_notes_1' =>
-'These radio buttons let you to specify which Member Groups are allowed to upload files.',
-
-'restrict_notes_2' =>
-'Super Admins can always upload files',
-
-'restrict_notes_3' =>
-'Note: File uploading is currently only allowed via the control panel',
-
-'member_group' =>
-'Member Group',
-
-'can_upload_files' =>
-'Can upload files',
-
-'images_only' =>
-'Images only',
-
-'all_filetypes' =>
-'All file types',
-
-'file_properties' =>
-'File Properties',
-
-'file_pre_format' =>
-'File Pre Formatting',
-
-'file_post_format' =>
-'File Post Formatting',
 
 'url_title_prefix' =>
 'URL Title Prefix',
@@ -1122,7 +1042,7 @@ $lang = array(
 'Field Instructions',
 
 'field_instructions_info' =>
-'Instructions for authors on how or what to enter into this custom field when submitting an entry.',
+'Instructions for authors on how or what to enter into this field when submitting an entry.',
 
 'show_pages_cluster' =>
 'Display Pages Submission Fields',

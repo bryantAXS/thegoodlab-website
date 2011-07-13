@@ -10,11 +10,9 @@ Matrix.bind('file', 'display', function(cell){
 
 		$filedirInput = $('> input.filedir', cell.dom.$td),
 		$filenameInput = $('> input.filename', cell.dom.$td),
-		$fileInput = $('> input.file', cell.dom.$td),
 		$addBtn = $('> a.matrix-add', cell.dom.$td);
 
 	var id = cell.field.id+'_'+cell.row.id+'_'+cell.col.id+'_file';
-	$fileInput.attr('id', id);
 
 	var removeFile = function(){
 		$thumb.remove();
@@ -27,6 +25,15 @@ Matrix.bind('file', 'display', function(cell){
 	$removeBtn.click(removeFile);
 
 	cell.selectFile = function(directory, name, thumb) {
+
+		// validation
+		if (! (directory && name)) {
+			setTimeout(function(){
+				alert(Matrix.lang.select_file_error);
+			}, 250);
+
+			return;
+		}
 
 		// update the inputs
 		$filedirInput.val(directory);
@@ -44,19 +51,36 @@ Matrix.bind('file', 'display', function(cell){
 
 		// prepare to set the container's width
 		$thumbImg.load(function() {
-			$thumb.width($thumbImg.attr('width'));
+			// wait a second...
+			setTimeout(function() {
+				$thumb.width($thumbImg.width());
+			}, 0);
 		});
 
 		// load the new thummb
 		$thumbImg.attr('src', thumb);
-
-		// restore everything to default state
-		$.ee_filebrowser.reset();
 	};
 
-	$.ee_filebrowser.add_trigger($addBtn, id, function(file, field){
-		cell.selectFile(file.directory, file.name, file.thumb);
-	});
+	// add_trigger() in EE 2.2 gained the 'settings' argument
+	if (cell.settings.ee22plus) {
+
+		$.ee_filebrowser.add_trigger($addBtn, id, {
+			content_type: cell.settings.content_type,
+			directory:    cell.settings.directory
+		}, function(file, field){
+			cell.selectFile(file.upload_location_id, file.file_name, file.thumb);
+		});
+
+	} else {
+
+		$.ee_filebrowser.add_trigger($addBtn, id, function(file, field){
+			cell.selectFile(file.directory, file.name, file.thumb);
+
+			// restore everything to default state
+			$.ee_filebrowser.reset();
+		});
+
+	}
 
 });
 

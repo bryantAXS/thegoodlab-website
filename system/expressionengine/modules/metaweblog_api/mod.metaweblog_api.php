@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -262,7 +262,7 @@ class Metaweblog_api {
 		{
 			$entry_date = $this->EE->localize->now;
 		}
-
+		
 		/** ---------------------------------
 		/**  Build our query string
 		/** --------------------------------*/
@@ -370,9 +370,15 @@ class Metaweblog_api {
 		$entry_data['site_id']	= $this->site_id;
 		$entry_data['versioning_enabled'] = 'n';
 
-		
 		$data = array_merge($metadata, $entry_data);
-		$data['categories'] = $this->categories;
+		
+		if (count($this->categories) > 0)
+		{
+			foreach($this->categories as $cat_id => $cat_name)
+			{
+				$data['category'][] = $cat_id;
+			}
+		}
 
 		$this->EE->session->userdata = array_merge(
 			$this->EE->session->userdata,
@@ -385,7 +391,10 @@ class Metaweblog_api {
 
 		$this->EE->load->library('api');
 		$this->EE->api->instantiate('channel_entries');
-		
+		$this->EE->api->instantiate('channel_fields');
+
+		$this->EE->api_channel_fields->setup_entry_settings($this->channel_id, $data);
+				
 		if ( ! $this->EE->api_channel_entries->submit_new_entry($this->channel_id, $data))
 		{
 			$errors = $this->EE->api_channel_entries->get_errors();
@@ -397,10 +406,8 @@ class Metaweblog_api {
 			return $this->EE->xmlrpc->send_response($response);
 		}
 		
-		//Return Entry ID of new entry
-		$response = array(
-			'entry_id' => array($this->EE->api_channel_entries->entry_id, 'string')
-		);
+		//Return Entry ID of new entry - defaults to string, so nothing fancy
+		$response = $this->EE->api_channel_entries->entry_id;
 
 		return $this->EE->xmlrpc->send_response($response);
 	}
@@ -774,8 +781,9 @@ class Metaweblog_api {
 	  	if ($this->parse_type === TRUE)
 	  	{
 			$this->EE->load->library('typography');
-			$this->EE->typography->initialize();
-			$this->EE->typography->encode_email = FALSE;
+			$this->EE->typography->initialize(array(
+						'encode_email'	=> FALSE)
+						);
 			$this->EE->config->set_item('enable_emoticons', 'n');
 		}
 
@@ -1569,6 +1577,8 @@ class Metaweblog_api {
 	/**
 	 * METAWEBLOG API: new media object
 	 *
+	 * XSS Cleaning is bypassed when uploading a file through MetaWeblog API
+	 *
 	 * @access	public
 	 * @param	parameter list
 	 * @return	void
@@ -1612,45 +1622,69 @@ class Metaweblog_api {
 		}
 
 		/** -------------------------------------
-		/**  File name and security
-		/** -------------------------------------*/
-
-		$this->EE->load->library('security');
-		
-		$filename = preg_replace("/\s+/", "_", $parameters['3']['name']);
-
-		$filename = $this->EE->security->sanitize_filename($filename);
-
-		if ($this->EE->security->xss_clean($parameters['3']['bits'], TRUE) === FALSE)
-		{
-			return $this->EE->xmlrpc->send_error_message('810', $this->EE->lang->line('invalid_file_content'));
-		}
-
-		/** -------------------------------------
-		/**  Upload the image
+		/**  upload the image
 		/** -------------------------------------*/
 		
-		$this->EE->load->helper('path');
+		$this->EE->load->library('filemanager');
+		
+		// Disable XSS Filtering
+		$this->EE->filemanager->xss_clean_off();
+		
+		// Figure out the FULL file path
+		$file_path = $this->EE->filemanager->clean_filename(
+			$parameters['3']['name'], 
+			$this->upload_dir,
+			TRUE
+		);
 
-		$upload_path = set_realpath($this->EE->functions->remove_double_slashes($query->row('server_path') .'/'));
+		$filename = basename($file_path);
 
-		$filename = $this->unique_filename($filename, $upload_path);
-
-		if ( ! $fp = @fopen($upload_path.$filename,FOPEN_WRITE_CREATE_DESTRUCTIVE))
+		// Check to see if we're dealing with relative paths
+		if (strncmp($file_path, '..', 2) == 0)
 		{
-			return $this->EE->xmlrpc->send_error_message('810', $this->EE->lang->line('unable_to_upload'));
+			$directory = dirname($file_path);
+			$file_path = realpath(substr($directory, 1)).'/'.$filename;
 		}
 		
-		@fwrite($fp, $parameters['3']['bits']);// Data base64 decoded by XML-RPC library
-		@fclose($fp);
+		// Upload the file and check for errors
+		if (file_put_contents($file_path, $parameters['3']['bits']) === FALSE)
+		{
+			return $this->EE->xmlrpc->send_error_message(
+				'810', 
+				$this->EE->lang->line('unable_to_upload')
+			);
+		}
+		
+		// Send the file
+		$result = $this->EE->filemanager->save_file(
+			$file_path, 
+			$this->upload_dir, 
+			array(
+				'title'     => $filename,
+				'path'      => dirname($file_path),
+				'file_name' => $filename
+			)
+		);
 
-		@chmod($upload_path.$filename, FILE_WRITE_MODE);
+		// Check to see the result
+		if ($result['status'] === FALSE)
+		{
+			$this->EE->xmlrpc->send_error_message(
+				'810', 
+				$result['message']
+			);
+		}
 
-		$response = array(array(
-								'url' =>
-								array($this->EE->functions->remove_double_slashes($query->row('url') .'/').$filename,'string'),
-								),
-								'struct');
+		// Build XMLRPC response
+		$response = array(
+			array(
+				'url' => array(
+					$query->row('url').$filename,
+					'string'
+				),
+			),
+			'struct'
+		);
 
 		return $this->EE->xmlrpc->send_response($response);
 	}
@@ -1831,13 +1865,13 @@ class Metaweblog_api {
 		$exclude = array('auto_xhtml');
 
 		$filelist = array('none', 'br', 'xhtml');
-		$ext_len = strlen(EXT);
+		$ext_len = strlen('.php');
 
 		if ($fp = @opendir(PATH_PI))
 		{
 			while (FALSE !== ($file = readdir($fp)))
 			{
-				if (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == EXT && strlen($file) > strlen('pi.'.EXT))
+				if (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == '.php' && strlen($file) > strlen('pi..php'))
 				{
 					$file = substr($file, 3, -$ext_len);
 
@@ -1855,7 +1889,7 @@ class Metaweblog_api {
 		{
 			while (FALSE !== ($file = readdir($fp)))
 			{
-				if (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == EXT && strlen($file) > strlen('pi.'.EXT))
+				if (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == '.php' && strlen($file) > strlen('pi..php'))
 				{
 					$file = substr($file, 3, -$ext_len);
 
@@ -1873,44 +1907,6 @@ class Metaweblog_api {
 		return $filelist;
 	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Guarantees Unique Filename
-	 *
-	 * @access	public
-	 * @param	filename
-	 * @return	void
-	 */
-	function unique_filename($filename, $upload_path)
-	{
-  		$i = 0;
-  		$subtype = '.jpg';
-  
-  		/** ------------------------------------
-  		/**  Strips out _ and - at end of name part of file name
-  		/** ------------------------------------*/
-  
-  		$x			= explode('.',$filename);
-		$name		=  ( ! isset($x['1'])) ? $filename : $x['0'];
-		$sfx		=  ( ! isset($x['1']) OR is_numeric($x[count($x) - 1])) ? $subtype : '.'.$x[count($x) - 1];
-		$name		=  (substr($name,-1) == '_' OR substr($name,-1) == '-') ? substr($name,0,-1) : $name;
-  		$filename	= $name.$sfx;
-  
-		while (file_exists($upload_path.$filename))
-		{
-			$i++;
-			$n			= - strlen($i);
-			$x			= explode('.',$filename);
-			$name		=  ( ! isset($x['1'])) ? $filename : $x['0'];
-			$sfx		=  ( ! isset($x['1'])) ? '' : '.'.$x[count($x) - 1];
-			$name		=  ($i==1) ? $name : substr($name,0,$n);
-			$name		=  (substr($name,-1) == '_' OR substr($name,-1) == '-') ? substr($name,0,-1) : $name;
-			$filename	=  $name."$i".$sfx;
-		}
-
-		return $filename;
-	}
 
 	// --------------------------------------------------------------------
 

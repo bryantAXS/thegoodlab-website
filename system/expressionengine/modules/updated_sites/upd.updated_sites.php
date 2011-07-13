@@ -1,28 +1,27 @@
-<?php
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
+ 
+// ------------------------------------------------------------------------
 
-/*
-=====================================================
- ExpressionEngine - by EllisLab
------------------------------------------------------
- http://expressionengine.com/
------------------------------------------------------
- Copyright (c) 2003 - 2010, EllisLab, Inc.
-=====================================================
- THIS IS COPYRIGHTED SOFTWARE
- PLEASE READ THE LICENSE AGREEMENT
- http://expressionengine.com/user_guide/license.html
-=====================================================
- File: mcp.updated_sites.php
------------------------------------------------------
- Purpose: Updated Sites class - CP
-=====================================================
-*/
-if ( ! defined('EXT'))
-{
-	exit('Invalid file request');
-}
-
-
+/**
+ * ExpressionEngine Updated Sites Module
+ *
+ * @package		ExpressionEngine
+ * @subpackage	Modules
+ * @category	Update File
+ * @author		ExpressionEngine Dev Team
+ * @link		http://expressionengine.com
+ */
 
 class Updated_sites_upd {
 
@@ -58,7 +57,8 @@ class Updated_sites_upd {
 				 `updated_sites_short_name` varchar(60) NOT NULL default '',
 				 `updated_sites_allowed` text NOT NULL,
 				 `updated_sites_prune` int(6) NOT NULL default '0',
-				 PRIMARY KEY `updated_sites_id` (`updated_sites_id`));";	
+				 PRIMARY KEY `updated_sites_id` (`updated_sites_id`))
+				DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;";	
 				 
 		$sql[] = "CREATE TABLE IF NOT EXISTS `exp_updated_site_pings` (
 				 `ping_id` int(10) unsigned NOT NULL auto_increment,
@@ -70,7 +70,8 @@ class Updated_sites_upd {
 				 `ping_ipaddress` varchar(16) NOT NULL default '',
 				 `ping_config_id` int(4) NOT NULL default '1',
 				 PRIMARY KEY `ping_id` (`ping_id`),
-				 KEY `ping_config_id` (`ping_config_id`));";	
+				 KEY `ping_config_id` (`ping_config_id`))
+				DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci;";	
 				 
  		$sql[] = "INSERT INTO exp_updated_sites 
  				  (updated_sites_pref_name, updated_sites_short_name, updated_sites_allowed, updated_sites_prune) 

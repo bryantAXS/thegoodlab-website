@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -31,8 +31,21 @@ class EE_Fieldtype {
 
 	/**
 	 * Constructor
+	 */
+	public function __construct()
+	{
+		$this->EE_Fieldtype();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Constructor
 	 *
 	 * @access	public
+	 * @deprecated This is only here to maintain backwards compatibility
+	 * for people using parent::EE_Fieldtype() and will be removed in a 
+	 * later version.
 	 */
 	function EE_Fieldtype()
 	{
@@ -223,13 +236,8 @@ class EE_Fieldtype {
 	
 	function display_publish_field($data)
 	{
-		$tmp = $this->EE->load->_ci_view_path;
-		$this->EE->load->_ci_view_path = PATH_THEMES.'cp_themes/default/';
+		$vars['glossary_items'] = $this->EE->load->ee_view('content/_assets/glossary_items', '', TRUE);
 
-		$vars['glossary_items'] = $this->EE->load->view('content/_assets/glossary_items', '', TRUE);
-		
-		$this->EE->load->_ci_view_path = $tmp;
-		
 		$this->EE->load->vars($vars);
 		return $this->display_field($data);
 	}

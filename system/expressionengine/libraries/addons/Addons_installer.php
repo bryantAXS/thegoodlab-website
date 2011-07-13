@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -47,20 +47,22 @@ class Addons_installer {
 	 */
 	function install($addon, $type = 'module', $check_package = TRUE)
 	{
-		$third_party = $this->EE->addons->is_package($addon);
-		
+		$is_package = $this->EE->addons->is_package($addon);
+
 		if (is_array($type))
 		{
 			foreach($type as $component)
 			{
 				$this->install($addon, $component, $check_package);
+				
 			}
 		}
-		elseif ($check_package && $this->EE->addons->is_package($addon))
+		elseif ($check_package && $is_package != FALSE)
 		{
 			if (count($this->EE->addons->_packages[$addon]) > 1)
 			{
-				$this->EE->functions->redirect(BASE.AMP.'C=addons'.AMP.'M=package_settings'.AMP.'package='.$addon.AMP.'return='.$_GET['C']);
+				
+			$this->EE->functions->redirect(BASE.AMP.'C=addons'.AMP.'M=package_settings'.AMP.'package='.$addon.AMP.'return='.$_GET['C']);
 			}
 			
 			$this->install($addon, key($this->EE->addons->_packages[$addon]), FALSE);
@@ -71,14 +73,14 @@ class Addons_installer {
 
 			if (method_exists($this, $method))
 			{
-				if ($third_party)
+				if ($is_package)
 				{
-					$this->EE->load->add_package_path($this->EE->addons->_packages[$addon][$type]['path']);
+					$this->EE->load->add_package_path($this->EE->addons->_packages[$addon][$type]['path'], FALSE);
 				}
 				
 				$this->$method($addon);
 				
-				if ($third_party)
+				if ($is_package)
 				{
 					$this->EE->load->remove_package_path($this->EE->addons->_packages[$addon][$type]['path']);
 				}
@@ -102,6 +104,7 @@ class Addons_installer {
 	function uninstall($addon, $type = 'module', $check_package = TRUE)
 	{
 		$third_party = $this->EE->addons->is_package($addon);
+		$is_package = $this->EE->addons->is_package($addon);
 		
 		if (is_array($type))
 		{
@@ -110,7 +113,7 @@ class Addons_installer {
 				$this->uninstall($addon, $component, $check_package);
 			}
 		}
-		elseif ($check_package && $this->EE->addons->is_package($addon))
+		elseif ($check_package && $is_package)
 		{
 			if (count($this->EE->addons->_packages[$addon]) > 1)
 			{
@@ -121,23 +124,26 @@ class Addons_installer {
 		}
 		else
 		{
+
 			$method = 'uninstall_'.$type;
 
 			if (method_exists($this, $method))
 			{
-				if ($third_party)
+				if ($is_package)
 				{
-					$this->EE->load->add_package_path($this->EE->addons->_packages[$addon][$type]['path']);
+					$this->EE->load->add_package_path($this->EE->addons->_packages[$addon][$type]['path'], FALSE);
 				}
 
 				$this->$method($addon);
 
-				if ($third_party)
+				if ($is_package)
 				{
 					$this->EE->load->remove_package_path($this->EE->addons->_packages[$addon][$type]['path']);
 				}
 			}
 		}
+
+
 		
 		return TRUE;
 	}
@@ -302,7 +308,6 @@ class Addons_installer {
 		if ($this->EE->api_channel_fields->include_handler($fieldtype))
 		{
 			$default_settings = array();
-			
 			$FT = $this->EE->api_channel_fields->setup_handler($fieldtype, TRUE);
 			
 			$default_settings = $FT->install();
@@ -405,11 +410,11 @@ class Addons_installer {
 
 		if (in_array($module, $this->EE->core->native_modules))
 		{
-			$path = PATH_MOD.$module.'/upd.'.$module.EXT;
+			$path = PATH_MOD.$module.'/upd.'.$module.'.php';
 		}
 		else
 		{
-			$path = PATH_THIRD.$module.'/upd.'.$module.EXT;
+			$path = PATH_THIRD.$module.'/upd.'.$module.'.php';
 		}
 
 		if ( ! is_file($path))
@@ -494,14 +499,8 @@ class Addons_installer {
 
 		if ( ! class_exists($class))
 		{
-			if ($this->EE->addons->is_package($extension))
-			{
-				include(PATH_THIRD.$extension.'/ext.'.$extension.EXT);
-			}
-			else
-			{
-				include(PATH_EXT.'ext.'.$extension.EXT);
-			}
+			include($this->EE->addons->_packages[$extension]['extension']['path'].'ext.'.$extension.'.php');
+
 		}
 		return new $class();
 	}

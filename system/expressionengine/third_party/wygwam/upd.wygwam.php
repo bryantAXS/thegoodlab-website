@@ -90,7 +90,7 @@ class Wygwam_upd {
 				// remove MediaEmbed
 				if (($key = array_search('MediaEmbed', $toolbar)) !== FALSE)
 				{
-					array_splice($toolbar, $key, 1);
+					array_splice($toolbar, $key, 1, 'EmbedMedia');
 				}
 			}
 		}

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -35,9 +35,9 @@ class Emoticon {
 		// Make a local reference to the ExpressionEngine super object
 		$this->EE =& get_instance();
 
-		if (is_file(PATH_MOD.'emoticon/emoticons'.EXT))
+		if (is_file(PATH_MOD.'emoticon/emoticons.php'))
 		{
-			require PATH_MOD.'emoticon/emoticons'.EXT;
+			require PATH_MOD.'emoticon/emoticons.php';
 
 			if (is_array($smileys))
 			{

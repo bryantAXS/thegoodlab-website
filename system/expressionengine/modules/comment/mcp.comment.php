@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -24,19 +24,22 @@
  */
 class Comment_mcp {
 
-	var $pipe_length		= '2';
-	var $comment_chars			= "20";
-	var $comment_leave_breaks = 'n';
-	var $perpage = 50;
-	var $base_url = '';
-	var $search_url;
+	protected $pipe_length			= '2';
+	protected $comment_chars		= "20";
+	protected $comment_leave_breaks = 'n';
+	protected $perpage 				= 50;
+	protected $base_url 			= '';
+	protected $search_url;
+
+	protected $_dir; 
+	protected $_limit;
+	protected $_offset;
+	protected $_order_by;
 
 	/**
 	 * Constructor
-	 *
-	 * @access	public
 	 */
-	function Comment_mcp()
+	public function __construct()
 	{
 		// Make a local reference to the ExpressionEngine super object
 		$this->EE =& get_instance();
@@ -45,12 +48,15 @@ class Comment_mcp {
 		{
 			$this->base_url = BASE.AMP.'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=comment';
 
-			if ($this->EE->cp->allowed_group('can_moderate_comments') &&  $this->EE->cp->allowed_group('can_edit_all_comments') && $this->EE->cp->allowed_group('can_delete_all_comments'))
+			if ($this->EE->cp->allowed_group('can_moderate_comments') &&  
+				$this->EE->cp->allowed_group('can_edit_all_comments') && 
+				$this->EE->cp->allowed_group('can_delete_all_comments'))
 			{
-				$this->EE->cp->set_right_nav(array(
-									'settings'				=> $this->base_url.AMP.'method=settings',
-									'comments' 				=> $this->base_url)
-								);	
+				$this->EE->cp->set_right_nav(
+					array(
+						'settings'	=> $this->base_url.AMP.'method=settings',
+						'comments'	=> $this->base_url)
+					);	
 			}
 		}
 	}
@@ -58,906 +64,477 @@ class Comment_mcp {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Main Comment Listing
+	 * Comments Home Page
 	 *
-	 * @access	public
-	 * @return	string
+	 * For the time being, this bad-boy is being simplified.  With some existing
+	 * inefficiencies + datatables, the memory requirements to load the page
+	 * with a large dataset (> 100k comments) was unacceptable.
+	 *
+	 * In an attempt to mitigate high memory usage, I'm purposely avoiding
+	 * using a model and doing the queries right in this controller.  But Greg, 
+	 * that's "poor design!" When performance is a concern, I'm more than happy
+	 * to drop using a model, since we aren't on an ORM. 
 	 */
-	function index($channel_id = '', $entry_id = '', $message = '', $id_array = '', $total_rows = '', $pag_base_url = '')
+	public function index()
 	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && ! $this->EE->cp->allowed_group('can_edit_all_comments') && ! $this->EE->cp->allowed_group('can_edit_own_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
+		$this->_permissions_check();
 
-		$this->EE->load->helper('text');
-		$this->EE->load->model('search_model');
-		$this->EE->load->model('comment_model');
-
-	
+		$this->EE->load->helper(array('text', 'form'));
 		$this->EE->load->library('javascript');
-		$this->EE->load->library('table');
-		$this->EE->load->helper('form');
-		
-		$this->EE->cp->set_variable('cp_page_title', $this->EE->lang->line('comments'));
-		// Add javascript
 
-		$this->EE->cp->add_js_script(array('plugin' => 'dataTables'));
-		$this->EE->cp->add_js_script(array('plugin' => 'crypt'));
-		$this->EE->cp->add_js_script('ui', 'datepicker');
-			
-		$this->EE->javascript->output($this->ajax_filters('comments_ajax_filter', 9));
-		
-		$this->EE->cp->get_installed_modules();
-		
-		$this->EE->javascript->output('
-		$(".toggle_comments").toggle(
-			function(){
-				$("input[class=comment_toggle]").each(function() {
-					this.checked = true;
-				});
-			}, function (){
-				$("input[class=comment_toggle]").each(function() {
-					this.checked = false;
-				});
-			}
-		);');
-		
+		$this->EE->javascript->set_global('lang.selection_required', lang('selection_required'));
 
-		// Require at least one comment checked to submit
-		$this->EE->javascript->output('
-		$("#target").submit(function() {
-			if ( ! $("input[class=comment_toggle]", this).is(":checked")) {
-			$.ee_notice("'.$this->EE->lang->line('selection_required').'", {"type" : "error"});
-			return false;
-			}
-		});');
-				
-		$this->EE->javascript->output('
-			$("#custom_date_start_span").datepicker({
-				dateFormat: "yy-mm-dd",
-				prevText: "<<",
-				nextText: ">>",
-				onSelect: function(date) {
-					$("#custom_date_start").val(date);
-					dates_picked();
-				}
-			});
-			$("#custom_date_end_span").datepicker({
-				dateFormat: "yy-mm-dd",
-				prevText: "<<",
-				nextText: ">>",
-				onSelect: function(date) {
-					$("#custom_date_end").val(date);
-					dates_picked();
-				}
-			});
+		$this->EE->cp->set_variable('cp_page_title', lang('comments'));
 
-			$("#custom_date_start, #custom_date_end").focus(function(){
-				if ($(this).val() == "yyyy-mm-dd")
-				{
-					$(this).val("");
-				}
-			});
+		$this->_setup_query_filters();
 
-			$("#custom_date_start, #custom_date_end").keypress(function(){
-				if ($(this).val().length >= 9)
-				{
-					dates_picked();
-				}
-			});
+		list($total_count, $qry) = $this->_setup_index_query();
 
-			function dates_picked()
-			{
-				if ($("#custom_date_start").val() != "yyyy-mm-dd" && $("#custom_date_end").val() != "yyyy-mm-dd")
-				{
-					// populate dropdown box
-					focus_number = $("#date_range").children().length;
-					$("#date_range").append("<option id=\"custom_date_option\">" + $("#custom_date_start").val() + " to " + $("#custom_date_end").val() + "</option>");
-					document.getElementById("date_range").options[focus_number].selected=true;
-
-					// hide custom date picker again
-					$("#custom_date_picker").slideUp("fast");
-				}
-			}
-		');
-
-		$this->EE->javascript->change("#date_range", "
-			if ($('#date_range').val() == 'custom_date')
-			{
-				// clear any current dates, remove any custom options
-				$('#custom_date_start').val('yyyy-mm-dd');
-				$('#custom_date_end').val('yyyy-mm-dd');
-				$('#custom_date_option').remove();
-
-				// drop it down
-				$('#custom_date_picker').slideDown('fast');
-			}
-			else
-			{
-				$('#custom_date_picker').hide();
-			}
-		");
-		
-
-		$this->EE->javascript->compile();
-
-		$filter = $this->filter_settings();
-
-		$vars = $this->create_filter($filter);
-		$vars['hidden'] = array();
-		$vars['pagination'] = FALSE;
-		
-		$vars['form_options'] = array(
-									'close' => $this->EE->lang->line('close_selected'),
-									'open' => $this->EE->lang->line('open_selected'),
-									'pending' => $this->EE->lang->line('pending_selected'),
-									);
-
-		if ($this->EE->cp->allowed_group('can_delete_all_comments') OR $this->EE->cp->allowed_group('can_delete_own_comments'))
+		if ( ! $qry->num_rows())
 		{
-			$vars['form_options']['null'] = '------';
-			$vars['form_options']['delete'] = $this->EE->lang->line('delete_selected');
-		}		
-			
-		if ( ! $rownum = $this->EE->input->get_post('rownum'))
-		{		
-			$rownum = 0;
+			$comments = FALSE;
+		}
+		else
+		{
+			$comment = $this->_get_comments($qry->result());
+			$channel = $this->_get_channel_info($comment->result());
+			$author = $this->_get_author_info($comment->result());
+
+			$comments = $this->_merge_comment_data($comment->result(), $channel, $author);
+
+			$comment->free_result();
+			$channel->free_result();
+			$author->free_result();
 		}
 
-		//  Get comment ids
-		$comment_id_query = $this->EE->comment_model->get_comment_ids($filter);	
-		
+		$data = array(
+			'comments'				=> $comments,
+			'pagination'			=> $this->_setup_pagination($total_count),
+			'channel_select_opts' 	=> $this->_channel_select_opts(),
+			'channel_selected'		=> $this->_channel,
+			'status_select_opts'	=> $this->_status_select_opts(),
+			'status_selected'		=> $this->_status,
+			'date_select_opts'		=> $this->_date_select_opts(),
+			'date_selected'			=> $this->_date_range,
+			'form_options'			=> array(
+							'close' 	=> lang('close_selected'),
+							'open' 		=> lang('open_selected'),
+							'pending' 	=> lang('pending_selected'),
+							'null'		=> '------',
+							'delete'	=> lang('delete_selected')
+			)
+		);
 
-		//  Check for pagination
-		$total = $comment_id_query->num_rows();
-		
-		
-
-		// No results?  No reason to continue...
-		if ($total == 0)
-		{
-			$vars['message'] = $this->EE->lang->line('no_comments');
-			$vars['comments'] = array();
-			return $this->EE->load->view('index', $vars, TRUE);
-		}
-
-		$comment_ids = array_slice($comment_id_query->result_array(), $rownum, $this->perpage);
-		
-		$ids = array();
-		
-		foreach ($comment_ids as $id)
-		{
-			$ids[] = $id['comment_id'];
-		}
-		
-		$comment_results = $this->EE->comment_model->fetch_comment_data($ids);
-
-		/* -------------------------------------------
-		/*	Hidden Configuration Variables
-		/*	- view_comment_chars => Number of characters to display (#)
-		/*	- view_comment_leave_breaks => Create <br />'s based on line breaks? (y/n)
-		/* -------------------------------------------*/
-
-		$this->comment_chars		= ($this->EE->config->item('view_comment_chars') !== FALSE) ? $this->EE->config->item('view_comment_chars') : $this->comment_chars;
-		$this->comment_leave_breaks = ($this->EE->config->item('view_comment_leave_breaks') !== FALSE) ? $this->EE->config->item('view_comment_leave_breaks') : $this->comment_leave_breaks;
-	
-		// Do we need pagination?
-
-		$this->EE->load->library('pagination');
-
-		$p_config = $this->pagination_config('index', $total);
-
-		$this->EE->pagination->initialize($p_config);
-		$pagination_links = $this->EE->pagination->create_links();
-			
-
-		// Prep for output
-		$config = ($this->EE->config->item('comment_word_censoring') == 'y') ? array('word_censor' => TRUE) : array();
-		
-		$this->EE->load->library('typography');
-		$this->EE->typography->initialize($config);
-		$this->EE->load->helper('form');
-
-
-		// Show comments
-		
-		$vars['comments'] = array();
-		
-		if ($comment_results != FALSE)
-		{
-			$config = ($this->EE->config->item('comment_word_censoring') == 'y') ? array('word_censor' => TRUE) : array();
-		
-			$this->EE->load->library('typography');
-			$this->EE->typography->initialize($config);
-			
-			$this->EE->typography->parse_images = FALSE;
-			$this->EE->typography->allow_headings = FALSE;
-			
-			foreach ($comment_results->result_array() as $row)
-			{
-				$data = array();
-
-				$row['full_comment'] = $this->EE->typography->parse_type($row['comment'],
-					array(
-						'text_format'	=> $row['comment_text_formatting'],
-						'html_format'	=> $row['comment_html_formatting'],
-						'auto_links'	=> $row['comment_auto_link_urls'],
-						'allow_img_url' => $row['comment_allow_img_urls']
-						)
-					);
-
-				if ($this->comment_leave_breaks == 'y')
-				{
-					$row['comment'] = str_replace(array("\n","\r"),
-												  '<br />',
-												  strip_tags($row['comment'])
-												  );
-				}
-				else
-				{
-					$row['comment'] = strip_tags(str_replace(array("\t","\n","\r"), ' ', $row['comment']));
-				}
-
-				if ($this->comment_chars != 0)
-				{
-					$row['comment'] = $this->EE->functions->char_limiter(trim($row['comment']), $this->comment_chars);
-				}
-
-				$row['can_edit_comment'] = TRUE;
-
-				if (($row['entry_author_id'] != $this->EE->session->userdata('member_id')) && ! $this->EE->cp->allowed_group('can_edit_all_comments'))
-				{
-					$row['can_edit_comment'] = FALSE;
-				}
-	
-				if ($row['status'] == 'o')
-				{
-					$status_label = $this->EE->lang->line('open');
-				}
-				elseif ($row['status'] == 'c')
-				{
-					$status_label = $this->EE->lang->line('closed');
-				}
-				else
-				{
-					$status_label = $this->EE->lang->line('pending');
-				}
-
-				$data = $row;
- 			
-				$data['edit_url'] = $this->base_url.AMP.'method=edit_comment_form'.AMP.'comment_id='.$row['comment_id'];
-			
-				$data['status_label'] = $status_label;
-				$data['status_search_url'] = $this->base_url.AMP.'status='.$row['status'];
-				$data['can_edit_comment'] = $row['can_edit_comment'];
-				$data['ip_search_url'] = $this->base_url.AMP.'ip_address='.base64_encode($row['ip_address']);
-				$data['channel_search_url'] = $this->base_url.AMP.'channel_id='.$row['channel_id'];
-				$data['email_search_url'] = $this->base_url.AMP.'email='.base64_encode($row['email']);
-				$data['mail_to'] = ($row['email'] != '') ? mailto($row['email']) : FALSE;
-				$data['name_search_url'] = $this->base_url.AMP.'name='.base64_encode($row['name']);
-				$data['date'] = $this->EE->localize->set_human_time($row['comment_date']);
-				$data['entry_search_url'] = $this->base_url.AMP.'entry_id='.$row['entry_id'];
-				$data['entry_title'] = $this->EE->functions->char_limiter(trim(strip_tags($row['title'])), 26);
-
-				$vars['comments'][] = $data;
-			} // END FOREACH
-		}
-
-		$vars['pagination'] = $pagination_links;
-		$vars['message'] = $message;
-
-		return $this->EE->load->view('index', $vars, TRUE);
+		return $this->EE->load->view('index', $data, TRUE);
 	}
 
+	// --------------------------------------------------------------------
 
+	/**
+	 * Date Select Options
+	 *
+	 * @return 	array
+	 */
+	 protected function _date_select_opts()
+	 {
+	 	return array(
+	 		''	=> lang('date_range'),
+	 		1 	=> lang('past_day'),
+	 		7	=> lang('past_week'),
+	 		31	=> lang('past_month'),
+	 		182	=> lang('past_six_months'),
+	 		365	=> lang('past_year')
+		);
+	 }
 
-	function pagination_config($method, $total_rows)
+	// --------------------------------------------------------------------
+
+	/**
+	 * Status Select Options
+	 *
+	 * @return array
+	 */
+	protected function _status_select_opts()
 	{
-		// Pass the relevant data to the paginate class
-
-		
-		$config['base_url'] = ($this->search_url == '') ? $this->base_url.AMP.'method='.$method : $this->base_url.AMP.'method='.$method.AMP.$this->search_url;
-		$config['total_rows'] = $total_rows;
-		$config['per_page'] = $this->perpage;
-		$config['page_query_string'] = TRUE;
-		$config['query_string_segment'] = 'rownum';
-		$config['full_tag_open'] = '<p id="paginationLinks">';
-		$config['full_tag_close'] = '</p>';
-		$config['prev_link'] = '<img src="'.$this->EE->cp->cp_theme_url.'images/pagination_prev_button.gif" width="13" height="13" alt="&lt;" />';
-		$config['next_link'] = '<img src="'.$this->EE->cp->cp_theme_url.'images/pagination_next_button.gif" width="13" height="13" alt="&gt;" />';
-		$config['first_link'] = '<img src="'.$this->EE->cp->cp_theme_url.'images/pagination_first_button.gif" width="13" height="13" alt="&lt; &lt;" />';
-		$config['last_link'] = '<img src="'.$this->EE->cp->cp_theme_url.'images/pagination_last_button.gif" width="13" height="13" alt="&gt; &gt;" />';
-
-		return $config;
+		return array(
+			''		=> lang('filter_by_status'),
+			'all'	=> lang('all'),
+			'p'		=> lang('pending'),
+			'o'		=> lang('open'),
+			'c'		=> lang('closed')
+		);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	function ajax_filters($ajax_method = '', $cols = '')
+	/**
+	 * Channel filter select options
+	 *
+	 * @return array
+	 */
+	protected function _channel_select_opts()
 	{
-		if ($ajax_method == '')
+		// We only limit to channels they are assigned to if they can't 
+		// moderate and can't edit all
+		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && 
+			 ! $this->EE->cp->allowed_group('can_edit_all_comments'))
 		{
-			return;
-		}
-		
-		$js = '
-var oCache = {
-	iCacheLower: -1
-};
-
-function fnSetKey( aoData, sKey, mValue )
-{
-	for ( var i=0, iLen=aoData.length ; i<iLen ; i++ )
-	{
-		if ( aoData[i].name == sKey )
-		{
-			aoData[i].value = mValue;
-		}
-	}
-}
-
-function fnGetKey( aoData, sKey )
-{
-	for ( var i=0, iLen=aoData.length ; i<iLen ; i++ )
-	{
-		if ( aoData[i].name == sKey )
-		{
-			return aoData[i].value;
-		}
-	}
-	return null;
-}
-
-	function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
-		var iPipe 			= '.$this->pipe_length.', /* Ajust the pipe size */
-			bNeedServer 	= false,
-			sEcho 			= fnGetKey(aoData, "sEcho"),
-			iRequestStart 	= fnGetKey(aoData, "iDisplayStart"),
-			iRequestLength 	= fnGetKey(aoData, "iDisplayLength"),
-			iRequestEnd 	= iRequestStart + iRequestLength,
-			keywords		= document.getElementById("keywords"),
-			status			= document.getElementById("f_status"),
-			channel_id		= document.getElementById("f_channel_id"),
-   			search_in		= document.getElementById("f_search_in"),
-   			date_range		= document.getElementById("date_range");
-
-			//keywordFix = $.base64Encode(keywords.value);
-			if (keywords.value.length)
-			{
-				keywordFix = $().crypt({method:"b64enc",source: keywords.value}); 
-			}
-			else
-			{
-				keywordFix = keywords.value;
-			}
-			
-		aoData.push( 
-			 { "name": "keywords", "value": keywordFix },
-	         { "name": "status", "value": status.value },
-			 { "name": "channel_id", "value": channel_id.value },
-	         { "name": "search_in", "value": search_in.value },
-	         { "name": "date_range", "value": date_range.value }
-		 );
-
-
-	oCache.iDisplayStart = iRequestStart;
-	
-	/* outside pipeline? */
-	if ( oCache.iCacheLower < 0 || iRequestStart < oCache.iCacheLower || iRequestEnd > oCache.iCacheUpper )
-	{
-		bNeedServer = true;
-	}
-	
-	/* sorting etc changed? */
-	if ( oCache.lastRequest && !bNeedServer )
-	{
-		for( var i=0, iLen=aoData.length ; i<iLen ; i++ )
-		{
-			if ( aoData[i].name != "iDisplayStart" && aoData[i].name != "iDisplayLength" && aoData[i].name != "sEcho" )
-			{
-				if ( aoData[i].value != oCache.lastRequest[i].value )
-				{
-					bNeedServer = true;
-					break;
-				}
-			}
-		}
-	}
-	
-	/* Store the request for checking next time around */
-	oCache.lastRequest = aoData.slice();
-	
-	if ( bNeedServer )
-	{
-		if ( iRequestStart < oCache.iCacheLower )
-		{
-			iRequestStart = iRequestStart - (iRequestLength*(iPipe-1));
-			if ( iRequestStart < 0 )
-			{
-				iRequestStart = 0;
-			}
-		}
-		
-		oCache.iCacheLower = iRequestStart;
-		oCache.iCacheUpper = iRequestStart + (iRequestLength * iPipe);
-		oCache.iDisplayLength = fnGetKey( aoData, "iDisplayLength" );
-		fnSetKey( aoData, "iDisplayStart", iRequestStart );
-		fnSetKey( aoData, "iDisplayLength", iRequestLength*iPipe );
-		
-
-					aoData.push(  
-			 			{ "name": "keywords", "value": keywordFix },
-	         			{ "name": "status", "value": status.value },
-			 			{ "name": "channel_id", "value": channel_id.value },
-	         			{ "name": "search_in", "value": search_in.value },
-	         			{ "name": "date_range", "value": date_range.value }
-
-		 			);
-		
-
-		$.getJSON( sSource, aoData, function (json) { 
-			/* Callback processing */
-			oCache.lastJson = jQuery.extend(true, {}, json);
-			
-			if ( oCache.iCacheLower != oCache.iDisplayStart )
-			{
-				json.aaData.splice( 0, oCache.iDisplayStart-oCache.iCacheLower );
-			}
-			json.aaData.splice( oCache.iDisplayLength, json.aaData.length );
-			
-			fnCallback(json)
-		} );
-	}
-	else
-	{
-		json = jQuery.extend(true, {}, oCache.lastJson);
-		json.sEcho = sEcho; /* Update the echo for each response */
-		json.aaData.splice( 0, iRequestStart-oCache.iCacheLower );
-		json.aaData.splice( iRequestLength, json.aaData.length );
-		fnCallback(json);
-		return;
-	}
-}
-
-	var time = new Date().getTime();
-
-	oTable = $(".mainTable").dataTable( {	
-			"sPaginationType": "full_numbers",
-			"bLengthChange": false,
-			"aaSorting": [[ 6, "desc" ]],
-			"bFilter": false,
-			"sWrapper": false,
-			"sInfo": false,
-			"bAutoWidth": false,
-			"fnDrawCallback": fnOpenClose,
-			"iDisplayLength": '.$this->perpage.', 
-			"aoColumns": [{ "bSortable" : false }, null, null, { "bVisible" : false }, null, null, null, null, null, { "bVisible" : false }, { "bSortable" : false } ],
-					
-		"oLanguage": {
-			"sZeroRecords": "'.$this->EE->lang->line('no_valid_comments').'",
-			
-			"oPaginate": {
-				"sFirst": "<img src=\"'.$this->EE->cp->cp_theme_url.'images/pagination_first_button.gif\" width=\"13\" height=\"13\" alt=\"&lt; &lt;\" />",
-				"sPrevious": "<img src=\"'.$this->EE->cp->cp_theme_url.'images/pagination_prev_button.gif\" width=\"13\" height=\"13\" alt=\"&lt; &lt;\" />",
-				"sNext": "<img src=\"'.$this->EE->cp->cp_theme_url.'images/pagination_next_button.gif\" width=\"13\" height=\"13\" alt=\"&lt; &lt;\" />", 
-				"sLast": "<img src=\"'.$this->EE->cp->cp_theme_url.'images/pagination_last_button.gif\" width=\"13\" height=\"13\" alt=\"&lt; &lt;\" />"
-			}
-		},
-		
-			"bProcessing": true,
-			"bServerSide": true,
-			"sAjaxSource": EE.BASE+"&C=addons_modules&M=show_module_cp&module=comment&method='.$ajax_method.'&time=" + time,
-			"fnServerData": fnDataTablesPipeline
-
-	} );
-	
-	/* Formating function for row details */
-	function fnFormatDetails ( nTr )
-	{
-		var aData = oTable.fnGetData( nTr );
-		var sOut = "<table class=\"detailTable\">";
-		sOut += "<tr><td>"+aData[9]+"</td></tr>";
-		sOut += "</table>";
-	
-		return sOut;
-	}
-	
-	/* Event handler function */
-function fnOpenClose ( oSettings )
-{
-	$("td img", oTable.fnGetNodes() ).each( function () {
-		$(this).click( function () {
-			var nTr = this.parentNode.parentNode;
-			if ( this.src.match("field_expand") )
-			{
-				/* This row is already open - close it */
-				this.src = "'.$this->EE->cp->cp_theme_url.'images/field_collapse.png";
-
-				var nRemove = $(nTr).next()[0];
-				nRemove.parentNode.removeChild( nRemove );
-			}
-			else
-			{
-				/* Open this row */
-				this.src = "'.$this->EE->cp->cp_theme_url.'images/field_expand.png";
-				oTable.fnOpen( nTr, fnFormatDetails(nTr), "details");
-			}
-		} );
-	} );
-}
-	
-			$("#expand_contract").toggle(function () {
-					$("[src$=\'field_collapse.png\']").click();
-				}, function() {
-					$("[src$=\'field_expand.png\']").click();
-			});
-			
-			$("#keywords").keyup( function () {
-			/* Filter on the column (the index) of this element */
-				oTable.fnDraw();
-			});
-
-			$("select#f_channel_id").change(function () {
-				oTable.fnDraw();
-			});	
-
-			$("select#f_status").change(function () {
-				oTable.fnDraw();
-			});
-
-			$("select#f_search_in").change(function () {
-				oTable.fnDraw();
-			});
-
-			$("select#date_range").change(function () {
-				oTable.fnDraw();
-			});
-
-';
-
-		return $js;
-		
-	}
-	
-	function comments_ajax_filter()
-	{
-		$this->EE->output->enable_profiler(FALSE);
-		$this->EE->load->helper('text');
-		//$this->EE->load->model('search_model');
-		$this->EE->load->model('comment_model');
-		$ids = array();
-		
-				
-		$col_map = array('comment', 'comment', 'title', 'channel_title', 'name', 'email', 'comment_date', 'ip_address', 'status');
-
-		// Note- we pipeline the js, so pull more data than are displayed on the page		
-		$perpage = $this->EE->input->get_post('iDisplayLength');
-		$offset = ($this->EE->input->get_post('iDisplayStart')) ? $this->EE->input->get_post('iDisplayStart') : 0; // Display start point
-		$sEcho = $this->EE->input->get_post('sEcho');
-
-		
-		/* Ordering */
-		$order = array();
-		
-		if ($this->EE->input->get('iSortCol_0') !== FALSE)
-		{
-			for ( $i=0; $i < $this->EE->input->get('iSortingCols'); $i++ )
-			{
-				if (isset($col_map[$this->EE->input->get('iSortCol_'.$i)]))
-				{
-					$order[$col_map[$this->EE->input->get('iSortCol_'.$i)]] = ($this->EE->input->get('sSortDir_'.$i) == 'asc') ? 'asc' : 'desc';
-				}
-			}
-		}
-
-		$filter = $this->filter_settings($ajax = TRUE);
-		
-		//  Get comment ids
-		
-		$comment_id_query = $this->EE->comment_model->get_comment_ids($filter, '', $order);	
-
-		$comment_ids = array_slice($comment_id_query->result_array(), $offset, $perpage);
-		
-		foreach ($comment_ids as $id)
-		{
-			$ids[] = $id['comment_id'];
-		}
-		
-		$this->EE->db->where('site_id', $this->EE->config->item('site_id'));
-		$total = $this->EE->db->count_all_results('comments');
-		
-		
-
-		$j_response['sEcho'] = $sEcho;
-		$j_response['iTotalRecords'] = $total;
-		$j_response['iTotalDisplayRecords'] = $comment_id_query->num_rows();
-					
-		$tdata = array();
-		$i = 0;			
-		
-		$comment_results = $this->EE->comment_model->fetch_comment_data($ids, $order);
-		
-		// Note- empty string added because otherwise it will throw a js error
-		if ($comment_results != FALSE)
-		{
-
-			$config = ($this->EE->config->item('comment_word_censoring') == 'y') ? array('word_censor' => TRUE) : array();
-		
-			$this->EE->load->library('typography');
-			$this->EE->typography->initialize($config);
-		
-			$this->EE->typography->parse_images = FALSE;
-			$this->EE->typography->allow_headings = FALSE;
-		
-			foreach ($comment_results->result_array() as $comment)
-			{
-				$can_edit_comment = TRUE;
-
-				if (($comment['entry_author_id'] != $this->EE->session->userdata('member_id')) && ! $this->EE->cp->allowed_group('can_edit_all_comments'))
-				{
-					$can_edit_comment = FALSE;
-				}
-	
-				if ($comment['status'] == 'o')
-				{
-					$status_label = $this->EE->lang->line('open');
-				}
-				elseif ($comment['status'] == 'c')
-				{
-					$status_label = $this->EE->lang->line('closed');
-				}
-				else
-				{
-					$status_label = $this->EE->lang->line('pending');
-				}
-			
-
-				if ($this->comment_leave_breaks == 'y')
-				{
-					$display_comment = str_replace(array("\n","\r"),
-												  '<br />',
-												  strip_tags($comment['comment'])
-												  );
-				}
-				else
-				{
-					$display_comment = strip_tags(str_replace(array("\t","\n","\r"), ' ', $comment['comment']));
-				}
-
-				if ($this->comment_chars != 0)
-				{
-					$display_comment = $this->EE->functions->char_limiter(trim($display_comment), $this->comment_chars);
-				}
-			
-
-				$full_comment = $this->EE->typography->parse_type($comment['comment'],
-					array(
-						'text_format'	=> $comment['comment_text_formatting'],
-						'html_format'	=> $comment['comment_html_formatting'],
-						'auto_links'	=> $comment['comment_auto_link_urls'],
-						'allow_img_url' => $comment['comment_allow_img_urls']
-						)
-					);
-			
-				$edit_url = $this->base_url.AMP.'method=edit_comment_form'.AMP.'comment_id='.$comment['comment_id'];
-				$status_search_url = $this->base_url.AMP.'status='.$comment['status'];
-				$ip_search_url = $this->base_url.AMP.'ip_address='.base64_encode($comment['ip_address']);
-				$channel_search_url = $this->base_url.AMP.'channel_id='.$comment['channel_id'];
-				$email_search_url = $this->base_url.AMP.'email='.base64_encode($comment['email']);
-
-				$mail_to = ($comment['email'] != '') ? mailto($comment['email']) : FALSE;
-				$name_search_url = $this->base_url.AMP.'name='.base64_encode($comment['name']);
-				$date = $this->EE->localize->set_human_time($comment['comment_date']);
-				$entry_search_url = $this->base_url.AMP.'entry_id='.$comment['entry_id'];
-				$entry_title = $this->EE->functions->char_limiter(trim(strip_tags($comment['title'])), 26);
-			
-				$expand_img = '<img src="'.$this->EE->cp->cp_theme_url.'images/field_collapse.png" alt="expand" />';
-			
-				$m[] = $expand_img;
-				$m[] = "<a class='less_important_link' href='{$edit_url}'>{$display_comment}</a>";
-				$m[] = "<a class='less_important_link' href='{$entry_search_url}'>{$entry_title}</a>";
-				$m[] = "<a class='less_important_link' href='{$channel_search_url}'>{$comment['channel_title']}</a>";
-				$m[] = "<a class='less_important_link'  href='{$name_search_url}'>{$comment['name']}</a>";
-				$m[] = "<a class='less_important_link'  href='{$email_search_url}'>{$comment['email']}</a>";
-				$m[] = ( ! is_null($date)) ? $date : '';
-				$m[] = "<a class='less_important_link' href='{$ip_search_url}'>{$comment['ip_address']}</a>";
-				$m[] = "<a class='less_important_link' href='{$status_search_url}'>{$status_label}</a>";
-				$m[] = ( ! is_null($full_comment)) ? $full_comment : '';
-				$m[] = '<input class="comment_toggle" type="checkbox" name="toggle[]" value="'.$comment['comment_id'].'" />';
-
-				$tdata[$i] = $m;
-				$i++;
-				unset($m);
-			}		
-		} // end false check
-	
-	
-		$j_response['aaData'] = $tdata;	
-		$sOutput = $this->EE->javascript->generate_json($j_response, TRUE);
-	
-		die($sOutput);
-	}
-
-
-
-	function filter_settings($ajax = FALSE)
-	{
-		// Load the search helper so we can filter the keywords
-		$this->EE->load->helper('search');	
-		$keywords = '';
-
-		if ($this->EE->input->post('keywords')) 
-		{
-			$keywords = $this->EE->input->get_post('keywords');
-		}
-		elseif ($this->EE->input->get('keywords'))
-		{
-			$keywords = base64_decode($this->EE->input->get('keywords'));
-		}
-		
-		$channel_id = ($this->EE->input->get_post('channel_id') && $this->EE->input->get_post('channel_id') != 'null') ? $this->EE->input->get_post('channel_id') : '';
-
-		$filter_on['status']= $this->EE->input->get_post('status');
-		$filter_on['order']	= $this->EE->input->get_post('order');
-		$filter_on['date_range'] = $this->EE->input->get_post('date_range');	
-		$filter_on['name'] = ($this->EE->input->get('name')) ? sanitize_search_terms(base64_decode($this->EE->input->get('name'))) : 	$this->EE->input->post('name');		
-		$filter_on['keywords'] = $keywords;
-		$filter_on['search_in'] = $this->EE->input->get_post('search_in');
-		$filter_on['channel_id'] = $this->EE->input->get_post('channel_id');
-		$filter_on['date_range'] = $this->EE->input->get_post('date_range');
-		$filter_on['ip_address'] = ($this->EE->input->get('ip_address')) ? sanitize_search_terms(base64_decode($this->EE->input->post('ip_address'))) : $this->EE->input->post('ip_address');	
-		$filter_on['email'] = ($this->EE->input->get('email')) ? base64_decode($this->EE->input->post('email')) : $this->EE->input->post('email');	
-		
-			
-		$filter_on['entry_id'] = $this->EE->input->get_post('entry_id');
-		$filter_on['comment_id'] = $this->EE->input->get_post('comment_id');
-		$filter_on['limit'] = $this->perpage;
-		
-		//  Because you can specify some extra gets- let's translate that back to search_in/keywords
-		
-		if ($this->EE->input->get('entry_id'))
-		{
-			$filter_on['search_in'] = 'entry_title';
-			
-			$this->EE->db->select('title');
-			$this->EE->db->where('entry_id', $this->EE->input->get('entry_id'));
-			$query = $this->EE->db->get('channel_titles');
-			
-			$row = $query->row();
-
-			$filter_on['keywords'] = $row->title;
-		}
-		elseif($this->EE->input->get('name'))
-		{
-			$filter_on['search_in'] = 'name';
-			$filter_on['keywords'] = base64_decode($this->EE->input->get('name'));
-		}
-		elseif($this->EE->input->get('email'))
-		{
-			$filter_on['search_in'] = 'email';
-			$filter_on['keywords'] = base64_decode($this->EE->input->get('email'));
-		}
-		elseif($this->EE->input->get('ip_address'))
-		{
-			$filter_on['search_in'] = 'ip_address';
-			$filter_on['keywords'] = base64_decode($this->EE->input->get('ip_address'));
-		}
-
-		//  Create the get variables for non-js pagination
-
-		// Post variables: search_in, keywords*, channel_id, status, date_range
-		// Get variables: entry_id, channel_id, name, email*, ip_address* and status 
-
-		$url = array('search_in' => $filter_on['search_in']);
-		$filter_on['search_form_hidden'] = array();
-		
-		foreach ($filter_on as $name => $value)
-		{
-			if($this->EE->input->post($name) && $this->EE->input->post($name) != '')
-			{
-				$v = ($name == 'keywords') ? base64_encode($this->EE->input->post($name)) : $this->EE->input->post($name);
-				
-				$url[$name] = $name.'='.$v;
-			}
-			elseif ($this->EE->input->get($name))
-			{
-				$url[$name] = $name.'='.$this->EE->input->get($name);
-			}
-		}
-		
-		if ( ! isset($url['keywords']))
-		{
-			unset($url['search_in']);
-		}
-		
-		$this->search_url = implode(AMP, $url);
-
-		return $filter_on;
-	}
-
-
-	function create_filter($filter)
-	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && ! $this->EE->cp->allowed_group('can_edit_all_comments') && ! $this->EE->cp->allowed_group('can_edit_own_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
-
-		// Channel selection pull-down menu
-		// Fetch the names of all channels and write each one in an <option> field
-
-		$fields = array('channel_title', 'channel_id', 'cat_group');
-		$where = array();
-		
-		//  We only limit to channels they are assigned to if they can't moderate and can't edit all
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && ! $this->EE->cp->allowed_group('can_edit_all_comments'))
-		{
-			$query = $this->EE->channel_model->get_channels($this->EE->config->item('site_id'), $fields, $where);
+			$query = $this->EE->channel_model->get_channels(
+									(int) $this->EE->config->item('site_id'), 
+									array('channel_title', 'channel_id', 'cat_group'));
 		}
 		else
 		{
 			$this->EE->db->select('channel_title, channel_id, cat_group');
-			$this->EE->db->where('site_id', $this->EE->config->item('site_id'));
+			$this->EE->db->where('site_id', (int) $this->EE->config->item('site_id'));
 			$this->EE->db->order_by('channel_title');
 		
 			$query = $this->EE->db->get('channels'); 
-		}		
-		
-		$vars = array(
-			'channel_selected'			=> $filter['channel_id'],
-			'channel_select_options'	=> array('' => $this->EE->lang->line('filter_by_channel'))
+		}
+
+		$opts = array(
+			''	=> lang('filter_by_channel')
 		);
 		
+		if ( ! $query)
+		{
+			return array();
+		}
+
 		if ($query->num_rows() > 1)
 		{
-			$vars['channel_select_options']['all'] = $this->EE->lang->line('all');
+			$opts['all'] = lang('all');
 		}
 
-		foreach ($query->result_array() as $row)
+		foreach ($query->result() as $row)
 		{
-			$vars['channel_select_options'][$row['channel_id']] = $row['channel_title'];
+			$opts[$row->channel_id] = $row->channel_title;
 		}
 
-		// Status pull-down menu
-		$vars['status_selected'] = $filter['status'];
-		
-		$vars['status_select_options'][''] = $this->EE->lang->line('filter_by_status');
-		$vars['status_select_options']['all'] = $this->EE->lang->line('all');
+		return $opts;
+	}
 
-	 	$vars['status_select_options']['p'] = $this->EE->lang->line('pending');
-		$vars['status_select_options']['o'] = $this->EE->lang->line('open');
-		$vars['status_select_options']['c'] = $this->EE->lang->line('closed');
+	// --------------------------------------------------------------------
 
-		// Date range pull-down menu
-		$vars['date_selected'] = $filter['date_range'];
+	/**
+	 * Merge Comment Data
+	 *
+	 * This is a...productive method.
+	 *
+	 * This method loops through the array of 50 comment db objects and 
+	 * adds in a few more vars that will be used in the view. Additionally,
+	 * we alter some values such as status to make it human readable to get 
+	 * that logic out of the views where it has no bidness.
+	 *
+	 * @param 	array 	array of comment objects
+	 * @param 	object 	db result from channel query
+	 * @param 	object 	db result from authors query
+	 * @return 	array 	array of altered comment objects
+	 */
+	protected function _merge_comment_data($comments, $channels, $authors)
+	{
+		$this->EE->load->library('typography');
 
-		$vars['date_select_options'][''] = $this->EE->lang->line('date_range');
-		$vars['date_select_options']['1'] = $this->EE->lang->line('past_day');
-		$vars['date_select_options']['7'] = $this->EE->lang->line('past_week');
-		$vars['date_select_options']['31'] = $this->EE->lang->line('past_month');
-		$vars['date_select_options']['182'] = $this->EE->lang->line('past_six_months');
-		$vars['date_select_options']['365'] = $this->EE->lang->line('past_year');
-		$vars['date_select_options']['custom_date'] = $this->EE->lang->line('any_date');
+		$config = array(
+			'parse_images'	=> FALSE,
+			'allow_headings'=> FALSE,	
+			'word_censor' 	=> ($this->EE->config->item('comment_word_censoring') == 'y') ? TRUE : FALSE
+		);
 
-		$vars['search_form'] = 'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=comment';
+		$this->EE->typography->initialize($config);
 
-		
-		$vars['keywords'] = $filter['keywords'];
-		
-		$vars['search_in_options']['comment'] =  $this->EE->lang->line('search_in_comments');
-		$vars['search_in_options']['ip_address'] =  $this->EE->lang->line('search_in_ips');
-		$vars['search_in_options']['email'] =  $this->EE->lang->line('search_in_emails');
-		$vars['search_in_options']['name'] =  $this->EE->lang->line('search_in_names');	
-		$vars['search_in_options']['entry_title'] =  $this->EE->lang->line('search_in_entry_titles');			
-		
-		$vars['keywords'] = $filter['keywords'];
-		$vars['search_in_selected'] = $filter['search_in'];
+		// There a result for authors here, or are they all anon?
+		$authors = ( ! $authors->num_rows()) ? array() : $authors->result();
 
-		$vars['search_form_hidden'] = array();
-		
-		return $vars;
-		
+		foreach ($comments as $k => $v)
+		{
+			// Drop the entry title into the comment object
+			foreach ($channels->result() as $row)
+			{
+				if ($v->entry_id == $row->entry_id)
+				{
+					$comments[$k]->entry_title = $row->title;
+
+					break;
+				}
+			}
+
+			// Get member info as well.
+			foreach ($authors as $row)
+			{
+				if ($v->author_id == $row->member_id)
+				{
+					$comments[$k]->author_screen_name = $row->screen_name;
+					break;
+				}
+			}
+
+			if ( ! isset($comments[$k]->author_screen_name))
+			{
+				$comments[$k]->author_screen_name = '';
+			}
+
+			// Convert stati to human readable form
+			switch ($comments[$k]->status)
+			{
+				case 'o':
+					$comments[$k]->status = lang('open');
+					break;
+				case 'c':
+					$comments[$k]->status = lang('closed');
+					break;
+				default:
+					$comments[$k]->status = lang("pending");
+			}
+
+			// Alter the email var
+			$comments[$k]->email = mailto($comments[$k]->email);
+
+			// Create comment_edit_link
+			$comments[$k]->comment_edit_link = sprintf(
+					"<a class=\"less_important_link\" href=\"%s\" title=\"%s\">%s</a>",
+					$this->base_url.AMP.'method=edit_comment_form'.AMP.'comment_id='.$comments[$k]->comment_id,
+					'edit',
+					ellipsize($comments[$k]->comment, 50)
+				);
+			
+			$comments[$k]->comment = $this->EE->typography->parse_type($comments[$k]->comment);
+		}
+
+		// flip the array
+		$comments = array_reverse($comments);
+
+		return $comments;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get comment author information
+	 *
+	 * @param 	array 	array of comment db objects
+	 * @return 	object 	members db result object
+	 */
+	protected function _get_author_info($comments)
+	{
+		$ids = array();
+
+		foreach ($comments as $comment)
+		{
+			if ($comment->author_id != 0) // db results are always string
+			{
+				$ids[] = (int) $comment->author_id;
+			}
+		}
+
+		$ids = array_unique($ids);
+
+		if (empty($ids))
+		{
+			$ids = array(0);
+		}
+
+		return $this->EE->db->select('member_id, screen_name, username')
+							->where_in('member_id', $ids)
+							->get('members');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get channel info.
+	 *
+	 * With large datasets/databases, a JOIN can be stupidly expensive,
+	 * especially in a situation where the db server isn't properly tuned
+	 * to make usage of system cache/buffers.  While I do appreciate the 
+	 * various distributions not making assumptions on what you want, sane
+	 * defaults would be really nice.
+	 *
+	 * @param 	array 	array of comment db objects
+	 * @return 	object 	channel_titles db result object
+	 */
+	protected function _get_channel_info($comments)
+	{
+		$ids = array();
+
+		foreach ($comments as $comment)
+		{
+			$ids[] = (int) $comment->entry_id;
+		}
+
+		// Remove duplicate keys.
+		$ids = array_unique($ids);
+
+		if (empty($ids))
+		{
+			$ids = array(0);
+		}
+
+		return $this->EE->db->select('title, entry_id')
+							->where_in('entry_id', $ids)
+							->get('channel_titles');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Setup pagination for the module index page.
+	 *
+	 * @param 	int 	total number of items
+	 * @return 	string 	rendered pagination links to display in the view
+	 */
+	protected function _setup_pagination($total)
+	{
+		$this->EE->load->library('pagination');
+
+		$url = $this->base_url.AMP.'method=index';
+
+		if ($this->_channel)
+		{
+			$url .= AMP.'channel_id='.$this->_channel;
+		}
+
+		if ($this->_status && $this->_status != 'all')
+		{
+			$url .= AMP.'status='.$this->_status;
+		}
+
+		if ($this->_date_range)
+		{
+			$url .= AMP.'status='.$this->_date_range;
+		}
+
+
+		$p_button = "<img src=\"{$this->EE->cp->cp_theme_url}images/pagination_%s_button.gif\" width=\"13\" height=\"13\" alt=\"%s\" />";
+
+		$config = array(
+			'base_url'				=> $url,
+			'total_rows'			=> $total,
+			'per_page'				=> $this->_limit,
+			'page_query_string'		=> TRUE,
+			'query_string_segment'	=> 'offset',
+			'full_tag_open'			=> '<p id="paginationLinks">',
+			'full_tag_close'		=> '</p>',
+			'prev_link'				=> sprintf($p_button, 'prev', '&lt;'),
+			'next_link'				=> sprintf($p_button, 'next', '&gt;'),
+			'first_link'			=> sprintf($p_button, 'first', '&lt; &lt;'),
+			'last_link'				=> sprintf($p_button, 'last', '&gt; &gt;')
+		);
+
+		$this->EE->pagination->initialize($config);
+
+		return $this->EE->pagination->create_links();
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Setup query 
+	 *
+	 * This method checks permissions on the logged in user to ensure they
+	 * have been granted access to moderate/edit comments.  If they are, 
+	 * we give them everything, if not, we only give them the comments they
+	 * authored.
+	 *
+	 * @return 	array 	$array($number_of_results, $comment_id_query);
+	 */
+	protected function _setup_index_query()
+	{
+		// get filters
+		$this->_query_filters();
+
+		// get total number of comments
+		$count = (int) $this->EE->db->select('COUNT(*) as count')
+									->get_where('comments', array(
+							  		'site_id' => (int) $this->EE->config->item('site_id')
+								   ))->row('count');
+
+		// get filters
+		$this->_query_filters();
+
+		$qry = $this->EE->db->select('comment_id')
+							->where('site_id', (int) $this->EE->config->item('site_id'))
+							->order_by('comment_date', $this->_dir)
+							->get('comments', $this->_limit, $this->_offset);
+
+		return array($count, $qry);
+	}
+
+	// --------------------------------------------------------------------	
+
+	protected function _query_filters()
+	{
+		// If the can ONLY edit their own comments- need to 
+		// bring in title table to limit on author		
+		if (( ! $this->EE->cp->allowed_group('can_moderate_comments') && 
+			  ! $this->EE->cp->allowed_group('can_edit_all_comments')) && 	
+				$this->EE->cp->allowed_group('can_edit_own_comments'))
+		{
+			$this->EE->db->where('author_id', (int) $this->EE->session->userdata('member_id'));
+		}
+
+		if ($this->_channel)
+		{
+			$this->EE->db->where('channel_id', (int) $this->_channel);
+		}
+
+		if ($this->_status && $this->_status != 'all')
+		{
+			$this->EE->db->where('status', $this->_status);
+		}
+
+		if ($this->_date_range)
+		{
+			$date_range = time() - ($this->_date_range * 60 * 60 * 24);
+			
+			$this->EE->db->where('comment_date >', (int) $date_range);			
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get Comments
+	 *
+	 * This method takes an array of comment ids and performs the query
+	 * based on the filtering that previously happened.  
+	 *
+	 * @param 	array 	ids of comments to retrieve
+	 * @return 	object 	db object
+	 */
+	protected function _get_comments($ids)
+	{
+		$comment_ids = array();
+
+		foreach ($ids as $id)
+		{
+			$comment_ids[] = (int) $id->comment_id;
+		}
+
+		return $this->EE->db->where_in('comment_id', $comment_ids)
+							->get('comments');
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Setup Query Filters
+	 *
+	 * This method Sets up a few class properties based on query strings to 
+	 * filter the comments query on the index page.
+	 *
+	 * @return void
+	 */
+	protected function _setup_query_filters()
+	{
+		$this->_channel = $this->EE->input->get_post('channel_id');
+		$this->_status = $this->EE->input->get_post('status');
+		$this->_date_range = $this->EE->input->get_post('date_range');
+
+		$this->_limit = ($per_page = $this->EE->input->get('per_page')) ? $per_page : 50;
+		$this->_offset = ($offset = $this->EE->input->get('offset')) ? $offset : 0;
+		$this->_dir = ($dir = $this->EE->input->get('dir')) ? $dir : 'desc'; 
+		$this->_order_by = ($ob = $this->EE->input->get('order_by')) ? $ob : 'comment_date';
 	}
 
 	// --------------------------------------------------------------------
@@ -965,12 +542,12 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Delete Comment Notification
 	 *
-	 * @access	public
 	 * @return	string
 	 */
-	function delete_comment_notification()
+	public function delete_comment_notification()
 	{
-		if ( ! $id = $this->EE->input->get_post('id') OR ! $hash = $this->EE->input->get_post('hash'))
+		if ( ! $id = $this->EE->input->get_post('id') OR 
+			 ! $hash = $this->EE->input->get_post('hash'))
 		{
 			return FALSE;
 		}
@@ -987,9 +564,9 @@ function fnOpenClose ( oSettings )
 		$this->EE->subscription->unsubscribe('', $hash);
 
 		$data = array(
-				'title' 	=> $this->EE->lang->line('cmt_notification_removal'),
-				'heading'	=> $this->EE->lang->line('thank_you'),
-				'content'	=> $this->EE->lang->line('cmt_you_have_been_removed'),
+				'title' 	=> lang('cmt_notification_removal'),
+				'heading'	=> lang('thank_you'),
+				'content'	=> lang('cmt_you_have_been_removed'),
 				'redirect'	=> '',
 				'link'		=> array($this->EE->config->item('site_url'), stripslashes($this->EE->config->item('site_name')))
 		);
@@ -1002,17 +579,11 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Edit Comment Form
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function edit_comment_form($comment_id = FALSE)
+	public function edit_comment_form($comment_id = FALSE)
 	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') 
-		  && ! $this->EE->cp->allowed_group('can_edit_all_comments') 
-		  && ! $this->EE->cp->allowed_group('can_edit_own_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
+		$this->_permissions_check();
 
 		$can_edit = FALSE;
 
@@ -1049,7 +620,7 @@ function fnOpenClose ( oSettings )
 
 		if ($comment_id == FALSE OR ! is_numeric($comment_id))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->EE->load->helper(array('form', 'snippets'));
@@ -1062,30 +633,29 @@ function fnOpenClose ( oSettings )
 		$this->EE->db->where('comments.comment_id', $comment_id);
 
 		$query = $this->EE->db->get();
-			
+		
 		if ($query->num_rows() === 0)
 		{
 			return FALSE;
 		}
-
 			
-		if ( ! $this->EE->cp->allowed_group('can_edit_all_comments'))
+		if ($this->EE->cp->allowed_group('can_edit_all_comments'))
 		{
-			if ($query->row('entry_author') != $this->EE->session->userdata('member_id'))
-			{
-				if ( ! $this->EE->cp->allowed_group('can_moderate_comments'))
-				{
-					show_error($this->EE->lang->line('unauthorized_access'));
-				}
-			}
-			else
-			{
-				$can_edit = TRUE;			
-			}
+			$can_edit = TRUE;
 		}
 		else
 		{
-			$can_edit = TRUE;
+			if ($query->row('entry_author') == $this->EE->session->userdata('member_id'))
+			{
+				$can_edit = TRUE;
+			}
+			else
+			{
+				if ( ! $this->EE->cp->allowed_group('can_moderate_comments'))
+				{
+					show_error(lang('unauthorized_access'));
+				}							
+			}
 		}
 
 		$vars = $query->row_array();
@@ -1094,9 +664,9 @@ function fnOpenClose ( oSettings )
 		$vars['move_to'] = '';
 		$vars['can_edit'] = $can_edit;
 		
-	 	$vars['status_select_options']['p'] = $this->EE->lang->line('pending');
-		$vars['status_select_options']['o'] = $this->EE->lang->line('open');
-		$vars['status_select_options']['c'] = $this->EE->lang->line('closed');	
+	 	$vars['status_select_options']['p'] = lang('pending');
+		$vars['status_select_options']['o'] = lang('open');
+		$vars['status_select_options']['c'] = lang('closed');	
 		
 		$vars['status'] = ($this->EE->input->post('status')) ? $this->EE->input->post('status') : $vars['status'];
 
@@ -1104,8 +674,9 @@ function fnOpenClose ( oSettings )
 		$config = ($this->EE->config->item('comment_word_censoring') == 'y') ? array('word_censor' => TRUE) : array();
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize($config);
-		$this->EE->typography->parse_images = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE)
+				);
 
 		$vars['display_comment'] = $this->EE->typography->parse_type($vars['comment'],
 										array(
@@ -1121,11 +692,11 @@ function fnOpenClose ( oSettings )
 						'email'			=> $query->row('email')
 						);
 
-		$this->EE->cp->set_variable('cp_page_title', $this->EE->lang->line('edit_comment'));
+		$this->EE->cp->set_variable('cp_page_title', lang('edit_comment'));
 
 		// a bit of a breadcrumb override is needed
 		$this->EE->cp->set_variable('cp_breadcrumbs', array(
-			$this->base_url => $this->EE->lang->line('comments')));
+			$this->base_url => lang('comments')));
 
 		$vars['hidden'] = $hidden;
 
@@ -1137,25 +708,34 @@ function fnOpenClose ( oSettings )
 	// --------------------------------------------------------------------
 
 	/**
-	 * Update Comment
-	 *
-	 * @access	public
-	 * @return	void
+	 * This permissions check is used in several places.
 	 */
-	function update_comment()
+	private function _permissions_check()
 	{
 		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') 
 		  && ! $this->EE->cp->allowed_group('can_edit_all_comments') 
 		  && ! $this->EE->cp->allowed_group('can_edit_own_comments'))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
+			show_error(lang('unauthorized_access'));
+		}		
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Comment
+	 *
+	 * @return	void
+	 */
+	public function update_comment()
+	{
+		$this->_permissions_check();
 
 		$comment_id = $this->EE->input->get_post('comment_id');
 
 		if ($comment_id == FALSE OR ! is_numeric($comment_id))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->EE->load->library('form_validation');
@@ -1179,12 +759,10 @@ function fnOpenClose ( oSettings )
 			{
 				if ( ! $this->EE->cp->allowed_group('can_moderate_comments'))
 				{
-					show_error($this->EE->lang->line('unauthorized_access'));
+					show_error(lang('unauthorized_access'));
 				}
-				else
-				{
-					$can_edit = TRUE;			
-				}
+
+				$can_edit = TRUE;
 			}
 		}
 
@@ -1212,7 +790,7 @@ function fnOpenClose ( oSettings )
 
 		if ($query->num_rows() == 0)
 		{
-			return show_error($this->EE->lang->line('no_channel_exists'));
+			return show_error(lang('no_channel_exists'));
 		}
 
 		foreach ($query->row_array() as $key => $val)
@@ -1227,7 +805,7 @@ function fnOpenClose ( oSettings )
 		{
 			if ( ! in_array($status, array('o', 'c', 'p')))
 			{
-				show_error($this->EE->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 			
 			$data = array('status' => $status);
@@ -1245,7 +823,8 @@ function fnOpenClose ( oSettings )
 
 			$url = $this->base_url.AMP.'comment_id='.$comment_id;
 
-			$this->EE->session->set_flashdata('message_success',  $this->EE->lang->line('comment_updated'));
+			$this->EE->session->set_flashdata('message_success',  
+												lang('comment_updated'));
 			$this->EE->functions->redirect($url);			
 		}
 		
@@ -1389,17 +968,25 @@ function fnOpenClose ( oSettings )
 
 		$url = $this->base_url.AMP.'comment_id='.$comment_id;
 
-		$this->EE->session->set_flashdata('message_success',  $this->EE->lang->line('comment_updated'));
+		$this->EE->session->set_flashdata('message_success',  lang('comment_updated'));
 		$this->EE->functions->redirect($url);
 	}
 
+	// --------------------------------------------------------------------
 
-	function _email_check($str)
+	/**
+	 * Email Check
+	 * 
+	 * callback function for form_validation, so it needs to be publicly 
+	 * accessible.
+	 */
+	public function _email_check($str)
 	{
 		// Is email missing?
 		if ($str == '')
 		{
-			$this->EE->form_validation->set_message('_email_check', $this->EE->lang->line('missing_email'));
+			$this->EE->form_validation->set_message('_email_check', 	
+												lang('missing_email'));
 			return FALSE;
 
 		}
@@ -1409,24 +996,33 @@ function fnOpenClose ( oSettings )
 		
 		if ( ! valid_email($str))
 		{
-			$this->EE->form_validation->set_message('_email_check', $this->EE->lang->line('invalid_email_address'));
+			$this->EE->form_validation->set_message('_email_check', 
+												lang('invalid_email_address'));
 			return FALSE;
 		}
 
 		// Is email banned?
 		if ($this->EE->session->ban_check('email', $str))
 		{
-			$this->EE->form_validation->set_message('_email_check', $this->EE->lang->line('banned_email'));
+			$this->EE->form_validation->set_message('_email_check', 
+												lang('banned_email'));
 			return FALSE;
 		}
 		
 		return TRUE;
 	}
+
+	// --------------------------------------------------------------------
 	
-	function _move_check($str)
+	/**
+	 * Move check -- form_validation callback
+	 *
+	 */
+	public function _move_check($str)
 	{
 		// failed by definition
-		$this->EE->form_validation->set_message('_move_check', $this->EE->lang->line('invalid_entry_id'));
+		$this->EE->form_validation->set_message('_move_check', 
+												lang('invalid_entry_id'));
 		return FALSE;
 	}
 	
@@ -1435,16 +1031,17 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Modify Comments
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function modify_comments()
+	public function modify_comments()
 	{
 		// This only happens if they submit with no comments checked, so we send
 		// them home.
-		if ( ! $this->EE->input->post('toggle') && ! $this->EE->input->get_post('comment_id'))
+		if ( ! $this->EE->input->post('toggle') && 
+			 ! $this->EE->input->get_post('comment_id'))
 		{
-			$this->EE->session->set_flashdata('message_failure', $this->EE->lang->line('no_valid_selections'));
+			$this->EE->session->set_flashdata('message_failure', 
+											lang('no_valid_selections'));
 			$this->EE->functions->redirect($this->base_url);
 		}
 
@@ -1470,15 +1067,14 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Delete Comments Confirmation
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function delete_comment_confirm()
+	public function delete_comment_confirm()
 	{
 		if ( ! $this->EE->cp->allowed_group('can_delete_all_comments') 
 		  && ! $this->EE->cp->allowed_group('can_delete_own_comments'))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->EE->cp->get_installed_modules();
@@ -1487,7 +1083,7 @@ function fnOpenClose ( oSettings )
 
 		if ( ! $this->EE->input->post('toggle') && ! $this->EE->input->get_post('comment_id'))
 		{
-			$this->EE->session->set_flashdata('message_failure', $this->EE->lang->line('no_valid_selections'));
+			$this->EE->session->set_flashdata('message_failure', lang('no_valid_selections'));
 			$this->EE->functions->redirect($this->base_url);
 		}
 
@@ -1509,7 +1105,7 @@ function fnOpenClose ( oSettings )
 
 		if (count($comments) == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->EE->db->select('channel_titles.author_id, title, comments.comment_id, comment, comments.ip_address');
@@ -1540,26 +1136,25 @@ function fnOpenClose ( oSettings )
 			}
 		}
 
-
 		if (count($comments) == 0)
 		{
-			$this->EE->session->set_flashdata('message_failure', $this->EE->lang->line('no_valid_selections'));
+			$this->EE->session->set_flashdata('message_failure', 
+											lang('no_valid_selections'));
 			$this->EE->functions->redirect($this->base_url);
 		}
 
 		$this->EE->load->helper('form');
-		$this->EE->cp->set_variable('cp_page_title', $this->EE->lang->line('delete_confirm'));
+		$this->EE->cp->set_variable('cp_page_title', lang('delete_confirm'));
 
 		$this->EE->cp->set_variable('cp_breadcrumbs', array(
-			$this->base_url => $this->EE->lang->line('comments'),
+			$this->base_url => lang('comments'),
 
 		));
 		
 		$vars = array();
 
 		$vars['hidden'] = array(
-								'comment_ids'	=> implode('|', array_keys($comments))
-								);
+					'comment_ids'	=> implode('|', array_keys($comments)));
 								
 		$vars['blacklist_installed'] = (isset($this->EE->cp->installed_modules['blacklist'])) ? TRUE : FALSE;
 								
@@ -1567,6 +1162,7 @@ function fnOpenClose ( oSettings )
 
 		$vars['comments'] = $comments;
 		$vars['message'] = $message;
+		
 		return $this->EE->load->view('delete_comments', $vars, TRUE);
 	}
 
@@ -1575,18 +1171,12 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Change Comment Status
 	 *
-	 * @access	public
 	 * @param	string	new status
 	 * @return	void
 	 */
-	function change_comment_status($status = '')
+	public function change_comment_status($status = '')
 	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') 
-		  && ! $this->EE->cp->allowed_group('can_edit_all_comments') 
-		  && ! $this->EE->cp->allowed_group('can_edit_own_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
+		$this->_permissions_check();
 
 		$comments	= array();
 		
@@ -1605,17 +1195,14 @@ function fnOpenClose ( oSettings )
 
 		if (count($comments) == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
-		if ($status == '')
-		{
-			$status = $this->EE->input->get('status');
-		}
-		
+		$status = ($status == '') ? $this->EE->input->get('status') : $status;
+
 		if ( ! in_array($status, array('o', 'c', 'p')))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->EE->db->select('exp_comments.entry_id, exp_comments.channel_id, exp_comments.author_id, comment_id, exp_channel_titles.author_id AS entry_author');
@@ -1627,7 +1214,7 @@ function fnOpenClose ( oSettings )
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$entry_ids	= array();
@@ -1652,7 +1239,7 @@ function fnOpenClose ( oSettings )
 		
 		if (count($comments) == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}		
 		
 
@@ -1676,12 +1263,35 @@ function fnOpenClose ( oSettings )
 		{
 			$this->send_notification_emails($comments);
 		}
+		
+		if ($this->EE->extensions->active_hook('update_comment_additional'))
+		{
+
+			$qry = $this->EE->db->where_in('comment_id', $comment_ids)
+								->get('comments');
+			
+			foreach ($qry->result() as $row)
+			{
+				/* -------------------------------------------
+				/* 'update_comment_additional' hook.
+				/*  - Add additional processing on comment update.
+				*/
+					$edata = $this->EE->extensions->call(
+													'update_comment_additional', 
+													$row->comment_id, $row
+												);
+
+					if ($this->EE->extensions->end_script === TRUE) return;
+				/*
+				/* -------------------------------------------*/
+			}
+		}
 
 		$this->EE->functions->clear_caching('all');
 
 		$url = $this->base_url;
 
-		$this->EE->session->set_flashdata('message_success', $this->EE->lang->line('status_changed'));
+		$this->EE->session->set_flashdata('message_success', lang('status_changed'));
 		$this->EE->functions->redirect($url);
 	}
 
@@ -1690,27 +1300,27 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Delete Comment
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function delete_comment()
+	public function delete_comment()
 	{
-		if ( ! $this->EE->cp->allowed_group('can_delete_all_comments') && ! $this->EE->cp->allowed_group('can_delete_own_comments'))
+		if ( ! $this->EE->cp->allowed_group('can_delete_all_comments') && 
+			 ! $this->EE->cp->allowed_group('can_delete_own_comments'))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$comment_id = $this->EE->input->post('comment_ids');
 
 		if ($comment_id == FALSE)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 
 		if ( ! preg_match("/^[0-9]+$/", str_replace('|', '', $comment_id)))
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$this->EE->db->where_in('comment_id', explode('|', $comment_id));
@@ -1718,7 +1328,7 @@ function fnOpenClose ( oSettings )
 
 		if ($count == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 	
 		$this->EE->cp->get_installed_modules();
@@ -1734,7 +1344,7 @@ function fnOpenClose ( oSettings )
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->EE->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$entry_ids	= array();
@@ -1763,7 +1373,7 @@ function fnOpenClose ( oSettings )
 			{
 				if ($row['author_id'] != $this->EE->session->userdata('member_id'))
 				{
-					show_error($this->EE->lang->line('unauthorized_access'));
+					show_error(lang('unauthorized_access'));
 				}
 			}
 		}
@@ -1771,7 +1381,7 @@ function fnOpenClose ( oSettings )
 		// If blacklist was checked- blacklist!
 		if ($blacklist_installed && $this->EE->input->post('add_to_blacklist') == 'y')
 		{
-			include_once PATH_MOD.'blacklist/mcp.blacklist'.EXT;
+			include_once PATH_MOD.'blacklist/mcp.blacklist.php';
 
 			$bl = new Blacklist_mcp();
 			
@@ -1798,15 +1408,11 @@ function fnOpenClose ( oSettings )
 		
 		$this->update_stats($entry_ids, $channel_ids, $author_ids);
 
-
-		$msg = $this->EE->lang->line('comment_deleted');
-
 		$this->EE->functions->clear_caching('all');
-
-		$this->EE->session->set_flashdata('message_success', $msg);
+		$this->EE->session->set_flashdata('message_success', 
+										  lang('comment_deleted'));
 
 		$this->EE->functions->redirect($this->base_url);
-
 	}
 	
 	// --------------------------------------------------------------------
@@ -1814,20 +1420,19 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Send Notification Emails
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function send_notification_emails($comments)
+	public function send_notification_emails($comments)
 	{
 		// Load subscription class
 		$this->EE->load->library('subscription');
 			
 		// Instantiate Typography class
-		$config = ($this->EE->config->item('comment_word_censoring') == 'y') ? array('word_censor' => TRUE) : array();
-	
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize($config);
-		$this->EE->typography->parse_images = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'		=> FALSE,
+				'word_censor'		=> ($this->EE->config->item('comment_word_censoring') == 'y') ? TRUE : FALSE)
+				);
 
 
 		// Grab the required comments
@@ -1878,7 +1483,7 @@ function fnOpenClose ( oSettings )
 				
 				// Create an array of comments to add to the email
 				
-				$comment_swap = array();
+				$comments_swap = array();
 				
 				foreach ($comments as $c)
 				{
@@ -1973,10 +1578,9 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Update Entry and Channel Stats
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function update_stats($entry_ids, $channel_ids, $author_ids)
+	public function update_stats($entry_ids, $channel_ids, $author_ids)
 	{
 		foreach($entry_ids as $entry_id)
 		{
@@ -2014,35 +1618,29 @@ function fnOpenClose ( oSettings )
 		
 		return;
 	}
-	
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Settings page
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function settings()
+	public function settings()
 	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && ! $this->EE->cp->allowed_group('can_edit_all_comments') && ! $this->EE->cp->allowed_group('can_delete_all_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
+		$this->_permissions_check();
 
 		$this->EE->load->library('table');
 		$this->EE->load->library('javascript');
 		$this->EE->load->helper('form');
 
-
 		$vars = array('action_url' => 'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=comment'.AMP.'method=save_settings'
 		);
 
-		$this->EE->cp->set_variable('cp_page_title', $this->EE->lang->line('comment_settings'));
+		$this->EE->cp->set_variable('cp_page_title', lang('comment_settings'));
 
 		$this->EE->cp->set_variable('cp_breadcrumbs', array(
-			$this->base_url => $this->EE->lang->line('comments')));		
+			$this->base_url => lang('comments')));		
 		
 		$vars['comment_word_censoring']			= ($this->EE->config->item('comment_word_censoring') == 'y') ? TRUE : FALSE;
 		$vars['comment_moderation_override']	= ($this->EE->config->item('comment_moderation_override') == 'y') ? TRUE : FALSE;
@@ -2056,16 +1654,12 @@ function fnOpenClose ( oSettings )
 	/**
 	 * Update Comment Settings
 	 *
-	 * @access	public
 	 * @return	void
 	 */	
-	function save_settings()
+	public function save_settings()
 	{
-		if ( ! $this->EE->cp->allowed_group('can_moderate_comments') && ! $this->EE->cp->allowed_group('can_edit_all_comments') && ! $this->EE->cp->allowed_group('can_delete_all_comments'))
-		{
-			show_error($this->EE->lang->line('unauthorized_access'));
-		}
-		
+		$this->_permissions_check();
+
 		$timelimit = $this->EE->input->post('comment_edit_time_limit');
 		
 		$insert['comment_word_censoring'] = ($this->EE->input->post('comment_word_censoring')) ? 'y' : 'n';
@@ -2075,10 +1669,9 @@ function fnOpenClose ( oSettings )
 		$this->EE->config->_update_config($insert);
 
 
-		$this->EE->session->set_flashdata('message_success', $this->EE->lang->line('settings_updated'));
+		$this->EE->session->set_flashdata('message_success', lang('settings_updated'));
 
 		$this->EE->functions->redirect($this->base_url.AMP.'method=settings');
-
 	}
 }
 // END CLASS

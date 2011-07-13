@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -51,21 +51,40 @@ class EE_Typography extends CI_Typography {
 	var $yes_no_syntax				= array('y', 'n');
 	var $code_chunks				= array();
 	var $code_counter				= 0;
-	var $http_hidden 				= 'ed9f01a60cc1ac21bf6f1684e5a3be23f38a51b9'; // hash to protect URLs in [url] BBCode
+	var $http_hidden 				= NULL; // hash to protect URLs in [url] BBCode
 	
 	// Allowed tags  Note: Specified in initialize()
 	var $safe_encode = array();
 	var $safe_decode = array();
 
-	/** -------------------------------------
-	/**  Constructor
-	/** -------------------------------------*/
-	function __construct()
+	/**
+	 * Constructor
+	 */
+	public function __construct()
 	{
 		$this->EE =& get_instance();
 		$this->initialize();
 	}
 
+	// --------------------------------------------------------------------
+	
+	/**
+	 * __set magic method
+	 *
+	 * Handles writing directly to the class properties
+	 *
+	 * @param	string
+	 * @param	mixed
+	 * @return	void
+	 */
+	public function __set($var, $val)
+	{
+		if (property_exists($this, $var))
+		{
+			$this->$var = $val;
+		}
+	}
+	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -75,10 +94,9 @@ class EE_Typography extends CI_Typography {
 	 * since CI will return the existing class when it's requested each time
 	 * inheriting the previous use's properties
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function initialize($config = array())
+	public function initialize($config = array())
 	{
 		// reset class properties
 		$this->single_line_pgfs		= TRUE;		// Whether to treat single lines as paragraphs in auto-xhtml
@@ -108,7 +126,10 @@ class EE_Typography extends CI_Typography {
 		$this->yes_no_syntax		= array('y', 'n');
 		$this->code_chunks			= array();
 		$this->code_counter			= 0;
-		$this->http_hidden 			= 'ed9f01a60cc1ac21bf6f1684e5a3be23f38a51b9'; // hash to protect URLs in [url] BBCode
+		
+		$this->EE->load->helper('string');
+		
+		$this->http_hidden 			= unique_marker('typography_url_protect'); // hash to protect URLs in [url] BBCode
 
 		foreach ($config as $key => $val)
 		{
@@ -155,16 +176,7 @@ class EE_Typography extends CI_Typography {
 		
 		if ($this->EE->config->item('enable_emoticons') == 'y')
 		{
-			if (is_file(PATH_MOD.'emoticon/emoticons'.EXT))
-			{
-				require PATH_MOD.'emoticon/emoticons'.EXT;
-				
-				if (is_array($smileys))
-				{
-					$this->smiley_array = $smileys;
-					$this->emoticon_path = $this->EE->config->slash_item('emoticon_path');
-				}
-			}
+			$this->_fetch_emotions_prefs();
 		}
 		
 		/* -------------------------------------------
@@ -183,33 +195,7 @@ class EE_Typography extends CI_Typography {
 		
 		if ($this->EE->config->item('enable_censoring') == 'y')
 		{
-			$this->word_censor = TRUE;
-		}
-		
-		if ($this->word_censor == TRUE && $this->EE->config->item('censored_words') != '')
-		{	
-			if ($this->EE->config->item('censor_replacement') !== FALSE)
-			{
-				$this->censored_replace = $this->EE->config->item('censor_replacement');
-			}
-			
-			$words = str_replace('OR', '|', trim($this->EE->config->item('censored_words')));
-	
-			if (substr($words, -1) == "|")
-			{
-				$words = substr($words, 0, -1);
-			}
-					
-			$this->censored_words = explode("|", $words);
-			
-			if (count($this->censored_words) == 0)
-			{
-				$this->word_censor = FALSE;
-			}
-		}
-		else
-		{
-			$this->word_censor = FALSE;
+			$this->_fetch_word_censor_prefs();
 		}
 		
 		/** -------------------------------------
@@ -222,10 +208,12 @@ class EE_Typography extends CI_Typography {
 
 	// --------------------------------------------------------------------
 	
-	/** ----------------------------------------
-	/**  Parse file paths
-	/** ----------------------------------------*/
-	function parse_file_paths($str)
+	/**
+	 * Parse file paths
+	 *
+	 * @param 	string 	
+	 */
+	public function parse_file_paths($str)
 	{
 		if ($this->parse_images == FALSE OR strpos($str, 'filedir_') === FALSE)
 		{
@@ -240,15 +228,17 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Typographic parser
-	/** -------------------------------------*/
-	
-	// Note: The processing order is very important in this function so don't change it!
-	
-	function parse_type($str, $prefs = '')
+	/**
+	 * Typographic parser
+	 * 
+	 * Note: The processing order is very important in this function so don't change it!
+	 *
+	 * @param 	string
+	 * @param 	array
+	 */
+	public function parse_type($str, $prefs = '')
 	{
 		if ($this->parse_images === TRUE)
         {
@@ -305,7 +295,11 @@ class EE_Typography extends CI_Typography {
 		{
 			if (isset($prefs['text_format']))
 			{
-				if ($prefs['text_format'] != 'none')
+				if ($prefs['text_format'] == 'none')
+				{
+					$this->text_format = 'none';
+				}
+				else
 				{
 					if (in_array($prefs['text_format'], $this->text_fmt_types))
 					{
@@ -313,15 +307,13 @@ class EE_Typography extends CI_Typography {
 					}
 					else
 					{
-						if (isset($this->text_fmt_plugins[$prefs['text_format']]) AND (file_exists(PATH_PI.'pi.'.$prefs['text_format'].EXT) OR file_exists(PATH_THIRD.$prefs['text_format'].'/pi.'.$prefs['text_format'].EXT)))
+						if (isset($this->text_fmt_plugins[$prefs['text_format']]) && 
+							(file_exists(PATH_PI.'pi.'.$prefs['text_format'].'.php') OR 
+							file_exists(PATH_THIRD.$prefs['text_format'].'/pi.'.$prefs['text_format'].'.php')))
 						{
 							$this->text_format = $prefs['text_format'];
 						}
-					}
-				}
-				else
-				{
-					$this->text_format = 'none';
+					}					
 				}
 			}
 		
@@ -368,27 +360,7 @@ class EE_Typography extends CI_Typography {
 		}		
 			
 		// We don't want BBCode parsed if it's within code examples so we'll convert the brackets
-		
-		if (strpos($str, '[code]') !== FALSE)
-		{
-			if (preg_match_all("/\[code\](.+?)\[\/code\]/si", $str, $matches))
-			{	  		
-				for ($i = 0; $i < count($matches['1']); $i++)
-				{				
-					$temp = str_replace(array('[', ']'), array('&#91;', '&#93;'), $matches['1'][$i]);
-					$str  = str_replace($matches['0'][$i], '[code]'.$temp.'[/code]', $str);
-				}			
-			}
-			
-			if ($this->highlight_code == TRUE)
-			{
-				$str = $this->text_highlight($str);
-			}
-			else
-			{
-				$str = str_replace(array('[code]', '[/code]'),	array('<code>', '</code>'),	$str);
-			}
-		}	
+		$str = $this->_protect_bbcode($str);
 
 		//  Strip IMG tags if not allowed
 		if ($this->allow_img_url == 'n')
@@ -442,7 +414,7 @@ class EE_Typography extends CI_Typography {
 			
 			if ( ! class_exists('EE_Template'))
 			{
-				require APPPATH.'libraries/Template'.EXT;
+				require APPPATH.'libraries/Template.php';
 				$this->EE->TMPL = new EE_Template();
 			}			
 			
@@ -452,11 +424,11 @@ class EE_Typography extends CI_Typography {
 			{	
 				if (in_array($prefs['text_format'], $this->EE->core->native_plugins))
 				{
-					require_once PATH_PI.'pi.'.$prefs['text_format'].EXT;
+					require_once PATH_PI.'pi.'.$prefs['text_format'].'.php';
 				}
 				else
 				{
-					require_once PATH_THIRD.$prefs['text_format'].'/pi.'.$prefs['text_format'].EXT;
+					require_once PATH_THIRD.$prefs['text_format'].'/pi.'.$prefs['text_format'].'.php';
 				}
 			}
 			
@@ -505,36 +477,10 @@ class EE_Typography extends CI_Typography {
 		}
 		
 		// Standard email addresses
-		
 		$str = $this->decode_emails($str);
 		
-		/** ------------------------------------------
-		/**  Insert the cached code tags
-		/** ------------------------------------------*/
-		
-		// The hightlight function called earlier converts the original code strings into markers
-		// so that the auth_xhtml function doesn't attempt to process the highlighted code chunks.
-		// Here we convert the markers back to their correct state.
-		
-		if (count($this->code_chunks) > 0)
-		{
-			foreach ($this->code_chunks as $key => $val)
-			{
-				if ($this->text_format == 'legacy_typography')
-				{
-					// First line takes care of the line break that might be there, which should
-					// be a line break because it is just a simple break from the [code] tag.
-					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>'."\n<br />", '</p><div class="codeblock">'.$val.'</div><p>', $str);
-					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>', '</p><div class="codeblock">'.$val.'</div><p>', $str);
-				}
-				else
-				{
-					$str = str_replace('{'.$key.'yH45k02wsSdrp}', $val, $str);
-				}
-			}
-			
-			$this->code_chunks = array();
-		}
+		// Insert the cached code tags
+		$str = $this->_convert_code_markers($str);
 		
 		// -------------------------------------------
 		// 'typography_parse_type_end' hook.
@@ -550,12 +496,14 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------	
 
-
-	/** -------------------------------------
-	/**  Format HTML
-	/** -------------------------------------*/
-	function format_html($str)
+	/**
+	 * Format HTML
+	 *
+	 * @param string
+	 */
+	public function format_html($str)
 	{
 		$html_options = array('all', 'safe', 'none');
 	
@@ -584,23 +532,21 @@ class EE_Typography extends CI_Typography {
 		// This prevents cross-site scripting hacks.
 		
 	 	$js = array(	
-						'onblur',
-						'onchange',
-						'onclick',
-						'onfocus',
-						'onload',
-						'onmouseover',
-						'onmouseup',
-						'onmousedown',
-						'onselect',
-						'onsubmit',
-						'onunload',
-						'onkeypress',
-						'onkeydown',
-						'onkeyup',
-						'onresize'
-					);
-		
+				'onblur',
+				'onchange',
+				'onclick',
+				'onfocus',
+				'onload',
+				'onmouseover',
+				'onmouseup',
+				'onmousedown',
+				'onselect',
+				'onsubmit',
+				'onunload',
+				'onkeypress',
+				'onkeydown',
+				'onkeyup',
+				'onresize');
 		
 		foreach ($js as $val)
 		{
@@ -609,7 +555,7 @@ class EE_Typography extends CI_Typography {
 				$str = preg_replace("/<img src\s*=(.+?)".$val."\s*\=.+?\>/i", "<img src=\\1 />", $str);
 				$str = preg_replace("/<a href\s*=(.+?)".$val."\s*\=.+?\>/i", "<a href=\\1>", $str);
 			}
-		}		
+		}
 		
 		// Turn <br /> tags into newlines
 		
@@ -673,36 +619,60 @@ class EE_Typography extends CI_Typography {
 		return $this->encode_tags($str);
 	}
 
-	/** -------------------------------------
-	/**  Auto link URLs and email addresses
-	/** -------------------------------------*/
-	function auto_linker($str)
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Auto link URLs and email addresses
+	 *
+	 * @param 	string
+	 */
+	public function auto_linker($str)
 	{
 		$str .= ' ';
 		
-		// We don't want any links that appear in the control panel (in channel entries, comments, etc.)
-		// to point directly at URLs.  Why?  Becuase the control panel URL will end up in people's referrer logs, 
-		// This would be a bad thing.  So, we'll point all links to the "bounce server"
-
-		$this->bounce = ((REQ == 'CP' && $this->EE->input->get('M') != 'send_email') OR $this->EE->config->item('redirect_submitted_links') == 'y') ? $this->EE->functions->fetch_site_index().QUERY_MARKER.'URL=' : '';
+		// We don't want any links that appear in the control panel 
+		// (in channel entries, comments, etc.) to point directly at URLs.
+		// Why? Becuase the control panel URL will end up in people's referrer 
+		// logs, this would be a bad thing. So, we'll point all links to the 
+		// "bounce server"
+		
+		if ((REQ == 'CP' && $this->EE->input->get('M') != 'send_email') OR
+			$this->EE->config->item('redirect_submitted_links') == 'y')
+		{
+			$this->bounce = $this->EE->functions->fetch_site_index().QUERY_MARKER.'URL=';
+		}
 		
 		// Protect URLs that are already in [url] BBCode
 		if (strpos($str, '[url') !== FALSE)
 		{
 			$str = preg_replace("/(\[url[^\]]*?\])http/is", '${1}'.$this->http_hidden, str_replace('[url=http', '[url='.$this->http_hidden, $str));
+			
+			$str = preg_replace("/(\[url[^\]]*?\])http/is", '${1}'.$this->http_hidden, str_replace('[url=http', '[url='.$this->http_hidden, $str));
 		}
 		
-		// New version.  Blame Paul if it doesn't work
-		// The parentheses on the end attempt to call any content after the URL. 
+		// New version. Blame Paul if it doesn't work
+		// The parentheses on the end attempt to call any content after the URL.
 		// This way we can make sure it is not [url=http://site.com]http://site.com[/url]
+		
+		// Edit: Added a check for the trailing 6 characters for an edgecase
+		// where the inner url was valid, but did not exactly match the other:
+		// [url=http://www.iblamepaul.com]www.iblamepaul.com[/url] ;) -pk
+		
 		if (strpos($str, 'http') !== FALSE)
 		{
-			$str = preg_replace_callback("#(^|\s|\(|..\])((http(s?)://)|(www\.))(\w+[^\s\)\<\[]+)#im", array(&$this, 'auto_linker_callback'), $str);
+			$str = preg_replace_callback("#(^|\s|\(|..\])((http(s?)://)|(www\.))(\w+[^\s\)\<\[]+)(.{0,6})#im", array(&$this, 'auto_linker_callback'), $str);
 		}
 		
 		// Auto link email
 		if (strpos($str, '@') !== FALSE)
 		{
+			// special treatment if it's in a mailto link
+			if (strpos($str, 'mailto:') !== FALSE)
+			{
+				$email_no_captures = '[a-zA-Z0-9_\.\-]+@[a-zA-Z0-9\-]+\.[a-zA-Z0-9\-\.]*';
+				$str = preg_replace('/<a\s+[^<>]*?href=(\042|\047)mailto:('.$email_no_captures.')\\1[^<>]*?>([^<]*)<\/a>/i', '[email=\\2]\\3[/email]', $str);
+			}
+
 			$str = preg_replace("/(^|\s|\(|\>)([a-zA-Z0-9_\.\-]+)@([a-zA-Z0-9\-]+)\.([a-zA-Z0-9\-\.]*)/i", "\\1[email]\\2@\\3.\\4[/email]", $str);
 		}
 		
@@ -718,16 +688,17 @@ class EE_Typography extends CI_Typography {
 		return substr($str, 0, -1);  // Removes space added above
 	}
 
+	// --------------------------------------------------------------------	
 	
-	/** -------------------------------------
-	/**  Callback function used above
-	/** -------------------------------------*/
-	function auto_linker_callback($matches)
+	/**
+	 * Callback function used above
+	 */
+	public function auto_linker_callback($matches)
 	{
 		//  If it is in BBCode, then we do not auto link
-		if (strtolower($matches['1']) == 'mg]' OR 
-			strtolower($matches['1']) == 'rl]' OR
-			strtolower(substr(trim($matches[6]), 0, 6)) == '[/url]'
+		if (strtolower($matches[1]) == 'mg]' OR 
+			strtolower($matches[1]) == 'rl]' OR
+			strtolower($matches[7]) == '[/url]'
 			)
 		{
 			return $matches['0'];
@@ -745,10 +716,6 @@ class EE_Typography extends CI_Typography {
 			$matches[6] = $punc_match[1];
 		}
 		
-		/** -----------------------------------
-		/**  Modified 2006-02-07 to send back BBCode instead of HTML.  Insures correct sanitizing.
-		/** -----------------------------------*/
-		
 		return	$matches['1'].'[url=http'.
 				$matches['4'].'://'.
 				$matches['5'].
@@ -756,30 +723,17 @@ class EE_Typography extends CI_Typography {
 				$matches['4'].'://'.
 				$matches['5'].
 				$matches['6'].'[/url]'.
-				$end;
-		
-		/** -----------------------------------
-		/**  Old Way
-		/** -----------------------------------*/
-		
-		$url_core = (REQ == 'CP' OR $this->EE->config->item('redirect_submitted_links') == 'y') ? urlencode($matches['6']) : $matches['6'];
-
-		return	$matches['1'].'<a href="'.$this->bounce.'http'.
-				$matches['4'].'://'.
-				$matches['5'].
-				$url_core.'"'.(($this->popup_links == TRUE) ? ' onclick="window.open(this.href); return false;" ' : '').'>http'.
-				$matches['4'].'://'.
-				$matches['5'].
-				$matches['6'].'</a>'.
+				$matches['7'].
 				$end;
 	}
 
+	// --------------------------------------------------------------------	
 
-
-	/** -------------------------------------
-	/**  Decode BBCode
-	/** -------------------------------------*/
-	function decode_bbcode($str)
+	/**
+	 * Decode BBCode
+	 *
+	 */
+	public function decode_bbcode($str)
 	{
 		/** -------------------------------------
         /**  Remap some deprecated tags with valid counterparts
@@ -951,9 +905,9 @@ class EE_Typography extends CI_Typography {
 			$bad_things	 = array("'",'"', ';', '[', '(', ')', '!', '*', '>', '<', "\t", "\r", "\n", 'document.cookie');
 
 			if ($this->allow_img_url == 'y')
-			{	
+			{
 				$str = preg_replace_callback("/\[img\](.*?)\[\/img\]/i", array($this, "image_sanitize"), $str); 
-				//$str = preg_replace("/\[img\](.*?)\[\/img\]/i", "<img src=\\1 />", $str);
+				// $str = preg_replace("/\[img\](.*?)\[\/img\]/i", "<img src=\\1 />", $str);
 			}
 			elseif($this->auto_links == 'y' && $this->html_format != 'none')
 			{
@@ -963,7 +917,7 @@ class EE_Typography extends CI_Typography {
 					{
 						$str = str_replace($matches['0'][$i], '<a href="'.str_replace($bad_things, '', $matches['1'][$i]).'">'.str_replace($bad_things, '', $matches['1'][$i])."</a>", $str);
 					}
-				}					
+				}
 			}
 			else
 			{
@@ -1003,16 +957,16 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------	
 	
-	/** -----------------------------------------
-	/**  Make images safe
-	/** -----------------------------------------*/
-	
-	// This simply removes parenthesis so that javascript event handlers
-	// can't be invoked. 
-
-	function image_sanitize($matches)
-	{		
+	/**
+	 * Make images safe
+	 *
+	 * This simply removes parenthesis so that javascript event handlers
+	 * can't be invoked. 
+	 */
+	public function image_sanitize($matches)
+	{
 		$url = str_replace(array('(', ')'), '', $matches['1']);
 
 		$width = '';
@@ -1030,11 +984,24 @@ class EE_Typography extends CI_Typography {
 			$height = $height_match[0];
 		}
 
-
-		if (preg_match("/\s+alt=(\"|\')([^\\1]*?)\\1/", $matches[1], $alt_match))
+		if (preg_match_all("/\s+alt=(\"|\')([^\\1]*?)\\1/", $matches[1], $alt_match))
 		{
-			$url = trim(str_replace($alt_match['0'], '', $url));
-			$alt = str_replace(array('"', "'"), '', $alt_match[2]);
+			// If there's more than one match for alt, use the first and remove the second
+			if (is_array($alt_match[0]))
+			{
+				$alt_tag = $alt_match[0][0];
+				$alt_value = $alt_match[2][0];
+				
+				$url = trim(str_replace($alt_match[0][1], '', $url));
+			}
+			else
+			{
+				$alt_tag = $alt_match[0];
+				$alt_value = $alt_match[2];
+			}
+
+			$url = trim(str_replace($alt_tag, '', $url));
+			$alt = str_replace(array('"', "'"), '', $alt_value);
 		}
 		else
 		{
@@ -1048,14 +1015,15 @@ class EE_Typography extends CI_Typography {
 			$alt = substr($alt, strrpos($alt, '/')+1);
 		}
 		
-		return "<img src=\"{$url}\" alt=\"{$alt}\"}{$width}{$height} />";
+		return "<img src=\"{$url}\" alt=\"{$alt}\"{$width}{$height} />";
 	}
 
+	// --------------------------------------------------------------------	
 	
-	/** -----------------------------------------
-	/**  Decode and spam protect email addresses
-	/** -----------------------------------------*/
-	function decode_emails($str)
+	/**
+	 * Decode and spam protect email addresses
+	 */
+	public function decode_emails($str)
 	{
 		if (strpos($str, '[email') === FALSE)
 		{
@@ -1073,12 +1041,12 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------	
 	
-
-	/** -------------------------------------
-	/**  Format Email via callback
-	/** -------------------------------------*/
-	function create_mailto($matches)
+	/**
+	 * Format Email via callback
+	 */
+	public function create_mailto($matches)
 	{	
 		$title = ( ! isset($matches['2'])) ? $matches['1'] : $matches['2'];
 	
@@ -1086,18 +1054,16 @@ class EE_Typography extends CI_Typography {
 		{
 			return $this->encode_email($matches['1'], $title, TRUE);
 		}
-		else
-		{
-			return "<a href=\"mailto:".$matches['1']."\">".$title."</a>";		
-		}
+
+		return "<a href=\"mailto:".$matches['1']."\">".$title."</a>";		
 	}
 
+	// --------------------------------------------------------------------	
 	
-
-	/** ----------------------------------------
-	/**  Font sizing matrix via callback
-	/** ----------------------------------------*/
-	function font_matrix($matches)
+	/**
+	 * Font sizing matrix via callback
+	 */
+	public function font_matrix($matches)
 	{
 		switch($matches['1'])
 		{
@@ -1119,21 +1085,23 @@ class EE_Typography extends CI_Typography {
 	
 		return "<span style=\"font-size:".$size.";\">".$matches['2']."</span>";
 	}
+
+	// --------------------------------------------------------------------		
 	
-	
-	/** -------------------------------------
-	/**  Encode tags
-	/** -------------------------------------*/
-	
-	function encode_tags($str) 
+	/**
+	 * Encode tags
+	 */
+	public function encode_tags($str) 
 	{  
 		return str_replace(array("<", ">"), array("&lt;", "&gt;"), $str);
 	}
 
-	/** -------------------------------------
-	/**  Strip IMG tags
-	/** -------------------------------------*/
-	function strip_images($str)
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Strip IMG tags
+	 */
+	public function strip_images($str)
 	{	
 		if (strpos($str, '<img') !== FALSE)
 		{
@@ -1144,10 +1112,12 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
-	/** -------------------------------------
-	/**  Emoticon replacement
-	/** -------------------------------------*/
-	function emoticon_replace($str)
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Emoticon replacement
+	 */
+	public function emoticon_replace($str)
 	{
 		if ($this->smiley_array === FALSE OR $this->parse_smileys === FALSE OR $this->EE->session->userdata('parse_smileys') == 'n')
 		{
@@ -1196,13 +1166,12 @@ class EE_Typography extends CI_Typography {
 		return ltrim($str);
 	}
 
+	// --------------------------------------------------------------------	
 
-
-
-	/** -------------------------------------
-	/**  Word censor
-	/** -------------------------------------*/
-	function filter_censored_words($str)
+	/**
+	 * Word censor
+	 */
+	public function filter_censored_words($str)
 	{
         if ($this->word_censor == FALSE)
         {
@@ -1213,14 +1182,12 @@ class EE_Typography extends CI_Typography {
 		return word_censor($str, $this->censored_words, $this->censored_replace);
 	}
 
-
-
-
-	/** -------------------------------------
-	/**  Colorize code strings
-	/** -------------------------------------*/
-		
-	function text_highlight($str)
+	// --------------------------------------------------------------------	
+	
+	/**
+	 * Colorize code strings
+	 */
+	public function text_highlight($str)
 	{		
 		// No [code] tags?  No reason to live.  Goodbye cruel world...
 		
@@ -1254,15 +1221,6 @@ class EE_Typography extends CI_Typography {
 
 			// All the magic happens here, baby!	
 			$temp = highlight_string($temp, TRUE);
-
-			// Prior to PHP 5, the highligh function used icky <font> tags
-			// so we'll replace them with <span> tags.
-
-			if (abs(PHP_VERSION) < 5)
-			{
-				$temp = str_replace(array('<font ', '</font>'), array('<span ', '</span>'), $temp);
-				$temp = preg_replace('#color="(.*?)"#', 'style="color: \\1"', $temp);
-			}
 			
 			// Remove our artificially added PHP, and the syntax highlighting that came with it
 			$temp = preg_replace('/<span style="color: #([A-Z0-9]+)">&lt;\?php(&nbsp;| )/i', '<span style="color: #$1">', $temp);
@@ -1289,38 +1247,11 @@ class EE_Typography extends CI_Typography {
 		return $str;
 	}
 
-	
+	// --------------------------------------------------------------------	
 
-
-	/** -------------------------------------
-	/**  NL to <br /> - Except within <pre>
-	/** -------------------------------------*/
-	
-	function nl2br_except_pre($str)
-	{
-		$ex = explode("pre>",$str);
-		$ct = count($ex);
-		
-		$newstr = "";
-		
-		for ($i = 0; $i < $ct; $i++)
-		{
-			if (($i % 2) == 0)
-				$newstr .= nl2br($ex[$i]);
-			else 
-				$newstr .= $ex[$i];
-			
-			if ($ct - 1 != $i) 
-				$newstr .= "pre>";
-		}
-		
-		return $newstr;
-	}
-
-
-	/** -------------------------------------
-	/**  Convert ampersands to entities
-	/** -------------------------------------*/
+	/**
+	 * Convert ampersands to entities
+	 */
 	function convert_ampersands($str)
 	{
 		if (strpos($str, '&') === FALSE) return $str;
@@ -1331,44 +1262,35 @@ class EE_Typography extends CI_Typography {
 		return str_replace(array("&","AMP14TX903DVGHY4QW","AMP14TX903DVGHY4QT"),array("&amp;", "&#","&"), $str);
 	}
 
+	// --------------------------------------------------------------------	
 
-	/** -------------------------------------------
-	/**  Auto XHTML Typography - light version
-	/** -------------------------------------------*/
-	
-	// We use this for channel entry titles.  It allows us to 
-	// format only the various characters without adding <p> tags
-	// Deprecated 9/11/08, format_characters() performs the same
-	// action, but with greater accuracy	
-	function light_xhtml_typography($str)
-	{
-		return $this->format_characters($str);
-	}
-	
-
-	/** -------------------------------------
-	/**  Auto XHTML Typography
-	/** -------------------------------------*/
+	/**
+	 * Auto XHTML Typography
+	 *
+	 * @deprecated in 2.1.5 and will be removed at a later date.
+	 */
     function xhtml_typography($str)
     {  		
 		return $this->auto_typography($str);
     }
 
+	// --------------------------------------------------------------------	
 
-	/** -------------------------------------
-	/**  Encode Email Address
-	/** -------------------------------------*/
-	function encode_email($email, $title = '', $anchor = TRUE)
+	/**
+	 * Encode Email Address
+	 */
+	public function encode_email($email, $title = '', $anchor = TRUE)
 	{
-		if (isset($this->EE->TMPL) && is_object($this->EE->TMPL) AND isset($this->EE->TMPL->encode_email) AND $this->EE->TMPL->encode_email == FALSE)
+		if (isset($this->EE->TMPL) && is_object($this->EE->TMPL) && 
+			isset($this->EE->TMPL->encode_email) && 
+			$this->EE->TMPL->encode_email == FALSE)
 		{
 			return $email;
 		}
 	
-		if ($title == "")
-			$title = $email;
+		$title = ($title == '') ? $email : $title;
 		
-		if (isset($this->encode_type) AND $this->encode_type == 'noscript')
+		if (isset($this->encode_type) && $this->encode_type == 'noscript')
 		{
 			$email = str_replace(array('@', '.'), array(' '.$this->EE->lang->line('at').' ', ' '.$this->EE->lang->line('dot').' '), $email);
 			return $email;
@@ -1378,7 +1300,10 @@ class EE_Typography extends CI_Typography {
 		
 		if ($anchor == TRUE)
 		{ 
-			$bit[] = '<'; $bit[] = 'a '; $bit[] = 'h'; $bit[] = 'r'; $bit[] = 'e'; $bit[] = 'f'; $bit[] = '='; $bit[] = '\"'; $bit[] = 'm'; $bit[] = 'a'; $bit[] = 'i'; $bit[] = 'l';  $bit[] = 't'; $bit[] = 'o'; $bit[] = ':';
+			$bit = array(
+				'<', 'a ', 'h', 'r', 'e', 'f', '=', '\"', 'm', 'a', 'i', 'l', 
+				't', 'o', ':'
+			);
 		}
 		
 		for ($i = 0; $i < strlen($email); $i++)
@@ -1455,7 +1380,136 @@ document.getElementById('<?php echo $span_id; ?>').innerHTML = output;
 
 		return str_replace("\n", '', $buffer);		
 	}
+	
+	// --------------------------------------------------------------------
 
+	/**
+	 * Fetch Emotions Preferences
+	 */
+	private function _fetch_emotions_prefs()
+	{
+		if (is_file(PATH_MOD.'emoticon/emoticons.php'))
+		{
+			require PATH_MOD.'emoticon/emoticons.php';
+				
+			if (is_array($smileys))
+			{
+				$this->smiley_array = $smileys;
+				$this->emoticon_path = $this->EE->config->slash_item('emoticon_path');
+			}
+		}
+	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Fetch Word Censor Preferences
+	 */
+	private function _fetch_word_censor_prefs()
+	{
+		$this->word_censor = TRUE;
+		
+		if ($this->word_censor == TRUE && $this->EE->config->item('censored_words') != '')
+		{	
+			if ($this->EE->config->item('censor_replacement') !== FALSE)
+			{
+				$this->censored_replace = $this->EE->config->item('censor_replacement');
+			}
+			
+			$words = str_replace('OR', '|', trim($this->EE->config->item('censored_words')));
+	
+			if (substr($words, -1) == "|")
+			{
+				$words = substr($words, 0, -1);
+			}
+					
+			$this->censored_words = explode("|", $words);
+			
+			if (count($this->censored_words) == 0)
+			{
+				$this->word_censor = FALSE;
+			}
+		}
+		else
+		{
+			$this->word_censor = FALSE;
+		}
+	}
+
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Protect BBCOde
+	 *
+	 * We don't want BBCode parsed if it's within code examples so we'll 
+	 * convert the brackets
+	 *
+	 */
+	private function _protect_bbcode($str)
+	{
+		if (strpos($str, '[code]') !== FALSE)
+		{
+			if (preg_match_all("/\[code\](.+?)\[\/code\]/si", $str, $matches))
+			{	  		
+				for ($i = 0; $i < count($matches['1']); $i++)
+				{				
+					$temp = str_replace(array('[', ']'), array('&#91;', '&#93;'), $matches['1'][$i]);
+					$str  = str_replace($matches['0'][$i], '[code]'.$temp.'[/code]', $str);
+				}			
+			}
+			
+			if ($this->highlight_code == TRUE)
+			{
+				$str = $this->text_highlight($str);
+			}
+			else
+			{
+				$str = str_replace(array('[code]', '[/code]'),	array('<code>', '</code>'),	$str);
+			}
+		}
+		
+		return $str;
+	}
+
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Convert Code Markers back to rendered code.
+	 *
+	 * The hightlight function called earlier converts the original code strings 
+	 * into markers so that the auth_xhtml function doesn't attempt to process 
+	 * the highlighted code chunks.  Here we convert the markers back to their 
+	 * correct state.
+	 *
+	 * @param 	string
+	 * @param 	string
+	 */
+	private function _convert_code_markers($str)
+	{
+		if (count($this->code_chunks) > 0)
+		{
+			foreach ($this->code_chunks as $key => $val)
+			{
+				if ($this->text_format == 'legacy_typography')
+				{
+					// First line takes care of the line break that might be there, which should
+					// be a line break because it is just a simple break from the [code] tag.
+					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>'."\n<br />", '</p><div class="codeblock">'.$val.'</div><p>', $str);
+					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>', '</p><div class="codeblock">'.$val.'</div><p>', $str);
+				}
+				else
+				{
+					$str = str_replace('{'.$key.'yH45k02wsSdrp}', $val, $str);
+				}
+			}
+
+			$this->code_chunks = array();
+		}
+		
+		return $str;
+	}
+
+	// --------------------------------------------------------------------	
 
 }
 // END CLASS

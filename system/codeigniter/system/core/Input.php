@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -53,13 +53,10 @@ class CI_Input {
 		$this->_enable_xss		= (config_item('global_xss_filtering') === TRUE) ? TRUE : FALSE;
 		$this->_enable_csrf		= (config_item('csrf_protection') === TRUE) ? TRUE : FALSE;
 
-		// Do we need to load the security class?
-		if ($this->_enable_xss == TRUE OR $this->_enable_csrf == TRUE)
-		{
-			$this->security =& load_class('Security');
-		}
+		global $SEC;
+		$this->security =& $SEC;
 
-		// Do we need the Unicode class?
+		// Do we need the UTF-8 class?
 		if (UTF8_ENABLED === TRUE)
 		{
 			global $UNI;
@@ -92,8 +89,7 @@ class CI_Input {
 
 		if ($xss_clean === TRUE)
 		{
-			$_security =& load_class('Security');
-			return $_security->xss_clean($array[$index]);
+			return $this->security->xss_clean($array[$index]);
 		}
 
 		return $array[$index];
@@ -225,8 +221,20 @@ class CI_Input {
 				$expire = 0;
 			}
 		}
+		
+		$secure_cookie = (config_item('cookie_secure') === TRUE) ? 1 : 0;
 
-		setcookie($prefix.$name, $value, $expire, $path, $domain, 0);
+		if ($secure_cookie)
+		{
+			$req = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : FALSE;
+
+			if ( ! $req OR $req == 'off')
+			{
+				return FALSE;
+			}
+		}
+
+		setcookie($prefix.$name, $value, $expire, $path, $domain, $secure_cookie);
 	}
 
 	// --------------------------------------------------------------------
@@ -502,6 +510,9 @@ class CI_Input {
 		{
 			$str = $this->uni->clean_string($str);
 		}
+		
+		// Remove control characters
+		$str = remove_invisible_characters($str);
 
 		// Should we filter the input data?
 		if ($this->_enable_xss === TRUE)
@@ -617,8 +628,7 @@ class CI_Input {
 
 		if ($xss_clean === TRUE)
 		{
-			$_security =& load_class('Security');
-			return $_security->xss_clean($this->headers[$index]);
+			return $this->security->xss_clean($this->headers[$index]);
 		}
 
 		return $this->headers[$index];		

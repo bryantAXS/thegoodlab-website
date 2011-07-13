@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -43,12 +43,12 @@ class Search extends CI_Controller {
 	 * @access	public
 	 * @return	void
 	 */	
-	function index($message = '')
+	function index()
 	{
 		$this->load->helper('html');
 		$this->load->helper('search');
 		
-		$vars['cp_page_title'] = $this->lang->line('search_results');
+		$vars['cp_page_title'] = lang('search_results');
 		$this->cp->set_variable('cp_page_title', $vars['cp_page_title']);
 		
 		// Saved search
@@ -66,7 +66,7 @@ class Search extends CI_Controller {
 			// Save the search
 			$search = rawurlencode(base64_encode($search));
 			
-			if ($this->input->get('ajax'))
+			if (AJAX_REQUEST)
 			{
 				// Force a js redirect
 				$url = str_replace('&amp;', '&', BASE).'&C=search&M=build_index&saved='.$search;
@@ -84,7 +84,7 @@ class Search extends CI_Controller {
 		$vars['search_data'] = $this->cp_search->generate_results($search);
 		$vars['num_rows'] = count($vars['search_data']);
 
-		if ($this->input->get('ajax'))
+		if (AJAX_REQUEST)
 		{
 			echo $this->load->view('search/sidebar', $vars, TRUE);
 			exit;

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -49,7 +49,6 @@ class Field_model extends CI_Model {
 	 */
 	function get_fields($group_id = '', $additional_where = array())
 	{
-		$this->db->select('field_id, field_name, field_label, field_type, field_order');
 		$this->db->from('channel_fields');
 
 		if ($group_id != '')
@@ -286,7 +285,7 @@ class Field_model extends CI_Model {
 	function get_field_content_types($parent = FALSE)
 	{
 		$field_types['file'] = array('image');
-		$field_types['text'] = array('integer', 'numeric');
+		$field_types['text'] = array('integer', 'numeric', 'decimal');
 		
 		if ($parent)
 		{

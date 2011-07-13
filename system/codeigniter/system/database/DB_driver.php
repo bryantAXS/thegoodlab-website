@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -424,8 +424,8 @@ class CI_DB_driver {
 
 		if ( ! class_exists($driver))
 		{
-			include_once(BASEPATH.'database/DB_result'.EXT);
-			include_once(BASEPATH.'database/drivers/'.$this->dbdriver.'/'.$this->dbdriver.'_result'.EXT);
+			include_once(BASEPATH.'database/DB_result.php');
+			include_once(BASEPATH.'database/drivers/'.$this->dbdriver.'/'.$this->dbdriver.'_result.php');
 		}
 
 		return $driver;
@@ -1115,7 +1115,7 @@ class CI_DB_driver {
 
 		if ( ! class_exists('CI_DB_Cache'))
 		{
-			if ( ! @include(BASEPATH.'database/DB_cache'.EXT))
+			if ( ! @include(BASEPATH.'database/DB_cache.php'))
 			{
 				return $this->cache_off();
 			}

@@ -1,5 +1,11 @@
 <?php
 
-$config['name']    = 'Matrix';
-$config['version'] = '2.0.11';
+if (! defined('MATRIX_VER'))
+{
+	define('MATRIX_NAME', 'Matrix');
+	define('MATRIX_VER',  '2.2.2.1');
+}
+
+$config['name']    = MATRIX_NAME;
+$config['version'] = MATRIX_VER;
 $config['nsm_addon_updater']['versions_xml'] = 'http://pixelandtonic.com/matrix/releasenotes.rss';

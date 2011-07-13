@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -41,6 +41,8 @@ class EE_Form_validation extends CI_Form_validation {
 		)
 		{
 			$this->CI->_mcp_reference->lang =& $this->CI->lang;
+			$this->CI->_mcp_reference->input =& $this->CI->input;
+			$this->CI->_mcp_reference->security =& $this->CI->security;
 			$this->CI =& $this->CI->_mcp_reference;
 		}
 	}

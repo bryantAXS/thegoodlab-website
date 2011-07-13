@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -53,11 +53,11 @@ class Expressionengine_info_acc {
 		$this->EE->lang->loadfile('expressionengine_info');
 		
 		// localize Accessory display name
-		$this->name = $this->EE->lang->line('expressionengine_info');
+		$this->name = lang('expressionengine_info');
 		
 		// set the sections
-		$this->sections[$this->EE->lang->line('resources')] = $this->_fetch_resources();
-		$this->sections[$this->EE->lang->line('version_and_build')] = $this->_fetch_version();
+		$this->sections[lang('resources')] = $this->_fetch_resources();
+		$this->sections[lang('version_and_build')] = $this->_fetch_version();
 	}
 
 	// --------------------------------------------------------------------
@@ -72,11 +72,9 @@ class Expressionengine_info_acc {
 	{
 		return '
 		<ul>
-			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com').'" title="ExpressionEngine.com">ExpressionEngine.com</a></li>
-			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com/user_guide').'">'.$this->EE->lang->line('documentation').'</a></li>
-			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com/forums').'">'.$this->EE->lang->line('support_forums').'</a></li>
-			<li><a href="'.$this->EE->cp->masked_url('https://secure.expressionengine.com/download.php').'">'.$this->EE->lang->line('downloads').'</a></li>
-			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com/support').'">'.$this->EE->lang->line('support_resources').'</a></li>
+			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com/user_guide').'">'.lang('documentation').'</a></li>
+			<li><a href="'.$this->EE->cp->masked_url('http://expressionengine.com/support/support_policy/').'">'.lang('support_resources').'</a></li>
+			<li><a href="'.$this->EE->cp->masked_url('https://secure.expressionengine.com/download.php').'">'.lang('downloads').'</a></li>
 		</ul>
 		';
 	}
@@ -98,7 +96,7 @@ class Expressionengine_info_acc {
 		
 		if ( ! $details)
 		{
-			return str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), $this->EE->lang->line('error_getting_version'));
+			return str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), lang('error_getting_version'));
 		}
 
 		end($details);
@@ -108,30 +106,32 @@ class Expressionengine_info_acc {
 		{
 			$instruct_url = $this->EE->cp->masked_url($this->EE->config->item('doc_url').'installation/update.html');
 			
-			$str = '<p><strong>' . $this->EE->lang->line('version_update_available') . '</strong></p><br />';
+			$str = '<p><strong>' . lang('version_update_available') . '</strong></p><br />';
 			$str .= '<ul>';
-			$str .= '<li>'.str_replace(array('%v', '%b'), array($latest_version[0], $latest_version[1]), $this->EE->lang->line('current_version')).'</li>';
-			$str .= '<li>'.str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), $this->EE->lang->line('installed_version')).'</li>';
+			$str .= '<li>'.str_replace(array('%v', '%b'), array($latest_version[0], $latest_version[1]), lang('current_version')).'</li>';
+			$str .= '<li>'.str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), lang('installed_version')).'</li>';
 			$str .= '</ul>';			
-			$str .= '<br /><p>'.NL.str_replace(array('%d', '%i'), array($download_url, $instruct_url), $this->EE->lang->line('version_update_inst')).'</p>';
+			$str .= '<br /><p>'.NL.str_replace(array('%d', '%i'), array($download_url, $instruct_url), lang('version_update_inst')).'</p>';
 			
 			return $str;
 		}
+/*
 		elseif($latest_version[1] > APP_BUILD)
 		{
 			$instruct_url = $this->EE->cp->masked_url($this->EE->config->item('doc_url').'installation/update_build.html');
 			
-			$str = '<p><strong>' . $this->EE->lang->line('build_update_available') . '</strong></p><br />';
+			$str = '<p><strong>' . lang('build_update_available') . '</strong></p><br />';
 			$str .= '<ul>';
-			$str .= '<li>'.str_replace(array('%v', '%b'), array($latest_version[0], $latest_version[1]), $this->EE->lang->line('current_version')).'</li>';
-			$str .= '<li>'.str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), $this->EE->lang->line('installed_version')).'</li>';
+			$str .= '<li>'.str_replace(array('%v', '%b'), array($latest_version[0], $latest_version[1]), lang('current_version')).'</li>';
+			$str .= '<li>'.str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), lang('installed_version')).'</li>';
 			$str .= '</ul>';			
-			$str .= '<br /><p>'.NL.str_replace(array('%d', '%i'), array($download_url, $instruct_url), $this->EE->lang->line('build_update_inst')).'</p>';			
+			$str .= '<br /><p>'.NL.str_replace(array('%d', '%i'), array($download_url, $instruct_url), lang('build_update_inst')).'</p>';			
 
 			return $str;
 		}
+*/
 		
-		return str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), $this->EE->lang->line('running_current'));
+		return str_replace(array('%v', '%b'), array(APP_VER, APP_BUILD), lang('running_current'));
 	}
 	
 }

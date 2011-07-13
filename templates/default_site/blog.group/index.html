@@ -1,0 +1,34 @@
+{embed="site/header" page_title="Blog"}
+
+  <section id='blog-listing-content-container' class='has-layout'>
+    <section id='blog-listing-content-left' class='col-6 left first'>
+      
+      {exp:switchee variable = "{segment_2}" parse="inward"}
+      
+      {case value=""}
+        {embed="blog/_listing"}
+        {embed="blog/_blog-sidebar"}
+      {/case}
+      
+      {case value="#P[0-9]*#"}
+        {embed="blog/_listing"}
+        {embed="blog/_blog-sidebar"}
+      {/case}
+      
+      {case value="tag"}
+        {embed="blog/_tag-listing"}
+        {embed="blog/_blog-sidebar"}
+      {/case}
+      
+      {case value="article" default="Yes"}
+        {embed="blog/_article"}
+        {embed="blog/_article-sidebar"}
+      {/case}
+      
+      {/exp:switchee}
+    
+  </section><!-- blog-listing-content-container -->
+      
+</div><!-- #content-container -->
+
+{embed="site/footer"}

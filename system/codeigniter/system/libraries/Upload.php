@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -142,7 +142,8 @@ class CI_Upload {
 	 */
 	public function do_upload($field = 'userfile')
 	{
-		// Is $_FILES[$field] set? If not, no reason to continue.
+		
+	// Is $_FILES[$field] set? If not, no reason to continue.
 		if ( ! isset($_FILES[$field]))
 		{
 			$this->set_error('upload_no_file_selected');
@@ -863,12 +864,6 @@ class CI_Upload {
 		}
 
 		$CI =& get_instance();
-
-		if ( ! isset($CI->security))
-		{
-			$CI->load->library('security');
-		}
-
 		return $CI->security->xss_clean($data, TRUE);
 	}
 
@@ -939,7 +934,7 @@ class CI_Upload {
 
 		if (count($this->mimes) == 0)
 		{
-			if (@require_once(APPPATH.'config/mimes'.EXT))
+			if (@require_once(APPPATH.'config/mimes.php'))
 			{
 				$this->mimes = $mimes;
 				unset($mimes);

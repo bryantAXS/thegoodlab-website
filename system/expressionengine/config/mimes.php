@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -61,6 +61,7 @@ $mimes = array(
 				'dxr'	=>	'application/x-director',
 				'eml'	=>	'message/rfc822',
 				'eps'	=>	'application/postscript',
+				'epub'	=>	'application/epub+zip',
 				'exe'	=>	'application/octet-stream',
 				'gif'	=>	'image/gif',
 				'gtar'	=>	'application/x-gtar',
@@ -82,6 +83,7 @@ $mimes = array(
 				'movie'	=>	'video/x-sgi-movie',
 				'mp2'	=>	'audio/mpeg',
 				'mp3'	=>	array('audio/mpeg', 'audio/mpg'),
+				'mp4'	=>	'video/mpeg',
 				'mpe'	=>	'video/mpeg',
 				'mpeg'	=>	'video/mpeg',
 				'mpg'	=>	'video/mpeg',
@@ -96,6 +98,8 @@ $mimes = array(
 				'odp'	=>	'application/vnd.oasis.opendocument.presentation',
 				'ods'	=>	'application/vnd.oasis.opendocument.spreadsheet',
 				'odt'	=>	'application/vnd.oasis.opendocument.text',
+				'ogg'	=>	'audio/ogg',
+				'ogv'	=>	'video/ogg',
 				'otc'	=>  'application/vnd.oasis.opendocument.chart-template',
 				'otf'	=>  'application/vnd.oasis.opendocument.formula-template',
 				'otg'	=>  'application/vnd.oasis.opendocument.graphics-template',

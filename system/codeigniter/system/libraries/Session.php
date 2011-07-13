@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -188,7 +188,7 @@ class CI_Session {
 		}
 
 		// Does the User Agent Match?
-		if ($this->sess_match_useragent == TRUE AND trim($session['user_agent']) != trim(substr($this->CI->input->user_agent(), 0, 50)))
+		if ($this->sess_match_useragent == TRUE AND trim($session['user_agent']) != trim(substr($this->CI->input->user_agent(), 0, 120)))
 		{
 			$this->sess_destroy();
 			return FALSE;
@@ -315,7 +315,7 @@ class CI_Session {
 		$this->userdata = array(
 							'session_id'	=> md5(uniqid($sessid, TRUE)),
 							'ip_address'	=> $this->CI->input->ip_address(),
-							'user_agent'	=> substr($this->CI->input->user_agent(), 0, 50),
+							'user_agent'	=> substr($this->CI->input->user_agent(), 0, 120),
 							'last_activity'	=> $this->now
 							);
 
@@ -402,6 +402,18 @@ class CI_Session {
 			$this->CI->db->where('session_id', $this->userdata['session_id']);
 			$this->CI->db->delete($this->sess_table_name);
 		}
+		
+		$secure_cookie = (config_item('cookie_secure') === TRUE) ? 1 : 0;
+
+		if ($secure_cookie)
+		{
+			$req = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : FALSE;
+
+			if ( ! $req OR $req == 'off')
+			{
+				return FALSE;
+			}
+		}
 
 		// Kill the cookie
 		setcookie(
@@ -410,7 +422,7 @@ class CI_Session {
 					($this->now - 31500000),
 					$this->cookie_path,
 					$this->cookie_domain,
-					0
+					$secure_cookie
 				);
 	}
 
@@ -434,11 +446,11 @@ class CI_Session {
 	 * Fetch all session data
 	 *
 	 * @access	public
-	 * @return	mixed
+	 * @return	array
 	 */
 	function all_userdata()
 	{
-		return ( ! isset($this->userdata)) ? FALSE : $this->userdata;
+		return $this->userdata;
 	}
 
 	// --------------------------------------------------------------------
@@ -658,6 +670,18 @@ class CI_Session {
 		}
 
 		$expire = ($this->sess_expire_on_close === TRUE) ? 0 : $this->sess_expiration + time();
+		
+		$secure_cookie = (config_item('cookie_secure') === TRUE) ? 1 : 0;
+
+		if ($secure_cookie)
+		{
+			$req = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : FALSE;
+
+			if ( ! $req OR $req == 'off')
+			{
+				return FALSE;
+			}
+		}
 
 		// Set the cookie
 		setcookie(
@@ -666,7 +690,7 @@ class CI_Session {
 					$expire,
 					$this->cookie_path,
 					$this->cookie_domain,
-					0
+					$secure_cookie
 				);
 	}
 

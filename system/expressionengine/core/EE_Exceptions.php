@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -42,16 +42,14 @@ class EE_Exceptions extends CI_Exceptions {
 		// "safe" HTML typography in EE will strip paragraph tags, and needs newlines to indicate paragraphs
 		$message = '<p>'.implode("</p>\n\n<p>", ( ! is_array($message)) ? array($message) : $message).'</p>';
 	
-		if (class_exists('CI_Controller'))
-		{
-			$EE =& get_instance();
-		}
-		else
+		if ( ! class_exists('CI_Controller'))
 		{
 			// too early to do anything pretty
 			exit($message);
 		}
-		
+
+		$EE =& get_instance();
+
 		// let's be kind if it's a submission error, and offer a back link
 		if ( ! empty($_POST) && ! AJAX_REQUEST)
 		{
@@ -69,7 +67,7 @@ class EE_Exceptions extends CI_Exceptions {
 		// CP requests get no change in treatment
 		// nor do errors that occur in code prior to template parsing
 		// since the db, typography, etc. aren't available yet
-		if ( ! defined('REQ') OR REQ == 'CP' OR (! isset($EE->TMPL)))
+		if ( ! defined('REQ') OR REQ == 'CP' OR ( ! isset($EE->TMPL)))
 		{
 			if (ob_get_level() > $this->ob_level + 1)
 			{
@@ -82,18 +80,18 @@ class EE_Exceptions extends CI_Exceptions {
 			{
 				$cp_theme = ( ! $EE->session->userdata('cp_theme')) ? $EE->config->item('cp_theme') : $EE->session->userdata('cp_theme');			
 
-				if (defined('PATH_THEMES') && (file_exists(PATH_THEMES.'cp_themes/'.$cp_theme.'/errors/'.$template.EXT)))
+				if (defined('PATH_THEMES') && (file_exists(PATH_THEMES.'cp_themes/'.$cp_theme.'/errors/'.$template.'.php')))
 				{
-					include(PATH_THEMES.'cp_themes/'.$cp_theme.'/errors/'.$template.EXT);
+					include(PATH_THEMES.'cp_themes/'.$cp_theme.'/errors/'.$template.'.php');
 				}
 				else
 				{
-					include(APPPATH.'errors/'.$template.EXT);
+					include(APPPATH.'errors/'.$template.'.php');
 				}
 			}
 			else
 			{
-				include(APPPATH.'errors/'.$template.EXT);
+				include(APPPATH.'errors/'.$template.'.php');
 			}
 
 			$buffer = ob_get_contents();

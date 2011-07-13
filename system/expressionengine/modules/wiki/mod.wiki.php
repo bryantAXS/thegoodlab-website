@@ -1,31 +1,30 @@
-<?php
+<?php  if (!defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
 
-/*
-=====================================================
- ExpressionEngine - by EllisLab
------------------------------------------------------
- http://expressionengine.com/
------------------------------------------------------
- Copyright (c) 2003 - 2010, EllisLab, Inc.
-=====================================================
- THIS IS COPYRIGHTED SOFTWARE
- PLEASE READ THE LICENSE AGREEMENT
- http://expressionengine.com/user_guide/license.html
-=====================================================
- File: mod.wiki.php
------------------------------------------------------
- Purpose: Wiki class
-=====================================================
-*/
-if ( ! defined('EXT'))
-{
-	exit('Invalid file request');
-}
+// ------------------------------------------------------------------------
 
-
+/**
+ * ExpressionEngine Wiki Module
+ *
+ * @package		ExpressionEngine
+ * @subpackage	Modules
+ * @category	Modules
+ * @author		ExpressionEngine Dev Team
+ * @link		http://expressionengine.com
+ */
 class Wiki {
 
-	var $version				= '1.2';
+	var $version				= '2.3';
 	
 	var $base_path				= '';
 	var $profile_path			= '';
@@ -721,8 +720,8 @@ class Wiki {
 		$str = preg_replace('/&#x([0-9a-f]{2,5});{0,1}|&#([0-9]{2,4});{0,1}/', '', $str);
 			
 		$trans = array();
-		
-		$trans["#[^a-z0-9\-\_@&\'\"!\.:\+\xA1-\xFF\s]#i"] = '';
+
+		$trans["#[^a-z0-9\-\_@&\'\"!\.:\+\x{A1}-\x{44F}\s]#iu"] = '';
 		
 		// Use dash or underscore as separator		
 		$replace = ($this->EE->config->item('word_separator') == 'dash') ? '-' : '_';
@@ -920,23 +919,11 @@ class Wiki {
 							 		 
 				if ($query->row('count')  > 0)
 				{
-					$query = $this->EE->db->query("SELECT * FROM exp_upload_prefs 
-										 WHERE id = '".$this->EE->db->escape_str($this->upload_dir)."'");
+					// Delete from file system??  Pretty much have to- nuked it
+					$this->EE->load->model('file_model');
+					$this->EE->file_model->delete_files_by_name($this->upload_dir, $topic);
 					
-					$server_path = $query->row('server_path');
-												
-					if (substr($server_path , -1) != '/')
-					{
-						$server_path .= '/';
-					}
-					
-					@unlink($server_path.$topic);
-								 
-					$query = $this->EE->db->query("DELETE FROM exp_wiki_uploads
-										 WHERE file_name = '".$this->EE->db->escape_str($topic)."'");
-										
-					// Clear wiki cache
-					$this->EE->functions->clear_caching('db');
+					// The hook clears out wiki_uploads and the db cache
 
 					$this->redirect($this->special_ns, 'Files');
 				}
@@ -1017,9 +1004,10 @@ class Wiki {
 		/** ----------------------------------------*/
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$summary = $this->convert_curly_brackets($this->EE->typography->parse_type( $this->wiki_syntax($query->row('upload_summary') ), 
 												  array(
@@ -1355,9 +1343,10 @@ class Wiki {
 		$parse_article = stristr($template, '{article}');
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$titles = $row_start;
 		$i = 0;
@@ -1596,14 +1585,11 @@ class Wiki {
 		/** ----------------------------------------*/
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
-		
-		if ($type == 'rss' OR $type == 'atom')
-		{
-			$this->EE->typography->encode_email = FALSE;
-		}	
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE,
+				'encode_email'	=> ($type == 'rss' OR $type == 'atom') ? FALSE : TRUE)
+				);
 		
 		$changes = '';
 		$count = 0;
@@ -2393,9 +2379,10 @@ class Wiki {
 			$this->return_data = $this->_allow_if('preview', $this->return_data);
 			
 			$this->EE->load->library('typography');
-			$this->EE->typography->initialize();
-			$this->EE->typography->parse_images = FALSE;
-			$this->EE->typography->parse_smileys = FALSE;
+			$this->EE->typography->initialize(array(
+						'parse_images'	=> FALSE,
+						'parse_smileys'	=> FALSE)
+						);
 			
 			$preview = $this->convert_curly_brackets($this->EE->typography->parse_type($this->wiki_syntax($_POST['article_content']), 
 													  array(
@@ -2986,9 +2973,10 @@ class Wiki {
 		}
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$article = $this->convert_curly_brackets($this->EE->typography->parse_type( $this->wiki_syntax($results->row('page_content') ), 
 												  array(
@@ -3629,9 +3617,10 @@ class Wiki {
 		}
 								
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$article = $this->convert_curly_brackets($this->EE->typography->parse_type( $this->wiki_syntax($results->row('page_content') ), 
 												  array(
@@ -4041,9 +4030,10 @@ class Wiki {
 			$revision['path:close_revision'] = $link.'/revision/'.$revision['revision_id'].'/close';
 			
 			$this->EE->load->library('typography');
-			$this->EE->typography->initialize();
-			$this->EE->typography->parse_images = FALSE;
-			$this->EE->typography->parse_smileys = FALSE;
+			$this->EE->typography->initialize(array(
+						'parse_images'	=> FALSE,
+						'parse_smileys'	=> FALSE)
+						);
 			
 			$revision['article'] = $this->convert_curly_brackets($this->EE->typography->parse_type( $this->wiki_syntax($this->EE->security->xss_clean($content)), 
 																  array(
@@ -4221,6 +4211,7 @@ class Wiki {
 				$query = $this->EE->db->query("SELECT cat_id
 									 FROM exp_wiki_categories
 									 WHERE cat_name = '".$this->EE->db->escape_str($this->valid_title($cats['0']))."'
+									 AND parent_id = '0' 
 									 AND wiki_id = '".$this->EE->db->escape_str($this->wiki_id)."' 
 									 LIMIT 1");
 									 
@@ -4756,9 +4747,10 @@ class Wiki {
 		}
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$results = '';
 		$i = 0;
@@ -5083,9 +5075,10 @@ class Wiki {
 		/** ----------------------------------------*/
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->parse_images = FALSE;
-		$this->EE->typography->parse_smileys = FALSE;
+		$this->EE->typography->initialize(array(
+				'parse_images'	=> FALSE,
+				'parse_smileys'	=> FALSE)
+				);
 		
 		$files = '';
 		$count = 0;
@@ -5303,11 +5296,13 @@ class Wiki {
 						
 			$server_path = $query->row('server_path');
 
+
+
 			switch($query->row('allowed_types'))
 			{
 				case 'all' : $allowed_types = '*';
 					break;
-				case 'img' : $allowed_types = 'jpg|png|gif';
+				case 'img' : $allowed_types = 'jpg|jpeg|png|gif';
 					break;
 				default :
 					$allowed_types = $query->row('allowed_types');
@@ -5352,12 +5347,10 @@ class Wiki {
 
 			if ($this->EE->upload->do_upload() === FALSE)
 			{
-				@unlink($this->EE->upload->file_name);
-				
 				return $this->EE->output->show_user_error('general', 
 							array($this->EE->lang->line($this->EE->upload->display_errors())));
 			}
-
+			
 			$file_data = $this->EE->upload->data();
 			
 			@chmod($file_data['full_path'], DIR_WRITE_MODE);
@@ -5374,6 +5367,24 @@ class Wiki {
 							'file_hash'				=> $this->EE->functions->random('md5')
 						 );
 			
+			$file_data['uploaded_by_member_id']	= $this->EE->session->userdata('member_id');
+			$file_data['modified_by_member_id'] = $this->EE->session->userdata('member_id');
+			$file_data['rel_path'] = $new_name;
+			
+			$this->EE->load->library('filemanager');
+			$this->EE->filemanager->xss_clean_off();
+			$saved = $this->EE->filemanager->save_file($server_path.$new_name, $this->upload_dir, $file_data, FALSE);
+			
+			// If it can't save to filemanager, we need to error and nuke the file
+			if ( ! $saved['status'])
+			{
+				@unlink($file_data['full_path']);
+				
+				return $this->EE->output->show_user_error('general', 
+							array($this->EE->lang->line($saved['message'])));
+			}			
+			
+
 			$this->EE->db->insert('wiki_uploads', $data);			
 			
 			if ($this->EE->config->item('secure_forms') == 'y')
@@ -5601,8 +5612,10 @@ class Wiki {
 		/** ------------------------------------*/
 		
 		$protected = array();
-		$front_protect = '89Protect17';
-		$back_protect  = '21Me01Please47';
+		$this->EE->load->helper('string');
+		
+		$front_protect = unique_marker('wiki_front_protect');
+		$back_protect  = unique_marker('wiki_back_protect');
 		
 		if (stristr($str, '<script') && preg_match_all("/<script.*?".">.*?<\/script>/is", $str, $matches))
 		{

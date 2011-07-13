@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -128,7 +128,7 @@ class CI_Exceptions {
 			ob_end_flush();
 		}
 		ob_start();
-		include(APPPATH.'errors/'.$template.EXT);
+		include(APPPATH.'errors/'.$template.'.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		return $buffer;
@@ -164,7 +164,7 @@ class CI_Exceptions {
 			ob_end_flush();
 		}
 		ob_start();
-		include(APPPATH.'errors/error_php'.EXT);
+		include(APPPATH.'errors/error_php.php');
 		$buffer = ob_get_contents();
 		ob_end_clean();
 		echo $buffer;

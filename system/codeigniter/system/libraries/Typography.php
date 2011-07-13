@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -333,7 +333,7 @@ class CI_Typography {
 		$str = str_replace("\n\n", "</p>\n\n<p>", $str);
 
 		// Convert single spaces to <br /> tags
-		$str = preg_replace("/([^\n])(\n)([^\n])/", "\\1<br />\\2\\3", $str);
+		$str = preg_replace("/([^\n])(\n)(?=[^\n])/", "\\1<br />\\2\\3", $str);
 
 		// Wrap the whole enchilada in enclosing paragraphs
 		if ($str != "\n")

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -31,9 +31,9 @@ class Addons_extensions extends CI_Controller {
 	{
 		parent::__construct();
 
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
+		if ( ! $this->cp->allowed_group('can_access_addons', 'can_access_extensions'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('addons');
@@ -50,18 +50,13 @@ class Addons_extensions extends CI_Controller {
 	 */
 	function index()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
 		$this->lang->loadfile('admin'); 
 		$this->load->library('extensions');
 		$this->load->library('table');
 		$this->load->helper('form');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('extensions'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=addons', $this->lang->line('addons'));
+		$this->cp->set_variable('cp_page_title', lang('extensions'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=addons', lang('addons'));
 
 		$this->jquery->tablesorter('.mainTable', '{
 			widgets: ["zebra"]
@@ -86,9 +81,12 @@ class Addons_extensions extends CI_Controller {
 		$installed_ext_q->free_result();
 		$names = array();
 		$extcount = 1;
-
+		// var_dump($extension_files); exit;
 		foreach($extension_files as $ext_name => $ext)
 		{
+			// Add the package path so things don't hork in the constructor
+			$this->load->add_package_path($ext['path']);
+
 			// Include the file so we can grab its meta data
 			$class_name = $ext['class'];
 			
@@ -105,7 +103,7 @@ class Addons_extensions extends CI_Controller {
 				
 				if ( ! class_exists($class_name))
 				{
-					trigger_error(str_replace(array('%c', '%f'), array(htmlentities($class_name), htmlentities($ext['path'].$ext['file'])), $this->lang->line('extension_class_does_not_exist')));
+					trigger_error(str_replace(array('%c', '%f'), array(htmlentities($class_name), htmlentities($ext['path'].$ext['file'])), lang('extension_class_does_not_exist')));
 					unset($extension_files[$ext_name]);
 					continue;
 				}
@@ -143,7 +141,7 @@ class Addons_extensions extends CI_Controller {
 			$extension_files[$ext_name]['status_switch'] = ( ! isset($installed_ext[$ext['class']]) ) ? 'enable_extension' : 'disable_extension';
 
 			$extension_files[$ext_name]['settings_enabled'] = (isset($installed_ext[$ext['class']]) AND $this->config->item('allow_extensions') == 'y' AND $OBJ->settings_exist == 'y');
-			$extension_files[$ext_name]['no_settings'] = $OBJ->settings_exist == 'y' ? $this->lang->line('settings') : '--';
+			$extension_files[$ext_name]['no_settings'] = $OBJ->settings_exist == 'y' ? lang('settings') : '--';
 			$extension_files[$ext_name]['settings_url'] = BASE.AMP.'C=addons_extensions'.AMP.'M=extension_settings'.AMP.'file='.$ext_name;
 			
 			$extension_files[$ext_name]['documentation'] = ($OBJ->docs_url) ? $this->config->item('base_url').$this->config->item('index_page').'?URL='.urlencode($OBJ->docs_url) : '';
@@ -153,6 +151,8 @@ class Addons_extensions extends CI_Controller {
 			{
 				$extension_files[$ext_name]['status'] = 'extension_disabled';
 			}
+
+			$this->load->remove_package_path($ext['path']);
 		}
 
 		$vars['extensions_enabled'] = ($this->config->item('allow_extensions') == 'y');
@@ -189,11 +189,6 @@ class Addons_extensions extends CI_Controller {
 	 */
 	function toggle_extension_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
 		$this->load->helper('form');
 		$this->lang->loadfile('admin');
 		
@@ -202,13 +197,13 @@ class Addons_extensions extends CI_Controller {
 		$vars = array();
 		$vars['form_action'] = 'C=addons_extensions'.AMP.'M=toggle_extension';
 		$vars['form_hidden'] = array('which' => 'all');
-		$vars['message'] = $this->lang->line($message);
+		$vars['message'] = lang($message);
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line($message));
+		$this->cp->set_variable('cp_page_title', lang($message));
 		
 		$this->cp->set_variable('cp_breadcrumbs', array(
-			BASE.AMP.'C=addons' => $this->lang->line('addons'),
-			BASE.AMP.'C=addons_extensions'=> $this->lang->line('extensions')
+			BASE.AMP.'C=addons' => lang('addons'),
+			BASE.AMP.'C=addons_extensions'=> lang('extensions')
 		));
 		
 		$this->javascript->compile();
@@ -227,16 +222,11 @@ class Addons_extensions extends CI_Controller {
 	 */
 	function toggle_extension()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
 		if ($this->input->post('which') == 'all')
 		{
 			$new_val = ($this->config->item('allow_extensions') == 'y') ? 'n' : 'y';
 			$this->config->_update_config(array('allow_extensions' => $new_val));
-			$cp_message = ($new_val == 'y') ? $this->lang->line('extensions_enabled'): $this->lang->line('extensions_disabled');
+			$cp_message = ($new_val == 'y') ? lang('extensions_enabled'): lang('extensions_disabled');
 		}
 		else
 		{
@@ -256,12 +246,12 @@ class Addons_extensions extends CI_Controller {
 				if (isset($installed[$file]))
 				{
 					$this->addons_installer->uninstall($file, 'extension');
-					$cp_message = $this->lang->line('extension_disabled');
+					$cp_message = lang('extension_disabled');
 				}
 				else
 				{
 					$this->addons_installer->install($file, 'extension');
-					$cp_message = $this->lang->line('extension_enabled');
+					$cp_message = lang('extension_enabled');
 				}
 			}
 		}
@@ -283,14 +273,9 @@ class Addons_extensions extends CI_Controller {
 	 */
 	function extension_settings($message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-		
 		if ($this->config->item('allow_extensions') != 'y')
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$file = $this->security->sanitize_filename($this->input->get_post('file'));
@@ -305,8 +290,8 @@ class Addons_extensions extends CI_Controller {
 		$this->load->helper('form');
 		$this->load->library('table');
 				
-		$this->cp->set_variable('cp_page_title', $this->lang->line('extension_settings'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=addons_extensions', $this->lang->line('extensions'));
+		$this->cp->set_variable('cp_page_title', lang('extension_settings'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=addons_extensions', lang('extensions'));
 		
 		$vars['message'] = $message;
 		$vars['file'] = $file;
@@ -331,21 +316,20 @@ class Addons_extensions extends CI_Controller {
 			$current = strip_slashes(unserialize($query->row('settings') ));
 		}
 		
+		$name = strtolower($vars['file']);
+		$ext_path = $this->addons->_packages[$name]['extension']['path'];
+
 		/** -----------------------------
 		/**  Call Extension File
 		/** -----------------------------*/
-		
+
 		if ( ! class_exists($class_name))
 		{
-			if (file_exists(APPPATH.'extensions/ext.'.strtolower($vars['file']).EXT))
+			if (file_exists($ext_path.'ext.'.$name.'.php'))
 			{
-				@include_once(APPPATH.'extensions/ext.'.strtolower($vars['file']).EXT);				
+				@include_once($ext_path.'ext.'.$name.'.php');				
 			}
-			elseif (file_exists(PATH_THIRD.strtolower($vars['file']).'/ext.'.strtolower($vars['file']).EXT))
-			{
-				@include_once(PATH_THIRD.strtolower($vars['file']).'/ext.'.strtolower($vars['file']).EXT);
-			}
-				
+	
 			if ( ! class_exists($class_name))
 			{
 				show_error(lang('not_authorized'));
@@ -379,29 +363,30 @@ class Addons_extensions extends CI_Controller {
 
 		$this->lang->loadfile(strtolower($vars['file']));
 		
+		
 		/** ---------------------------------------
 		/**  Creating Their Own Settings Form?
 		/** ---------------------------------------*/
+
 
 		if (method_exists($OBJ, 'settings_form') === TRUE)
 		{
 			// we're going to wipe the view vars here in a sec
 			$file = $vars['file'];
-			
+
 			// add the package and view paths
-			$this->load->add_package_path(PATH_THIRD.strtolower($file).'/');
-			$orig_view_path = $this->load->_ci_view_path;
-			$this->load->_ci_view_path = PATH_THIRD.strtolower($file).'/views/';
+			$this->load->add_package_path($ext_path, FALSE);				
 			
 			// reset view variables
 			$vars  = array('_extension_name' => $name);
 			
+
 			// fetch the content
 			$vars['_extension_settings_body'] = $OBJ->settings_form($current);
-			
-			// restore our package and view paths
-			$this->load->_ci_view_path = $orig_view_path;
-			$this->load->remove_package_path(PATH_THIRD.strtolower($file).'/');
+
+			// restore our package paths
+			$this->load->remove_package_path($ext_path);
+
 
 			// load it up, kapowpow!
 			$this->javascript->compile();
@@ -436,7 +421,7 @@ class Addons_extensions extends CI_Controller {
 			{
 				foreach ($subtext[$key] as $txt)
 				{
-					$sub .= $this->lang->line($txt);
+					$sub .= lang($txt);
 				}
 			}
 			
@@ -454,7 +439,7 @@ class Addons_extensions extends CI_Controller {
 					// Select fields
 					foreach ($options[1] as $k => $v)
 					{
-						$details[$k] = $this->lang->line($v);
+						$details[$k] = lang($v);
 					}
 
 					$selected = $value;
@@ -517,24 +502,19 @@ class Addons_extensions extends CI_Controller {
 	 */
 	function save_extension_settings()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons') OR ! $this->cp->allowed_group('can_access_extensions'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-		
 		if ($this->config->item('allow_extensions') != 'y')
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 			
 		if ($this->input->get_post('file') === FALSE OR ! preg_match("/^[a-z0-9][\w.-]*$/i",$this->input->get_post('file')))
 		{
 			return FALSE;
 		}
-		
+
 		$this->lang->loadfile('admin');
 		
-		$this->cp->set_variable('cp_page_title', $this->lang->line('extension_settings'));
+		$this->cp->set_variable('cp_page_title', lang('extension_settings'));
 						
 		$vars['file'] = $this->input->get_post('file');
 		$class_name = ucfirst($vars['file']).'_ext';
@@ -543,17 +523,23 @@ class Addons_extensions extends CI_Controller {
 		/**  Call Extension File
 		/** -----------------------------*/
 		
+		$name = strtolower($vars['file']);
+		$ext_path = $this->addons->_packages[$name]['extension']['path'];
+		
+
+		/** -----------------------------
+		/**  Call Extension File
+		/** -----------------------------*/
+
 		if ( ! class_exists($class_name))
 		{
-			if (file_exists(APPPATH.'extensions/ext.'.strtolower($vars['file']).EXT))
+		
+			if (file_exists($ext_path.'ext.'.$name.'.php'))
 			{
-				@include_once(APPPATH.'extensions/ext.'.strtolower($vars['file']).EXT);				
+
+				@include_once($ext_path.'ext.'.$name.'.php');				
 			}
-			elseif (file_exists(PATH_THIRD.strtolower($vars['file']).'/ext.'.strtolower($vars['file']).EXT))
-			{
-				@include_once(PATH_THIRD.strtolower($vars['file']).'/ext.'.strtolower($vars['file']).EXT);
-			}
-			
+
 			if ( ! class_exists($class_name)) return FALSE;
 		}
 
@@ -614,7 +600,7 @@ class Addons_extensions extends CI_Controller {
 		$this->db->where('class', $class_name);
 		$this->db->update('extensions', array('settings' => serialize($insert)));
 		
-		$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+		$this->session->set_flashdata('message_success', lang('preferences_updated'));
 		$this->functions->redirect(BASE.AMP.'C=addons_extensions');
 	}
 

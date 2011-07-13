@@ -6,7 +6,7 @@
  * 
  * @package   Matrix
  * @author    Brandon Kelly <brandon@pixelandtonic.com>
- * @copyright Copyright (c) 2010 Pixel & Tonic, LLC
+ * @copyright Copyright (c) 2011 Pixel & Tonic, Inc
  */
 class Matrix_file_ft {
 
@@ -14,10 +14,15 @@ class Matrix_file_ft {
 		'name' => 'File'
 	);
 
+	var $default_settings = array(
+		'content_type' => 'any',
+		'directory'    => 'all'
+	);
+
 	/**
 	 * Constructor
 	 */
-	function Matrix_file_ft()
+	function __construct()
 	{
 		$this->EE =& get_instance();
 
@@ -32,6 +37,14 @@ class Matrix_file_ft {
 		$this->cache =& $this->EE->session->cache['matrix']['celltypes']['file'];
 	}
 
+	/**
+	 * Prep Settings
+	 */
+	private function _prep_settings(&$settings)
+	{
+		$settings = array_merge($this->default_settings, $settings);
+	}
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -39,23 +52,52 @@ class Matrix_file_ft {
 	 */
 	function display_cell_settings($data)
 	{
-		$content_type = isset($data['content_type']) ? $data['content_type'] : 'any';
+		$this->_prep_settings($data);
 
-		return array(
-			array(
-				str_replace(' ', '&nbsp;', lang('field_content_file')),
-				form_dropdown('content_type', $data['field_content_options_file'], $content_type)
-			)
+		if (version_compare(APP_VER, '2.2', '>='))
+		{
+			$directory_options['all'] = lang('all');
+
+			$filedirs = $this->EE->file_upload_preferences_model->get_upload_preferences(1);
+
+			foreach ($filedirs->result() as $filedir)
+			{
+				$directory_options[$filedir->id] = $filedir->name;
+			}
+
+			$r[] = array(
+				lang('allowed_dirs_file'),
+				form_dropdown('directory', $directory_options, $data['directory'])
+			);
+		}
+
+		$content_type_options = array('all' => lang('all'), 'image' => lang('type_image'));
+
+		$r[] = array(
+			str_replace(' ', '&nbsp;', lang('field_content_file')),
+			form_dropdown('content_type', $content_type_options, $data['content_type'])
 		);
+
+		return $r;
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Data exists?
+	 */
+	private function _data_exists($data)
+	{
+		return (isset($data['filename']) && $data['filename']);
+	}
 
 	/**
 	 * Display Cell
 	 */
 	function display_cell($data)
 	{
+		$this->_prep_settings($this->settings);
+
 		if (! isset($this->cache['displayed']))
 		{
 			// include matrix_text.js
@@ -86,34 +128,51 @@ class Matrix_file_ft {
 		//  Existing file?
 		// -------------------------------------------
 
-		if ($data)
+		if ($this->_data_exists($data))
 		{
 			if (is_array($data))
 			{
 				$filedir = $data['filedir'];
 				$filename = $data['filename'];
 			}
-			else if (preg_match('/{filedir_([0-9]+)}/', $data, $matches))
+			else if (preg_match('/^{filedir_([0-9]+)}(.*)/', $data, $matches))
 			{
 				$filedir  = $matches[1];
-				$filename = str_replace($matches[0], '', $data);
+				$filename = $matches[2];
 			}
 		}
 
 		if (isset($filedir))
 		{
-			$filedir_info = $this->EE->tools_model->get_upload_preferences($this->EE->session->userdata('group_id'), $filedir);
-			$thumb_filename = $filedir_info->row('server_path').'_thumbs/thumb_'.$filename;
-
-			if (file_exists($thumb_filename))
+			if (version_compare(APP_VER, '2.1.5', '>='))
 			{
-				$thumb_url = $filedir_info->row('url').'_thumbs/thumb_'.$filename;
-				$thumb_size = getimagesize($thumb_filename);
+				$this->EE->load->library('filemanager');
+				$thumb_info = $this->EE->filemanager->get_thumb($filename, $filedir);
+				$thumb_url = $thumb_info['thumb'];
+
+				if (! isset($thumb_info['thumb_path']))
+				{
+					$filedir_info = $this->EE->tools_model->get_upload_preferences(1, $filedir);
+					$thumb_info['thumb_path'] = $filedir_info->row('server_path').'_thumb/'.$filename;
+				}
+
+				$thumb_size = file_exists($thumb_info['thumb_path']) ? getimagesize($thumb_info['thumb_path']) : array(64, 64);
 			}
 			else
 			{
-				$thumb_url = PATH_CP_GBL_IMG.'default.png';
-				$thumb_size = array(64, 64);
+				$filedir_info = $this->EE->tools_model->get_upload_preferences(1, $filedir);
+				$thumb_filename = $filedir_info->row('server_path').'_thumbs/thumb_'.$filename;
+
+				if (file_exists($thumb_filename))
+				{
+					$thumb_url = $filedir_info->row('url').'_thumbs/thumb_'.$filename;
+					$thumb_size = getimagesize($thumb_filename);
+				}
+				else
+				{
+					$thumb_url = PATH_CP_GBL_IMG.'default.png';
+					$thumb_size = array(64, 64);
+				}
 			}
 
 			$r['data'] = '<div class="matrix-thumb" style="width: '.$thumb_size[0].'px;">'
@@ -132,12 +191,22 @@ class Matrix_file_ft {
 			$add_style = '';
 		}
 
-		$add_line = (! isset($this->settings['content_type']) || $this->settings['content_type'] != 'image') ? 'add_file' : 'add_image';
+		$add_line = ($this->settings['content_type'] != 'image') ? 'add_file' : 'add_image';
 
 		$r['data'] .= '<input type="hidden" name="'.$this->cell_name.'[filedir]"  value="'.$filedir .'" class="filedir" />'
 		            . '<input type="hidden" name="'.$this->cell_name.'[filename]" value="'.$filename.'" class="filename" />'
-		            . '<input type="file" name="'.$this->cell_name.'[file]" class="file" />'
 		            . '<a class="matrix-btn matrix-add"'.$add_style.'>'.$this->EE->lang->line($add_line).'</a>';
+
+		// pass along the EE version in the settings
+		$r['settings']['ee22plus'] = version_compare(APP_VER, '2.2', '>=');
+
+		if (APP_VER == '2.1.5')
+		{
+			$this->EE->cp->add_js_script(array(
+					'plugin' => array('tmpl')
+				)
+			);
+		}
 
 		return $r;
 	}
@@ -145,11 +214,25 @@ class Matrix_file_ft {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Validate Cell
+	 */
+	function validate_cell($data)
+	{
+		// is this a required column?
+		if ($this->settings['col_required'] == 'y' && ! $this->_data_exists($data))
+		{
+			return lang('col_required');
+		}
+
+		return TRUE;
+	}
+
+	/**
 	 * Save Cell
 	 */
 	function save_cell($data)
 	{
-		if (isset($data['filename']) && $data['filename'])
+		if ($this->_data_exists($data))
 		{
 			return '{filedir_'.$data['filedir'].'}'.$data['filename'];
 		}

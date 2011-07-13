@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.3.1
@@ -366,6 +366,9 @@ class CI_Table {
 		}
 
 		$out .= $this->template['table_close'];
+
+		// Clear table class properties before generating the table
+		$this->clear();
 
 		return $out;
 	}

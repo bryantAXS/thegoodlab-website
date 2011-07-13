@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -50,7 +50,7 @@ class EE_Accessories {
 	function generate_accessories($permissions = '')
 	{
 		$accessories = array();
-		$ext_len = strlen(EXT);
+		$ext_len = strlen('.php');
 		
 		$controller	= $this->EE->router->fetch_class();
 		$member_group = $this->EE->session->userdata('group_id');
@@ -101,10 +101,6 @@ class EE_Accessories {
 						if (array_key_exists('package', $info))
 						{
 							$third_party = TRUE;
-
-							// switch the view and package path temporarily to the packages's folder
-							$orig_view_path = $this->EE->load->_ci_view_path;
-							$this->EE->load->_ci_view_path = PATH_THIRD.strtolower($name).'/views/';
 							$this->EE->load->add_package_path(PATH_THIRD.strtolower($name).'/');
 						}
 						
@@ -127,8 +123,6 @@ class EE_Accessories {
 						
 						if ($third_party === TRUE)
 						{
-							// switch the view path back to the original, remove package path
-							$this->EE->load->_ci_view_path = $orig_view_path;
 							$this->EE->load->remove_package_path(PATH_THIRD.strtolower($name).'/');
 						}
 					}
@@ -207,8 +201,8 @@ class EE_Accessories {
 					continue;
 				}
 
-				$file = str_replace(EXT, '', $file);
-				$controllers[] = str_replace(EXT, '', $file);
+				$file = str_replace('.php', '', $file);
+				$controllers[] = str_replace('.php', '', $file);
 			}
 		}
 		
@@ -260,7 +254,7 @@ class EE_Accessories {
 		
 		if (strncmp($path, PATH_THIRD, strlen(PATH_THIRD)) == 0)
 		{
-			$this->EE->load->add_package_path(PATH_THIRD.strtolower($name).'/');
+			$this->EE->load->add_package_path(PATH_THIRD.strtolower($name).'/', FALSE);
 		}
 		
 		return $class;

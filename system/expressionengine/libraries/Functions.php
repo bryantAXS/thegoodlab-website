@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -295,6 +295,8 @@ class EE_Functions {
 	{
 		if (preg_match("#=(.*)#", $str, $match))
 		{		
+			$match[1] = trim($match[1], '}');
+			
 			if (isset($this->cached_path[$match[1]]))
 			{
 				return $this->cached_path[$match[1]];
@@ -316,7 +318,7 @@ class EE_Functions {
 			}
 			
 			$this->cached_path[$match[1]] = $path;
-		
+
 			return $path;
 		}
 		else
@@ -367,11 +369,15 @@ class EE_Functions {
 		{			
 			// Ajax requests don't redirect - serve the flashdata
 			
-			if ($this->EE->input->server('HTTP_X_REQUESTED_WITH') && ($this->EE->input->server('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'))
+			if ($this->EE->input->is_ajax_request())
 			{
 				// We want the data that would be available for the next request
 				$this->EE->session->_age_flashdata();
-				die($this->EE->javascript->generate_json($this->EE->session->flashdata));
+
+				$this->EE->load->library('javascript');
+
+					die($this->EE->javascript->generate_json(
+								$this->EE->session->flashdata));
 			}
 		}
 
@@ -468,7 +474,7 @@ class EE_Functions {
 		// Add the CSRF Protection Hash
 		if ($this->EE->config->item('csrf_protection') == TRUE )
 		{
-			$data['hidden_fields'][$this->EE->security->csrf_token_name] = $this->EE->security->csrf_hash;		
+			$data['hidden_fields'][$this->EE->security->get_csrf_token_name()] = $this->EE->security->get_csrf_hash();
 		}
 
 		// 'form_declaration_modify_data' hook.
@@ -745,8 +751,20 @@ class EE_Functions {
 		}
 		
 		$value = stripslashes($value);
+		
+		$secure_cookie = ($this->EE->config->item('cookie_secure') === TRUE) ? 1 : 0;
+
+		if ($secure_cookie)
+		{
+			$req = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : FALSE;
+
+			if ( ! $req OR $req == 'off')
+			{
+				return FALSE;
+			}
+		}
 					
-		setcookie($prefix.$name, $value, $expire, $path, $domain, 0);
+		setcookie($prefix.$name, $value, $expire, $path, $domain, $secure_cookie);
 	}
 
 	// --------------------------------------------------------------------
@@ -888,7 +906,7 @@ class EE_Functions {
 		}
 		else
 		{
-			if ( ! @include(APPPATH.'language/'.$user_lang.'/email_data'.EXT))
+			if ( ! @include(APPPATH.'language/'.$user_lang.'/email_data.php'))
 			{
 				return array('title' => $query->row('data_title') , 'data' => $query->row('template_data') );
 			}
@@ -921,7 +939,7 @@ class EE_Functions {
 	 */
 	function encoding_menu($name, $selected = '')
 	{
-		$file = APPPATH.'config/languages'.EXT;	
+		$file = APPPATH.'config/languages.php';	
 
 		if ( ! file_exists($file)) 
 		{
@@ -941,6 +959,8 @@ class EE_Functions {
 
 	/**
 	 * Create Directory Map
+	 *
+	 * DEPRECATED IN 2.2
 	 *
 	 * @access	public
 	 * @param	string
@@ -1620,50 +1640,6 @@ class EE_Functions {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Remap pMachine Pro URLs
-	 *
-	 *  Since pM URLs are different than EE URLs,
-	 *  for those who have migrated from pM we will
-	 *  check the URL formatting.  If the request is
-	 *  for a pMachine URL, we'll remap it to the new EE location
-	 *
-	 *  DEPRECATED in 2.0
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function remap_pm_urls()
-	{
-		if ($this->EE->config->item('remap_pm_urls') == 'y' AND $this->EE->config->item('remap_pm_dest') !== FALSE AND $this->EE->uri->uri_string != '')
-		{
-			$p_uri = ( ! isset($_GET['id'])) ? $this->EE->uri->uri_string : '/'.$_GET['id'].'/';
-			
-			if (preg_match('/^\/[0-9]{1,6}(?:\_[0-9]{1,4}){3}/', $p_uri))
-			{
-				$pentry_id = substr($p_uri, 1, (strpos($p_uri, '_')-1));
-			}
-			elseif (preg_match('/^\/P[0-9]{1,6}/', $p_uri))
-			{	
-				$p_uri = str_replace("/", "", $p_uri);
-				$pentry_id = substr($p_uri, 1);
-			}
-				
-			if (isset($pentry_id) AND $pentry_id != '')
-			{
-				$query = $this->EE->db->query("SELECT url_title FROM exp_channel_titles WHERE pentry_id = '".$this->EE->db->escape_str($pentry_id)."'");
-				
-				if ($query->num_rows() == 1)
-				{
-					$this->redirect($this->EE->config->slash_item('remap_pm_dest').$query->row('url_title') .'/');
-					exit;
-				}
-			}
-		}		
-	}
-	
-	// --------------------------------------------------------------------
-
-	/**
 	 * Generate CAPTCHA
 	 *
 	 * @access	public
@@ -1715,7 +1691,7 @@ class EE_Functions {
 			return FALSE;
 		}
 		
-		if ( ! file_exists(APPPATH.'config/captcha'.EXT))
+		if ( ! file_exists(APPPATH.'config/captcha.php'))
 		{
 			return FALSE;
 		}	
@@ -1768,7 +1744,7 @@ class EE_Functions {
 		// Fetch and insert word	
 		if ($old_word == '')
 		{
-			require APPPATH.'config/captcha'.EXT;
+			require APPPATH.'config/captcha.php';
 			$word = $words[array_rand($words)];
 			
 			if ($this->EE->config->item('captcha_rand') == 'y')
@@ -2008,11 +1984,11 @@ class EE_Functions {
 					if (strncasecmp($parts[0], 'not ', 4) == 0)
 					{
 						$parts[0] = substr($parts[0], 4);
-						$sql = "AND ({$prefix}{$field} NOT IN ('".implode("','", $parts)."') OR {$prefix}{$field} IS NULL)";
+						$sql = "({$prefix}{$field} NOT IN ('".implode("','", $parts)."') OR {$prefix}{$field} IS NULL)";
 					}
 					else
 					{
-						$sql = "AND ({$prefix}{$field} IN ('".implode("','", $parts)."') OR {$prefix}{$field} IS NULL)";
+						$sql = "({$prefix}{$field} IN ('".implode("','", $parts)."') OR {$prefix}{$field} IS NULL)";
 					}
 					
 					$this->EE->db->where($sql);
@@ -2040,11 +2016,11 @@ class EE_Functions {
 				if (strncasecmp($str, 'not ', 4) == 0)
 				{
 					$str = trim(substr($str, 3));
-					$sql = "AND ({$prefix}{$field} != '".$this->EE->db->escape_str($str)."' OR {$prefix}{$field} IS NULL)";
+					$sql = "({$prefix}{$field} != '".$this->EE->db->escape_str($str)."' OR {$prefix}{$field} IS NULL)";
 				}
 				else
 				{
-					$sql = "AND ({$prefix}{$field} = '".$this->EE->db->escape_str($str)."' OR {$prefix}{$field} IS NULL)";
+					$sql = "({$prefix}{$field} = '".$this->EE->db->escape_str($str)."' OR {$prefix}{$field} IS NULL)";
 				}
 				
 				$this->EE->db->where($sql);
@@ -2592,7 +2568,16 @@ class EE_Functions {
 	 * @return	array
 	 */
 	function prep_conditionals($str, $vars, $safety='n', $prefix='')
-	{				
+	{
+		if (isset($this->EE->TMPL->embed_vars))
+		{
+			// If this is being called from a module tag, embedded variables
+			// aren't going to be available yet.  So this is a quick workaround
+			// to ensure advanced conditionals using embedded variables can do
+			// their thing in mod tags.
+			$vars = array_merge($vars, $this->EE->TMPL->embed_vars);			
+		}
+					
 		if (count($vars) == 0) return $str;
 
 		$switch  = array();
@@ -2605,7 +2590,7 @@ class EE_Functions {
 						')','(',
 						'TRUE', 'FALSE');
 		
-		$str = str_replace(LD.'if:else'.RD, 'c831adif9wel5ed9e', $str);
+		$str = str_replace(LD.'if:else'.RD, unique_marker('if_else_safety'), $str);
 		
 		// The ((else)*if) is actually faster than (elseif|if) in PHP 5.0.4, 
 		// but only by a half a thousandth of a second.  However, why not be
@@ -2824,7 +2809,7 @@ class EE_Functions {
 		unset($matches);
 		unset($protect);
 		
-		$str = str_replace('c831adif9wel5ed9e',LD.'if:else'.RD, $str);
+		$str = str_replace(unique_marker('if_else_safety'),LD.'if:else'.RD, $str);
 		
 		return $str;
 	}
@@ -2844,17 +2829,28 @@ class EE_Functions {
 			return $this->file_paths;
 		}
 		
-		$this->EE->db->select('id, url');
-		$query = $this->EE->db->get('upload_prefs');
-
-		if ($query->num_rows() == 0)
+		// if $this->file_paths === FALSE, 
+		// we've queried and have nuttin
+		if ($this->file_paths === FALSE)
 		{
+			return array();	
+		}
+
+		$qry = $this->EE->db->select('id, url')
+							->get('upload_prefs');
+
+		if ($qry->num_rows() === 0)
+		{
+			// Set $this->file_paths to FALSE so we check for it
+			// the next time through a coupla lines up.
+			// by default it's array().
+			$this->file_paths = FALSE;
 			return array();
 		}
 				
-		foreach ($query->result_array() as $row)
+		foreach ($qry->result() as $row)
 		{			
-			$this->file_paths[$row['id']] = $row['url'];
+			$this->file_paths[$row->id] = $row->url;
 		}
 		
 		return $this->file_paths;
@@ -2876,6 +2872,37 @@ class EE_Functions {
 	{
 		return clone $object;
 	}
+	
+	// --------------------------------------------------------------------
+	
+	/**
+	 * bookmarklet qstr decode
+	 *
+	 * @param 	string
+	 */
+	function bm_qstr_decode($str)
+	{
+		$str = str_replace("%20",	" ",		$str);
+		$str = str_replace("%uFFA5", "&#8226;",	$str);
+		$str = str_replace("%uFFCA", " ",		$str);
+		$str = str_replace("%uFFC1", "-",		$str);
+		$str = str_replace("%uFFC9", "...",		$str);
+		$str = str_replace("%uFFD0", "-",		$str);
+		$str = str_replace("%uFFD1", "-",		$str);
+		$str = str_replace("%uFFD2", "\"",		$str);
+		$str = str_replace("%uFFD3", "\"",		$str);
+		$str = str_replace("%uFFD4", "\'",		$str);
+		$str = str_replace("%uFFD5", "\'",		$str);
+
+		$str =	preg_replace("/\%u([0-9A-F]{4,4})/e","'&#'.base_convert('\\1',16,10).';'", $str);
+
+		$str = $this->security->xss_clean(stripslashes(urldecode($str)));
+
+		return $str;
+	}		
+	
+	// --------------------------------------------------------------------
+	
 }
 // END CLASS
 

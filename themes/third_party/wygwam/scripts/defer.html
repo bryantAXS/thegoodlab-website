@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en" title="Click to edit">
+<body>
+	<script type="text/javascript">
+		var id = document.location.search.substr(1),
+			html = parent.Wygwam.defers[id].html;
+
+		document.write(html);
+
+		document.onclick = function() {
+			parent.Wygwam.initDeferedField(id);
+		};
+	</script>
+</body>
+</html>

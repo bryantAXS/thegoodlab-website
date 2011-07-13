@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -39,33 +39,61 @@ class Css extends CI_Controller {
 		}
 		
 		$file = 'global';
-		$path = $this->load->_ci_view_path;
+		$path = '';
 		
 		if ($this->input->get_post('M') == 'third_party' && $package = $this->input->get_post('package'))
 		{
+			$package = strtolower($package);
+			
 			$file = $this->input->get_post('file');
 			$path = PATH_THIRD.$package.'/';
+			
+			// There's a good chance we don't need ci_view_path
+			// So try this first
+			if (file_exists($path.'css/'.$file.'.css'))
+			{
+				return $this->_load_css_file($path, $file);
+			}
 		}
 		elseif ($this->input->get_post('M') !== FALSE)
 		{
 			$file = $this->input->get_post('M');
 		}
+		
+		
+		$css_paths = array(
+			PATH_CP_THEME.$this->session->userdata('cp_theme').'/',
+			PATH_CP_THEME.'default/'
+		);
 
-		if (is_array($this->load->_ci_view_path))
+		if ($this->session->userdata('cp_theme') == 'default')
 		{
-			foreach($this->load->_ci_view_path as $path)
+			array_shift($css_paths);
+		}
+		
+		foreach ($css_paths as $a_path)
+		{
+			$path = $a_path.'css/'.$file.'.css';
+			
+			if (file_exists($path))
 			{
-				if (file_exists($path.'css/'.$file.'.css'))
-				{
-					break;
-				}
+				break;
 			}
 		}
 		
-		$this->_load_css_file($path, $file);
+		return $this->_load_css_file($path, $file);
 	}
 
-
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Load CSS File
+	 *
+	 * @access	public
+	 * @param	string		path to the CSS
+	 * @param	string		name of the CSS file, sans file extension
+	 * @return	void
+	 */
 	private function _load_css_file($path, $file)
 	{
 		if ( ! file_exists($path.'css/'.$file.'.css'))
@@ -73,50 +101,14 @@ class Css extends CI_Controller {
 			return FALSE;
 		}
 		
-		$this->load->_ci_view_path = $path;
-		
 		$this->output->out_type = 'cp_asset';
 		$this->output->enable_profiler(FALSE);
 
-		$max_age		= 5184000;
-		$modified		= filemtime($path);
-		$modified_since	= $this->input->server('HTTP_IF_MODIFIED_SINCE');
-
-		// Remove anything after the semicolon
-
-		if ($pos = strrpos($modified_since, ';') !== FALSE)
-		{
-			$modified_since = substr($modified_since, 0, $pos);
-		}
-
-		// If the file is in the client cache, we'll
-		// send a 304 and be done with it.
-
-		if ($modified_since && (strtotime($modified_since) == $modified))
-		{
-			$this->output->set_status_header(304);
-			exit;
-		}
-
-		// Send a custom ETag to maintain a useful cache in
-		// load-balanced environments
-
-		$this->output->set_header("ETag: ".md5($modified.$path));
-
-
-		// All times GMT
-		$modified = gmdate('D, d M Y H:i:s', $modified).' GMT';
-		$expires  = gmdate('D, d M Y H:i:s', time() + $max_age).' GMT';
-
-		$this->output->set_status_header(200);
+		$this->output->send_cache_headers(filemtime($path), 5184000, $path);
 
 		@header('Content-type: text/css');
-		@header("Cache-Control: max-age={$max_age}, must-revalidate");
-		@header('Vary: Accept-Encoding');
-		@header('Last-Modified: '.$modified);
-		@header('Expires: '.$expires);
 
-		$this->load->view('css/'.$file.'.css', '');
+		$this->output->set_output(file_get_contents($path.'css/'.$file.'.css'));
 
 		if ($this->config->item('send_headers') == 'y')
 		{
@@ -128,9 +120,10 @@ class Css extends CI_Controller {
 	// ------------------------------------------------------------------------	
 	
 	/**
+	 * Control Panel Global Extension
 	 *
-	 *
-	 *
+	 * @access	public
+	 * @return	void
 	 */
 	function _cp_global_ext()
 	{
@@ -151,6 +144,8 @@ class Css extends CI_Controller {
 		$this->output->set_header('Content-Length: '.strlen($str));
 		$this->output->set_output($str);		
 	}
+
+	// --------------------------------------------------------------------
 	
 }
 // END CLASS

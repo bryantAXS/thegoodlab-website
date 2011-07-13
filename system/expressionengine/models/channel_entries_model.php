@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -85,14 +85,14 @@ class Channel_entries_model extends CI_Model {
 	 * @access	public
 	 * @return	mixed
 	 */
-	function get_entry($entry_id, $channel_id = '', $autosave = FALSE)
+	function get_entry($entry_id, $channel_id = '', $autosave_entry_id = FALSE)
 	{
 		if ($channel_id != '')
 		{
-			if ($autosave === TRUE)
+			if ($autosave_entry_id)
 			{
 				$this->db->from('channel_entries_autosave AS t');
-				$this->db->where('t.entry_id', $entry_id);
+				$this->db->where('t.entry_id', $autosave_entry_id);
 			}
 			else
 			{
@@ -106,11 +106,20 @@ class Channel_entries_model extends CI_Model {
 		}
 		else
 		{
-			$from = $autosave ? 'channel_entries_autosave' : 'channel_titles';
+			if ($autosave_entry_id)
+			{
+				$from = 'channel_entries_autosave';
+				$entry_id_selection = $autosave_entry_id;
+			}
+			else
+			{
+				$from = 'channel_titles';
+				$entry_id_selection = $entry_id;
+			}
 
 			$this->db->from($from);
 			$this->db->select('channel_id, entry_id, author_id');
-			$this->db->where('entry_id', $entry_id);
+			$this->db->where('entry_id', $entry_id_selection);
 		}
 
 

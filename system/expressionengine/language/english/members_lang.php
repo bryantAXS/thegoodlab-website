@@ -21,7 +21,7 @@ $lang = array(
 "User Banning",
 
 "custom_profile_fields" => 
-"Custom Member Fields",
+"Member Fields",
 
 "member_cfg" =>
 "Membership Preferences",
@@ -199,7 +199,7 @@ $lang = array(
 "Private Message - Member Search Result Rows",
 
 "message_submission_error" =>
-"Private Message - Submisssion Error",
+"Private Message - Submission Error",
 
 "message_attachment_link" =>
 "Private Message - Attachment Link",
@@ -398,7 +398,7 @@ $lang = array(
 "Create a New Member Group",
 
 "member_has_cp_access" =>
-"can access the control panel",
+"Can access the control panel",
 
 "edit_member_group" => 
 "Edit Member Group",
@@ -607,6 +607,9 @@ $lang = array(
 "can_admin_channels" =>
 "Can administrate channels and channel preferences",
 
+"can_admin_upload_prefs" =>
+"Can administrate file upload preferences",
+
 "can_admin_members" =>
 "Can administrate members accounts",
 
@@ -749,7 +752,7 @@ $lang = array(
 "Will be displayed in the member profile page",
 
 "custom_member_fields" =>
-"Custom Member Fields",
+"Member Fields",
 
 "current_fields" =>
 "Member Fields",
@@ -758,7 +761,7 @@ $lang = array(
 "Edit Field",
 
 "create_member_field" =>
-"Create Field",
+"Create Member Field",
 
 "field_updated" =>
 "Field Updated",
@@ -827,7 +830,7 @@ $lang = array(
 "Member Field Deleted:",
 
 "no_custom_profile_fields" =>
-"There are currently no custom member fields",
+"There are currently no member fields.",
 
 "member_search" =>
 "Member Search",
@@ -886,142 +889,6 @@ $lang = array(
 'setting' =>
 'Setting',
 
-/* moved to design - DJ
- 
-"template_set_names" =>
-"Available Template Sets",
-
-"unable_to_find_templates" =>
-"Unable to locate the member profile templates.",
-
-"unable_to_find_template_file" =>
-"Unable to locate the member template file.",
-
-"template_updated" =>
-"Template Has Been Updated",
-
-"template_set" =>
-"Template Set:",
-
-"file_not_writable" =>
-"Note: This file is not writable",
-
-"error_opening_template" =>
-"Error: Unable to open the template file in order to write its contents.",
-
-"file_writing_instructions" =>
-"You will not be able to save changes to this template until it is given write permissions for this server.",
-
-"aim_console" =>
-"AOL Instant Messenger Console",
-
-"breadcrumb" =>
-"Breadcrumb",
-
-"copyright" =>
-"Copyright Notice",
-
-"edit_profile_form" =>
-"Member Profile Form",
-
-"email_form" =>
-"Email Console",
-
-"email_prefs_form" =>
-"Email Preferences Form",
-
-"email_user_message" =>
-"Email Messages",
-
-"forgot_form" =>
-"Forgot Password Form",
-
-"home_page" =>
-"Member Profile Home Page",
-
-"icq_console" =>
-"ICQ Console",
-
-"localization_form" =>
-"Localization Preferences Form",
-
-"login_form" =>
-"Login Form",
-
-"memberlist" =>
-"Member List Page",
-
-"memberlist_rows" =>
-"Member List Rows",
-
-"menu" =>
-"Member Profile Menu",
-
-"notepad_form" =>
-"Notepad Form",
-
-"password_change_warning" =>
-"Password Change Warning",
-
-"public_custom_profile_fields" =>
-"Custom Profile Fields for Public Profile",
-
-"public_profile" =>
-"Public Member Profile",
-
-"registration_form" =>
-"Registration Form",
-
-"stylesheet" =>
-"CSS Stylesheet",
-
-"success" =>
-"Profile Update Message",
-
-"username_change_disallowed" =>
-"Username Change Disallowed Message",
-
-"username_password_form" =>
-"Username and Password Form",
-
-"username_row" =>
-"Username Form Row",
-
-"signature_form" =>
-"Signature Form",
-
-"edit_avatar" =>
-"Edit Avatar Page",
-
-"avatar_folder_list" =>
-"Avatar Folder Listing",
-
-"browse_avatars" =>
-"Browse Avatar Page",
-
-"edit_photo" =>
-"Edit Member Photo Page",
-
-"emoticon_page" =>
-"Emoticon Page",
-
-"update_un_pw_form" =>
-"Update Username and Password Form",
-
-"update_and_return" =>
-"Update and Finished",
-
-"submit_and_return" =>
-"Submit and Finished",
-
-'group_description' =>
-"Member Group Description",
-
-'view' =>
-"View",
--- Added these back in -- ga
-*/
-
 "resend_activation_emails" =>
 "Resend Activation Emails",
 
@@ -1033,22 +900,6 @@ $lang = array(
 
 'activation_email_resent' =>
 "Activation Email Resent",
-/*
-'bulletin' =>
-"Bulletin",
-
-"bulletin_form" =>
-"Bulletin Form",
-
-"new_member_search" =>
-"New Member Search",
-
-'edit_ignore_list_form' =>
-'Ignore List Form',
-
-'edit_ignore_list_rows' =>
-'Ignore List Rows',
-*/
 
 'can_access_site' =>
 "Can Access Site",

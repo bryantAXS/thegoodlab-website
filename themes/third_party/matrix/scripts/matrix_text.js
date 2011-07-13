@@ -1,17 +1,21 @@
 (function($) {
 
 
+var integerKeyCodes = [9 /* (tab) */ , 8 /* (delete) */ , 37,38,39,40 /* (arrows) */ , 45,91 /* (minus) */ , 48,49,50,51,52,53,54,55,56,57 /* (0-9) */ ],
+	numericKeyCodes = [9 /* (tab) */ , 8 /* (delete) */ , 37,38,39,40 /* (arrows) */ , 45,91 /* (minus) */ , 46,190 /* period */ , 48,49,50,51,52,53,54,55,56,57 /* (0-9) */ ];
+
+
 Matrix.bind('text', 'display', function(cell){
 
-	var settings = $.extend({ maxl: '', multiline: 'n', spaces: 'y' }, cell.settings),
+	var settings = $.extend({ maxl: '', multiline: 'n', spaces: 'y', content: 'any' }, cell.settings),
 		$textarea = $('> *[name]', cell.dom.$td).css('overflow', 'hidden'),
-		$charsLeft = $('> div > div', cell.dom.$td),
+		$charsLeft = $('> div.matrix-charsleft-container > div.matrix-charsleft', cell.dom.$td),
 		clicked = false,
 		clickedDirectly = false,
 		focussed = false;
 
 	// is this a textarea?
-	if ($textarea.attr('nodeName') == 'TEXTAREA') {
+	if ($textarea[0].nodeName == 'TEXTAREA') {
 
 		var updateHeight = true;
 
@@ -152,10 +156,15 @@ Matrix.bind('text', 'display', function(cell){
 	//  Input validation
 	// -------------------------------------------
 
-	if (settings.multiline != 'y' || settings.spaces != 'y') {
-		$textarea.keypress(function(event){
-			if ((settings.multiline != 'y' && event.keyCode == 13)
-				|| (settings.spaces != 'y' && event.keyCode == 32)) {
+	if (settings.multiline != 'y' || settings.spaces != 'y' || settings.content != 'any') {
+		$textarea.keypress(function(event) {
+			var keyCode = event.keyCode ? event.keyCode : event.charCode;
+
+			if (! event.metaKey && (
+				(settings.multiline != 'y' && keyCode == 13)
+				|| (settings.spaces != 'y' && keyCode == 32)
+				|| (settings.content == 'integer' && $.inArray(keyCode, integerKeyCodes) == -1)
+				|| (settings.content == 'numeric' && $.inArray(keyCode, numericKeyCodes) == -1))) {
 				event.preventDefault();
 			}
 		});

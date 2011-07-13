@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -61,21 +61,16 @@
  * Enable it only if you have a good reason to.
  * 
  */
-	$debug = 0;
+	$debug = 1;
 
 
 /*
  * --------------------------------------------------------------------
  *  CUSTOM CONFIG VALUES
  * --------------------------------------------------------------------
- *
- * 'cp_url' is typically the only config override variable
- *  that would need to be managed in the control panel index.php file
- *
- * Un-comment the $assign_to_config array below to use this feature
- *
  */
 //	$assign_to_config['cp_url'] = ''; // masked CP access only 
+//	$assign_to_config['site_name']  = ''; // MSM only
 	
 /*
  * --------------------------------------------------------------------
@@ -183,27 +178,6 @@
 		error_reporting(0);	
 	}
 
-/*
- * --------------------------------------------------------------------
- *  Is the request a URL redirect redirect?
- * --------------------------------------------------------------------
- *
- * All external links that appear in the ExpressionEngine control panel
- * are redirected to this index.php file first, before being sent to the
- * final destination, so that the location of the control panel will not 
- * end up in the referrer logs of other sites.
- *
- */	
-	if (isset($_GET['URL'])) 
-	{ 
-		if ( ! file_exists(APPPATH.'libraries/Redirect'.EXT))
-		{
-			exit('Some components appear to be missing from your ExpressionEngine installation.');	
-		}
-		require(APPPATH.'libraries/Redirect'.EXT);
-
-		exit();  // We halt system execution since we're done
-	}
 
 /*
  *---------------------------------------------------------------

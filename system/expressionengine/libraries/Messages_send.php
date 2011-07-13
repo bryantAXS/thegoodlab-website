@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -404,9 +404,12 @@ class EE_Messages_send extends EE_Messages {
 		/** ----------------------------------------
 		/**  Is the IP or User Agent unavalable?
 		/** ----------------------------------------*/
-		if ($this->EE->input->ip_address() == '0.0.0.0' OR $this->EE->session->userdata['user_agent'] == '')
-		{			
-			return $this->_error_page();
+		if ($this->EE->config->item('require_ip_for_posting') == 'y')
+		{
+			if ($this->EE->input->ip_address() == '0.0.0.0' OR $this->EE->session->userdata['user_agent'] == '')
+			{			
+				return $this->_error_page();
+			}
 		}
 		
 		/** -------------------------------------
@@ -873,10 +876,11 @@ class EE_Messages_send extends EE_Messages {
 			if ($query->num_rows() > 0)
 			{
 				$this->EE->load->library('typography');
-				$this->EE->typography->initialize();
-				$this->EE->typography->parse_images = FALSE;
- 				$this->EE->typography->smileys = FALSE;
-				$this->EE->typography->highlight_code = TRUE;
+				$this->EE->typography->initialize(array(
+ 				 				'parse_images'		=> FALSE,
+ 				 				'smileys'			=> FALSE,
+ 				 				'highlight_code'	=> TRUE)
+ 				 				);
 
 				if ($this->EE->config->item('enable_censoring') == 'y' AND $this->EE->config->item('censored_words') != '')
         		{

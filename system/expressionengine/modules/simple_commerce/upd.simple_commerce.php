@@ -1,28 +1,27 @@
-<?php
+<?php  if ( ! defined('BASEPATH')) exit('No direct script access allowed');
+/**
+ * ExpressionEngine - by EllisLab
+ *
+ * @package		ExpressionEngine
+ * @author		ExpressionEngine Dev Team
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @license		http://expressionengine.com/user_guide/license.html
+ * @link		http://expressionengine.com
+ * @since		Version 2.0
+ * @filesource
+ */
+ 
+// ------------------------------------------------------------------------
 
-/*
-=====================================================
- ExpressionEngine - by EllisLab
------------------------------------------------------
- http://expressionengine.com/
------------------------------------------------------
- Copyright (c) 2003 - 2010, EllisLab, Inc.
-=====================================================
- THIS IS COPYRIGHTED SOFTWARE
- PLEASE READ THE LICENSE AGREEMENT
- http://expressionengine.com/user_guide/license.html
-=====================================================
- File: mcp.simple_commerce.php
------------------------------------------------------
- Purpose: Simple Commerce class - CP
-=====================================================
-*/
-if ( ! defined('EXT'))
-{
-	exit('Invalid file request');
-}
-
-
+/**
+ * ExpressionEngine Simple Commerce Module
+ *
+ * @package		ExpressionEngine
+ * @subpackage	Modules
+ * @category	Update File
+ * @author		ExpressionEngine Dev Team
+ * @link		http://expressionengine.com
+ */
 
 class Simple_commerce_upd {
 
@@ -74,7 +73,7 @@ class Simple_commerce_upd {
 
   PRIMARY KEY `item_id` (`item_id`),
   KEY `entry_id` (`entry_id`)
-)";
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
 
 		$sql[] = "CREATE TABLE IF NOT EXISTS `exp_simple_commerce_purchases` (
   `purchase_id` int(8) unsigned NOT NULL auto_increment,
@@ -90,14 +89,15 @@ class Simple_commerce_upd {
   KEY `item_id` (`item_id`),
   KEY `member_id` (`member_id`),
   KEY `txn_id` (`txn_id`)
-)";
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
 
 		$sql[] = "CREATE TABLE IF NOT EXISTS `exp_simple_commerce_emails` (
   `email_id` int(8) unsigned NOT NULL auto_increment,
   `email_name` varchar(50) NOT NULL default '',
   `email_subject` varchar(125) NOT NULL default '',
   `email_body` text NOT NULL,
-  PRIMARY KEY `email_id` (`email_id`))";
+  PRIMARY KEY `email_id` (`email_id`)
+) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
 		
 
 		foreach ($sql as $query)

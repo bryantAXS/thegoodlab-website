@@ -26,7 +26,7 @@ $.fn.ffMatrix = {
 /**
  * Matrix
  */
-Matrix = function(id, label, cols, rowInfo, maxRows){
+Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 
 	// keep a record of this object
 	Matrix.instances.push(this);
@@ -36,6 +36,7 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 	obj.label = label;
 	obj.cols = cols;
 	obj.rows = [];
+	obj.minRows = minRows;
 	obj.maxRows = maxRows;
 
 	obj.focussedCell;
@@ -59,7 +60,7 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 	obj.menu.$addAbove = $('<li>'+Matrix.lang.add_row_above+'</li>').appendTo(obj.menu.$ul);
 	obj.menu.$addBelow = $('<li>'+Matrix.lang.add_row_below+'</li>').appendTo(obj.menu.$ul);
 	obj.menu.$ul.append($('<li class="br" />'));
-	obj.menu.$remove = $('<li>'+Matrix.lang.remove_row+'</li>').appendTo(obj.menu.$ul);
+	obj.menu.$delete = $('<li>'+Matrix.lang.delete_row+'</li>').appendTo(obj.menu.$ul);
 
 	obj.menu.reset = function(){
 		// unbind any previous menu item events, and
@@ -67,7 +68,7 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 		var stopPropagation = function(e){ e.stopPropagation(); };
 		obj.menu.$addAbove.unbind().bind('mousedown', stopPropagation);
 		obj.menu.$addBelow.unbind().bind('mousedown', stopPropagation);
-		obj.menu.$remove.unbind().bind('mousedown', stopPropagation);
+		obj.menu.$delete.unbind().bind('mousedown', stopPropagation);
 	};
 
 	obj.menu.showing = false;
@@ -124,8 +125,8 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 			cellSettings = {};
 
 		var $tr = $('<tr class="matrix">'
-		          +   '<th class="matrix matrix-first">'
-		          +     '<div><span>'+rowCount+'</span><a title="Options"></a></div>'
+		          +   '<th class="matrix matrix-first matrix-tr-header">'
+		          +     '<div><span>'+rowCount+'</span><a title="'+Matrix.lang.options+'"></a></div>'
 		          +     '<input type="hidden" name="'+obj.id+'[row_order][]" value="'+rowId+'" />'
 		          +   '</th>'
 		          + '</tr>');
@@ -159,10 +160,14 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 
 		// is this the new last row?
 		if (index == obj.totalRows) {
-			$tr.appendTo(obj.dom.$tbody);
+			$tr.appendTo(obj.dom.$tbody).addClass('matrix-last');
 
-			obj.rows[obj.totalRows-1].dom.$tr.removeClass('matrix-last');
-			$tr.addClass('matrix-last');
+			// was there a previous last row?
+			if (obj.totalRows > 1) {
+				obj.rows[obj.totalRows-1].dom.$tr.removeClass('matrix-last');
+			} else {
+				obj.dom.$table.removeClass('matrix-nodata');
+			}
 		} else {
 			$tr.insertBefore(obj.rows[index].dom.$tr);
 
@@ -196,8 +201,8 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 	 * Remove Row
 	 */
 	obj.removeRow = function(index) {
-		// does this row exist, and is it not the only row?
-		if (typeof index == 'undefined' || typeof obj.rows[index] == 'undefined' || obj.totalRows == 1) return false;
+		// deny if the row doesn't exist (somehow?), or if we're at the minimum
+		if (typeof index == 'undefined' || typeof obj.rows[index] == 'undefined' || obj.totalRows == obj.minRows) return false;
 
 		var row = obj.rows[index];
 
@@ -220,14 +225,19 @@ Matrix = function(id, label, cols, rowInfo, maxRows){
 			obj.rows[i].updateIndex(i);
 		}
 
-		// was this the first row?
-		if (index == 0) {
-			obj.rows[0].dom.$tr.addClass('matrix-first');
-		}
+		// are there no rows left?
+		if (!obj.totalRows) {
+			obj.dom.$table.addClass('matrix-nodata');
+		} else {
+			// was this the first row?
+			if (index == 0) {
+				obj.rows[0].dom.$tr.addClass('matrix-first');
+			}
 
-		// was this the last row?
-		if (index == obj.totalRows) {
-			obj.rows[obj.totalRows-1].dom.$tr.addClass('matrix-last');
+			// was this the last row?
+			if (index == obj.totalRows) {
+				obj.rows[obj.totalRows-1].dom.$tr.addClass('matrix-last');
+			}
 		}
 
 		// enable add row button?
@@ -382,34 +392,30 @@ Matrix.Row = function(field, index, id, cellSettings, tr){
 
 		obj.field.menu.reset();
 
-		// disable add row items?
-		if (obj.field.maxRows && obj.field.totalRows == obj.field.maxRows) {
+		if (obj.field.minRows && obj.field.totalRows <= obj.field.minRows) {
+			// disable Delete Row option
+			obj.field.menu.$delete.addClass('disabled');
+		} else {
+			// Delete Row
+			obj.field.menu.$delete.removeClass('disabled').bind('click', function(){
+				obj.field.removeRow(obj.index);
+			});
+		}
+
+		if (obj.field.maxRows && obj.field.totalRows >= obj.field.maxRows) {
+			// disable Add Row options
 			obj.field.menu.$addAbove.addClass('disabled');
 			obj.field.menu.$addBelow.addClass('disabled');
-		}
-		else {
-			obj.field.menu.$addAbove.removeClass('disabled');
-			obj.field.menu.$addBelow.removeClass('disabled');
-
+		} else {
 			// Add Row Above
-			obj.field.menu.$addAbove.bind('click', function(){
+			obj.field.menu.$addAbove.removeClass('disabled').bind('click', function(){
 				obj.field.addRow(obj.index);
 			});
 
 			// Add Row Below
-			obj.field.menu.$addBelow.bind('click', function(){
+			obj.field.menu.$addBelow.removeClass('disabled').bind('click', function(){
 				obj.field.addRow(obj.index+1);
 			});
-		}
-
-		// Remove Row
-		if (obj.field.totalRows > 1) {
-			obj.field.menu.$remove.removeClass('disabled');
-			obj.field.menu.$remove.bind('click', function(){
-				obj.field.removeRow(obj.index);
-			});
-		} else {
-			obj.field.menu.$remove.addClass('disabled');
 		}
 
 		setTimeout(function(){
@@ -642,7 +648,7 @@ Matrix.Cell = function(field, type, settings, td, row, col){
 
 	obj.dom = {};
 	obj.dom.$td = $(td);
-	obj.dom.$inputs = $('*[name]', obj.dom.$td);
+	obj.dom.$inputs = $('*[name][type!=hidden]', obj.dom.$td);
 
 	obj.focussed = false;
 
@@ -657,7 +663,7 @@ Matrix.Cell = function(field, type, settings, td, row, col){
 			callbacks[callback][obj.type].call(obj.dom.$td, obj);
 		}
 		else if (typeof $.fn.ffMatrix[oldCallback][obj.type] == 'function') {
-			$.fn.ffMatrix[oldCallback][obj.type](obj.dom.$td);
+			$.fn.ffMatrix[oldCallback][obj.type](obj.dom.$td, obj);
 		}
 	};
 
@@ -715,12 +721,11 @@ Matrix.Cell = function(field, type, settings, td, row, col){
 	obj.dom.$td.mousedown(function(event){
 		obj.field.ignoreThisClick = true;
 
-		if (obj.focus()) {
-			if (event.target == this) {
-				setTimeout(function(){
-					obj.dom.$inputs.focus();
-				}, 0);
-			}
+		// focus the first visible input
+		if (obj.dom.$inputs.length && obj.focus() && event.target == this) {
+			setTimeout(function(){
+				$(obj.dom.$inputs[0]).focus();
+			}, 0);
 		}
 	});
 

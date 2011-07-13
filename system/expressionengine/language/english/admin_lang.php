@@ -654,18 +654,6 @@ $lang = array(
 "profile_buttons_exp" =>
 "This is the path to the directory containing the images used in the member profile pages.",
 
-"remap_pm_urls" =>
-"Remap pMachine Pro URLs to EE",
-
-"remap_pm_urls_desc" =>
-"If you have migrated to EE from pM Pro, enabling this option will redirect visitors who come to your site using old pM URLs to the correct page in EE.",
-
-"remap_pm_dest" =>
-"Destination of Remapped URLs",
-
-"remap_pm_dest_exp" =>
-"If pM Pro URLs are encountered, where should they be directed to?  Use a full URL and include the template_group/template:  http://www.yoursite.com/index.php/template_group/template/",
-
 "captcha_rand" =>
 "Add Random Number to CAPTCHA Word",
 
@@ -817,7 +805,7 @@ $lang = array(
 "Clear all caches when new entries are posted?",
 
 "require_ip_for_posting" =>
-"Require IP Address and User Agent when receiving comments?",
+"Require IP Address and User Agent for posting?",
 
 "redirect_submitted_links" =>
 "Apply Rank Denial to User-submitted Links?",
@@ -874,7 +862,7 @@ $lang = array(
 "Is system on?",
 
 "is_system_on_explanation" =>
-"If system is off, only Super Admins will be able to see your site(s)",
+"If system is off, only Super Admins will be able to see your site(s) by default",
 
 "system_off_msg" => 
 "System Off Message",
@@ -1311,17 +1299,17 @@ $lang = array(
 "channel_administration" => 
 "Channel Administration",
 
-"channel_management" => 
-"Channel Management",
+"channels" => 
+"Channels",
 
 "field_management" => 
-"Custom Channel Fields",
+"Channel Fields",
 
 "file_upload_prefs" => 
 "File Upload Preferences",
 
 "categories" => 
-"Category Management",
+"Categories",
 
 'missing_required_fields' =>
 'You Are Missing Required Field(s):',
@@ -1329,17 +1317,17 @@ $lang = array(
 "default_ping_servers" => 
 "Default Ping Servers",
 
-"status_management" => 
-"Custom Entry Statuses",
+"statuses" => 
+"Statuses",
 
 "status_created" =>
-"Status has been Created",
+"Status created",
 
 "status_updated" =>
-"Status has been updated",
+"Status updated",
 
 "status_deleted" =>
-"Status has been deleted",
+"Status deleted",
 
 
 "taken_status_group_name" => 

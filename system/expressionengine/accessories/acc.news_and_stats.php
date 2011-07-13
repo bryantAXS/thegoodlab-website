@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -74,7 +74,7 @@ class News_and_stats_acc {
 	{
 		$ret = ''; 
 		
-		if ( ! file_exists(PATH_PI.'pi.magpie'.EXT))
+		if ( ! file_exists(PATH_PI.'pi.magpie.php'))
 		{
 			return '';
 		}
@@ -96,7 +96,7 @@ class News_and_stats_acc {
 
 		if ( ! class_exists('Magpie'))
 		{
-			require PATH_PI.'pi.magpie'.EXT;
+			require PATH_PI.'pi.magpie.php';
 		}
 
 		$feed = fetch_rss('http://expressionengine.com/feeds/rss/cpnews/', 60*60*24*3); // set cache to 3 days

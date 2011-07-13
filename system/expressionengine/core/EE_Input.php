@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -62,6 +62,30 @@ class EE_Input extends CI_Input {
 	{
 		$EE =& get_instance();
 
+		/*
+ 		* --------------------------------------------------------------------
+ 		*  Is the request a URL redirect redirect?  Moved from the index so we can have config variables!
+ 		* --------------------------------------------------------------------
+ 		*
+ 		* All external links that appear in the ExpressionEngine control panel
+ 		* are redirected to this index.php file first, before being sent to the
+ 		* final destination, so that the location of the control panel will not 
+ 		* end up in the referrer logs of other sites.
+ 		*
+ 		*/	
+
+		if (isset($_GET['URL'])) 
+		{ 
+			if ( ! file_exists(APPPATH.'libraries/Redirect.php'))
+			{
+				exit('Some components appear to be missing from your ExpressionEngine installation.');	
+			}
+			
+			require(APPPATH.'libraries/Redirect.php');
+
+			exit();  // We halt system execution since we're done
+		}		
+
 		$filter_keys = TRUE;
 	
 		if ($request_type == 'CP' && isset($_GET['BK']) && isset($_GET['channel_id']) && isset($_GET['title']) && $EE->session->userdata['admin_sess'] == 1)
@@ -80,15 +104,40 @@ class EE_Input extends CI_Input {
 				{
 					if (is_array($val))
 					{
-						exit('Invalid GET Data - Array');
+						$data = '';
+						
+						if ((int) config_item('debug') == 2)
+						{
+							$data = '<br>' . print_r($data, TRUE);
+						}
+						
+						exit(sprintf("Invalid GET Data - Array %s", $data));
 					}
 					elseif (preg_match("#(;|\?|exec\s*\(|system\s*\(|passthru\s*\(|cmd\s*\(|[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3})#i", $val))
 					{
-						exit('Invalid GET Data');
+						$data = ((int) config_item('debug') == 2) ? "<br>{$val}" : '';
+						
+						exit(sprintf("Invalid GET Data %s", $data));
 					}   
 				}
 			}	
 		}	
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Remove session ID from string
+	 *
+	 * This function is used mainly by the Input class to strip
+	 * session IDs if they are used in public pages.
+	 *
+	 * @param	string
+	 * @return	string
+	 */	
+	public function remove_session_id($str)
+	{
+		return preg_replace("#S=.+?/#", "", $str);
 	}
 
 	// --------------------------------------------------------------------

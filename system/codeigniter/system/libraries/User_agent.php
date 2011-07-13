@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -84,7 +84,7 @@ class CI_User_agent {
 	 */
 	function _load_agent_file()
 	{
-		if ( ! @include(APPPATH.'config/user_agents'.EXT))
+		if ( ! @include(APPPATH.'config/user_agents.php'))
 		{
 			return FALSE;
 		}

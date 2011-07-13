@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -32,21 +32,28 @@
  *  Define the CodeIgniter Version
  * ------------------------------------------------------
  */
-	define('CI_VERSION', '2.0');
+	define('CI_VERSION', '2.0.1');
+
+/*
+ * ------------------------------------------------------
+ *  Define the CodeIgniter Branch (Core = TRUE, Reactor = FALSE)
+ * ------------------------------------------------------
+ */
+	define('CI_CORE', TRUE);
 
 /*
  * ------------------------------------------------------
  *  Load the global functions
  * ------------------------------------------------------
  */
-	require(BASEPATH.'core/Common'.EXT);
+	require(BASEPATH.'core/Common.php');
 
 /*
  * ------------------------------------------------------
  *  Load the framework constants
  * ------------------------------------------------------
  */
-	require(APPPATH.'config/constants'.EXT);
+	require(APPPATH.'config/constants.php');
 
 /*
  * ------------------------------------------------------
@@ -129,17 +136,17 @@
 
 /*
  * ------------------------------------------------------
- *  Instantiate the Unicode class
+ *  Instantiate the UTF-8 class
  * ------------------------------------------------------
  *
- * Note: Order here is rather important as the Unicode
+ * Note: Order here is rather important as the UTF-8
  * class needs to be used very early on, but it cannot
  * properly determine if UTf-8 can be supported until
  * after the Config class is instantiated.
  *
  */
 
-	$UNI =& load_class('Unicode', 'core');
+	$UNI =& load_class('Utf8', 'core');
 
 /*
  * ------------------------------------------------------
@@ -183,6 +190,13 @@
 	}
 
 /*
+ * -----------------------------------------------------
+ * Load the security class for xss and csrf support
+ * -----------------------------------------------------
+ */
+	$SEC =& load_class('Security', 'core');
+
+/*
  * ------------------------------------------------------
  *  Load the Input class and sanitize globals
  * ------------------------------------------------------
@@ -203,7 +217,7 @@
  *
  */
 	// Load the base controller class
-	require BASEPATH.'core/Controller'.EXT;
+	require BASEPATH.'core/Controller.php';
 
 	function &get_instance()
 	{
@@ -211,20 +225,20 @@
 	}
 
 
-	if (file_exists(APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller'.EXT))
+	if (file_exists(APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller.php'))
 	{
-		require APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller'.EXT;
+		require APPPATH.'core/'.$CFG->config['subclass_prefix'].'Controller.php';
 	}
 
 	// Load the local application controller
 	// Note: The Router class automatically validates the controller path using the router->_validate_request().
 	// If this include fails it means that the default controller in the Routes.php file is not resolving to something valid.
-	if ( ! file_exists(APPPATH.'controllers/'.$RTR->fetch_directory().$RTR->fetch_class().EXT))
+	if ( ! file_exists(APPPATH.'controllers/'.$RTR->fetch_directory().$RTR->fetch_class().'.php'))
 	{
 		show_error('Unable to load your default controller. Please make sure the controller specified in your Routes.php file is valid.');
 	}
 
-	include(APPPATH.'controllers/'.$RTR->fetch_directory().$RTR->fetch_class().EXT);
+	include(APPPATH.'controllers/'.$RTR->fetch_directory().$RTR->fetch_class().'.php');
 
 	// Set a mark point for benchmarking
 	$BM->mark('loading_time:_base_classes_end');

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -63,7 +63,7 @@ class Api_channel_categories extends Api {
 	 *
 	 * @return 	mixed		FALSE if no results or cat array of results.
 	 */
-	public function category_tree($group_id, $selected = '', $order = 'c')
+	public function category_tree($group_id, $selected = '', $order = 'c', $exclude="files")
 	{
 		// reset $this->categories
 		$this->initialize(array(
@@ -102,7 +102,7 @@ class Api_channel_categories extends Api {
 						->from('category_groups g, categories c')
 						->where('g.group_id', 'c.group_id', FALSE)
 						->where_in('g.group_id', $group_ids)
-						->order_by('group_id, parent_id', $order)
+						->order_by('group_id, parent_id, '.$order, 'asc')
 						->get();
 
 		if ($query->num_rows() === 0)

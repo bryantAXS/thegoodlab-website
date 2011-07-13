@@ -5,7 +5,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -43,11 +43,34 @@ class Member {
 	var $trigger			= 'member';
 	var $theme_class		= 'profile_theme';
 	var $request			= 'public_profile';
-	var $no_menu 			= array('public_profile', 'memberlist', 'do_member_search', 'member_search', 'register', 'smileys', 'login', 'unpw_update', 'email_console', 'send_email', 'aim_console', 'icq_console', 'forgot_password', 'delete', 'member_mini_search', 'do_member_mini_search');
-	var $no_login 			= array('public_profile', 'memberlist', 'do_member_search', 'member_search', 'register', 'forgot_password', 'unpw_update');
-	var $id_override		= array('edit_subscriptions', 'memberlist', 'member_search', 'browse_avatars', 'messages', 'unpw_update');
-	var $no_breadcrumb 		= array('email_console', 'send_email', 'aim_console', 'icq_console', 'member_mini_search', 'do_member_mini_search');
-	var $simple_page		= array('email_console', 'send_email', 'aim_console', 'icq_console', 'smileys', 'member_mini_search', 'do_member_mini_search');
+	var $no_menu 			= array(
+						'public_profile', 'memberlist', 'do_member_search', 
+						'member_search', 'register', 'smileys', 'login', 
+						'unpw_update', 'email_console', 'send_email', 
+						'aim_console', 'icq_console', 'forgot_password', 
+						'delete', 'member_mini_search', 'do_member_mini_search'
+					);
+
+	var $no_login 			= array(
+						'public_profile', 'memberlist', 'do_member_search', 
+						'member_search', 'register', 'forgot_password', 'unpw_update'
+					);
+
+	var $id_override		= array(
+						'edit_subscriptions', 'memberlist', 'member_search', 
+						'browse_avatars', 'messages', 'unpw_update'
+					);
+
+	var $no_breadcrumb 		= array(
+						'email_console', 'send_email', 'aim_console', 
+						'icq_console', 'member_mini_search', 'do_member_mini_search'
+					);
+
+	var $simple_page		= array(
+						'email_console', 'send_email', 'aim_console', 
+						'icq_console', 'smileys', 'member_mini_search', 'do_member_mini_search'
+					);
+
 	var $page_title 		= '';
 	var $basepath			= '';
 	var $forum_path			= '';
@@ -129,14 +152,9 @@ class Member {
 	/**
 	 * Constructor
 	 */
-	function Member()
+	function __construct()
 	{
-		// Make a local reference to the ExpressionEngine super object
 		$this->EE =& get_instance();
-
-		/** ----------------------------------
-		/**  Load language files
-		/** ----------------------------------*/
 
 		$this->EE->lang->loadfile('myaccount');
 		$this->EE->lang->loadfile('member');
@@ -144,10 +162,12 @@ class Member {
 		$this->EE->db->cache_off();
 	}
 
-	/** ----------------------------------
-	/**  Prep the Request String
-	/** ----------------------------------*/
-	function _prep_request()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Prep the Request String
+	 */
+	public function _prep_request()
 	{
 		// Typcially the profile page URLs will be something like:
 		//
@@ -160,7 +180,6 @@ class Member {
 		// This determines what page is shown. Anything after that will normally
 		// be an ID number, so we'll assign it to the $this->cur_id variable.
 
-		// Load the string helper
 		$this->EE->load->helper('string');
 
 		$this->request = trim_slashes($this->EE->uri->uri_string);
@@ -186,10 +205,7 @@ class Member {
 			$this->request = str_replace(current($xr).'/', '', $this->request);
 		}
 
-		/** ----------------------------------
-		/**  Determine the ID number, if any
-		/** ----------------------------------*/
-
+		// Determine the ID number, if any
 		$this->cur_id = '';
 
 		if (strpos($this->request, '/') !== FALSE)
@@ -198,21 +214,18 @@ class Member {
 
 			if (count($x) > 2)
 			{
-				$this->request		= $x['0'];
-				$this->cur_id		= $x['1'];
-				$this->uri_extra	= $x['2'];
+				$this->request		= $x[0];
+				$this->cur_id		= $x[1];
+				$this->uri_extra	= $x[2];
 			}
 			else
 			{
-				$this->request		= $x['0'];
-				$this->cur_id		= $x['1'];
+				$this->request		= $x[0];
+				$this->cur_id		= $x[1];
 			}
 		}
 
-		/** ----------------------------------
-		/**  Is this a public profile request?
-		/** ----------------------------------*/
-
+		// Is this a public profile request?
 		// Public member profiles are found at:
 		//
 		// index.php/member/123/
@@ -232,10 +245,7 @@ class Member {
  			$this->request	= 'public_profile';
 		}
  		 
-		/** ----------------------------------
-		/**  Disable the full page view
-		/** ----------------------------------*/
- 
+		// Disable the full page view
  		if (in_array($this->request, $this->simple_page))
  		{
 			$this->show_headings = FALSE;
@@ -246,15 +256,14 @@ class Member {
 			$this->breadcrumb = FALSE;
  		}
  
-		/** ----------------------------------
-		/**  Validate ID number
-		/** ----------------------------------*/
 
+ 		// Validate ID number
 		// The $this->cur_id variable can only contain a number.
 		// There are a few exceptions like the memberlist page and the
 		// subscriptions page
 
- 		if ( ! in_array($this->request, $this->id_override) AND $this->cur_id != '' AND ! is_numeric($this->cur_id))
+ 		if ( ! in_array($this->request, $this->id_override) && 
+ 			$this->cur_id != '' && ! is_numeric($this->cur_id))
  		{
  			return FALSE;
  		}
@@ -262,15 +271,14 @@ class Member {
  		return TRUE;
 	}
 
-	/** ----------------------------------
-	/**  Run the Member Class
-	/** ----------------------------------*/
-	function manager()
-	{
-		/** ---------------------------------
-		/**  Prep the request
-		/** ---------------------------------*/
+	// --------------------------------------------------------------------
 
+	/**
+	 * Run the Member Class
+	 */
+	public function manager()
+	{
+		// Prep the request
 		if ( ! $this->_prep_request())
 		{
 			exit("Invalid Page Request");
@@ -289,24 +297,18 @@ class Member {
 		//
 		// -------------------------------------------
 
-		/** ---------------------------------
-		/**  Is the user logged in?
-		/** ---------------------------------*/
-
-		if ($this->request != 'login' AND ! in_array($this->request, $this->no_login) AND $this->EE->session->userdata('member_id') == 0)
+		// Is the user logged in?
+		if ($this->request != 'login' && 
+			! in_array($this->request, $this->no_login) && 
+			$this->EE->session->userdata('member_id') == 0)
 		{
 			return $this->_final_prep($this->profile_login_form('self'));
  		}
-		/** ---------------------------------
-		/**  Left-side Menu
-		/** ---------------------------------*/
 
+ 		// Left-side Menu
 		$left = ( ! in_array($this->request, $this->no_menu)) ? $this->profile_menu() : '';
 
-		/** ------------------------------
-		/**  Validate the request
-		/** ------------------------------*/
-
+		// Validate the request
 		$methods = array(
 							'public_profile',
 							'memberlist',
@@ -358,16 +360,13 @@ class Member {
 			return $this->EE->output->show_user_error('general', array($this->EE->lang->line('invalid_action')));
 		}
 
-		/** ------------------------------
-		/**  Call the requested function
-		/** ------------------------------*/
-
-		if ($this->request == 'profile')	$this->request = 'profile_main';
-		if ($this->request == 'register')	$this->request = 'registration_form';
-		if ($this->cur_id  == 'member_search')		{$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
-		if ($this->cur_id  == 'do_member_search')	{$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
-		if ($this->cur_id  == 'buddy_search')		{$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
-		if ($this->cur_id  == 'do_buddy_search')	{$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
+		// Call the requested function
+		if ($this->request == 'profile') $this->request = 'profile_main';
+		if ($this->request == 'register') $this->request = 'registration_form';
+		if ($this->cur_id  == 'member_search') {$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
+		if ($this->cur_id  == 'do_member_search') {$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
+		if ($this->cur_id  == 'buddy_search') {$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
+		if ($this->cur_id  == 'do_buddy_search') {$left = ''; $this->breadcrumb = FALSE; $this->show_headings = FALSE;}
 
 		$function = $this->request;
 
@@ -392,10 +391,7 @@ class Member {
 		if ($this->cur_id  == 'edit_folders')	{$left = $this->profile_menu();}
 		if ($this->cur_id  == 'send_message')	{$left = $this->profile_menu();}
 
-		/** ------------------------------
-		/**  Parse the template the template
-		/** ------------------------------*/
-
+		// Parse the template the template
 		if ($left == '')
 		{
 			$out = $this->_var_swap($this->_load_element('basic_profile'),
@@ -418,19 +414,23 @@ class Member {
 		return $this->_final_prep($out);
 	}
 
-	/** ----------------------------------------
-	/**  Private Messages
-	/** ----------------------------------------*/
-	function messages()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Private Messages
+	 */
+	public function messages()
 	{
-		if (($this->EE->session->userdata['can_send_private_messages'] != 'y' && $this->EE->session->userdata['group_id'] != '1') OR $this->EE->session->userdata['accept_messages'] != 'y')
+		if (($this->EE->session->userdata('can_send_private_messages') != 'y' && 
+			$this->EE->session->userdata('group_id') != '1') OR 
+			$this->EE->session->userdata('accept_messages') != 'y')
 		{
 			return $this->profile_main();
 		}
 
 		if ( ! class_exists('EE_Messages'))
 		{
-			require APPPATH.'libraries/Messages'.EXT;
+			require APPPATH.'libraries/Messages.php';
 		}
 
 		$MESS = new EE_Messages;
@@ -447,10 +447,12 @@ class Member {
 		return $MESS->return_data;
 	}
 
-	/** ----------------------------------------
-	/**  Member Profile - Menu
-	/** ----------------------------------------*/
-	function profile_menu()
+	// --------------------------------------------------------------------	
+
+	/**
+	 * Member Profile - Menu
+	 */
+	public function profile_menu()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -467,20 +469,23 @@ class Member {
 		return $MS->profile_menu();
 	}
 
+	// --------------------------------------------------------------------	
 
-	/** ----------------------------------------
-	/**  Private Messages - Menu
-	/** ----------------------------------------*/
-	function pm_menu()
+	/**
+	 * Private Messages - Menu
+	 */
+	public function pm_menu()
 	{
-		if (($this->EE->session->userdata['can_send_private_messages'] != 'y' && $this->EE->session->userdata['group_id'] != '1') OR $this->EE->session->userdata['accept_messages'] != 'y')
+		if (($this->EE->session->userdata('can_send_private_messages') != 'y' && 
+			$this->EE->session->userdata('group_id') != '1') OR 
+			$this->EE->session->userdata('accept_messages') != 'y')
 		{
 			return;
 		}
 
 		if ( ! class_exists('EE_Messages'))
 		{
-			require APPPATH.'libraries/Messages'.EXT;
+			require APPPATH.'libraries/Messages.php';
 		}
 
 		$MESS = new EE_Messages;
@@ -493,10 +498,12 @@ class Member {
 		return $MESS->menu;
 	}
 
-	/** ----------------------------------------
-	/**  Member Profile Main Page
-	/** ----------------------------------------*/
-	function profile_main()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Profile Main Page
+	 */
+	public function profile_main()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -513,10 +520,12 @@ class Member {
 		return $MS->profile_main();
 	}
 
-	/** ----------------------------------------
-	/**  Member Public Profile
-	/** ----------------------------------------*/
-	function public_profile()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Public Profile
+	 */
+	public function public_profile()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -533,11 +542,12 @@ class Member {
 		return $MS->public_profile();
 	}
 
-	/** ----------------------------------------
-	/**  Login Page
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function profile_login_form($return = '-2')
+	/**
+	 * Login Page
+	 */
+	public function profile_login_form($return = '-2')
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -554,10 +564,12 @@ class Member {
 		return $MA->profile_login_form($return);
 	}
 
-	/** ----------------------------------------
-	/**  Member Profile Edit Page
-	/** ----------------------------------------*/
-	function edit_profile()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Profile Edit Page
+	 */
+	public function edit_profile()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -574,10 +586,12 @@ class Member {
 		return $MS->edit_profile();
 	}
 
-	/** ----------------------------------------
-	/**  Profile Update
-	/** ----------------------------------------*/
-	function update_profile()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Profile Update
+	 */
+	public function update_profile()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -594,10 +608,12 @@ class Member {
 		return $MS->update_profile();
 	}
 
-	/** ----------------------------------------
-	/**  Forum Preferences
-	/** ----------------------------------------*/
-	function edit_preferences()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Forum Preferences
+	 */
+	public function edit_preferences()
 	{
 	 	if ( ! class_exists('Member_settings'))
 		{
@@ -614,10 +630,12 @@ class Member {
 		return $MS->edit_preferences();
 	}
 
-	/** ----------------------------------------
-	/**  Update  Preferences
-	/** ----------------------------------------*/
-	function update_preferences()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Update Preferences
+	 */
+	public function update_preferences()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -634,10 +652,12 @@ class Member {
 		return $MS->update_preferences();
 	}
 
-	/** ----------------------------------------
-	/**  Email Settings
-	/** ----------------------------------------*/
-	function edit_email()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Email Settings
+	 */
+	public function edit_email()
 	{
 	 	if ( ! class_exists('Member_settings'))
 		{
@@ -654,10 +674,12 @@ class Member {
 		return $MS->edit_email();
 	}
 
-	/** ----------------------------------------
-	/**  Email Update
-	/** ----------------------------------------*/
-	function update_email()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Email Update
+	 */
+	public function update_email()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -674,10 +696,12 @@ class Member {
 		return $MS->update_email();
 	}
 
-	/** ----------------------------------------
-	/**  Username/Password Preferences
-	/** ----------------------------------------*/
-	function edit_userpass()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Username/Password Preferences
+	 */
+	public function edit_userpass()
 	{
 	 	if ( ! class_exists('Member_settings'))
 		{
@@ -694,10 +718,12 @@ class Member {
 		return $MS->edit_userpass();
 	}
 
-	/** ----------------------------------------
-	/**  Username/Password Update
-	/** ----------------------------------------*/
-	function update_userpass()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Username/Password Update
+	 */
+	public function update_userpass()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -714,11 +740,12 @@ class Member {
 		return $MS->update_userpass();
 	}
 
-	/** ----------------------------------------
-	/**  Localization Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_localization()
+	/**
+	 * Localization Edit Form
+	 */
+	public function edit_localization()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -735,11 +762,12 @@ class Member {
 		return $MS->edit_localization();
 	}
 
-	/** ----------------------------------------
-	/**  Update Localization Prefs
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function update_localization()
+	/**
+	 * Update Localization Prefs
+	 */
+	public function update_localization()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -756,11 +784,12 @@ class Member {
 		return $MS->update_localization();
 	}
 
-	/** ----------------------------------------
-	/**  Signature Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_signature()
+	/**
+	 * Signature Edit Form
+	 */
+	public function edit_signature()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -777,11 +806,12 @@ class Member {
 		return $MI->edit_signature();
 	}
 
-	/** ----------------------------------------
-	/**  Update Signature
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function update_signature()
+	/**
+	 * Update Signature
+	 */
+	public function update_signature()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -798,11 +828,12 @@ class Member {
 		return $MI->update_signature();
 	}
 
-	/** ----------------------------------------
-	/**  Avatar Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_avatar()
+	/**
+	 * Avatar Edit Form
+	 */
+	public function edit_avatar()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -819,11 +850,12 @@ class Member {
 		return $MI->edit_avatar();
 	}
 
-	/** ----------------------------------------
-	/**  Browse Avatars
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function browse_avatars()
+	/**
+	 * Browse Avatars
+	 */
+	public function browse_avatars()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -840,11 +872,12 @@ class Member {
 		return $MI->browse_avatars();
 	}
 
-	/** ----------------------------------------
-	/**  Select Avatar From  Library
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function select_avatar()
+	/**
+	 * Select Avatar From Library
+	 */
+	public function select_avatar()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -861,11 +894,12 @@ class Member {
 		return $MI->select_avatar();
 	}
 
-	/** ----------------------------------------
-	/**  Photo Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_photo()
+	/**
+	 * Photo Edit Form
+	 */
+	public function edit_photo()
 	{
 		if ( ! class_exists('Member_images'))
 		{
@@ -882,11 +916,12 @@ class Member {
 		return $MI->edit_photo();
 	}
 
-	/** ----------------------------------------
-	/**  Notepad Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_notepad()
+	/**
+	 * Notepad Edit Form
+	 */
+	public function edit_notepad()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -903,11 +938,12 @@ class Member {
 		return $MS->edit_notepad();
 	}
 
-	/** ----------------------------------------
-	/**  Update Notepad
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function update_notepad()
+	/**
+	 * Update Notepad
+	 */
+	public function update_notepad()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -924,10 +960,12 @@ class Member {
 		return $MS->update_notepad();
 	}
 
-	/** ----------------------------------------
-	/**  Member Login
-	/** ----------------------------------------*/
-	function member_login()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Login
+	 */
+	public function member_login()
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -944,10 +982,12 @@ class Member {
 		$MA->member_login();
 	}
 
-	/** ----------------------------------------
-	/**  Member Logout
-	/** ----------------------------------------*/
-	function member_logout()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Logout
+	 */
+	public function member_logout()
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -964,10 +1004,12 @@ class Member {
 		$MA->member_logout();
 	}
 
-	/** ----------------------------------------
-	/**  Member Forgot Password Form
-	/** ----------------------------------------*/
-	function forgot_password($ret = '-3')
+	// --------------------------------------------------------------------
+
+	/**
+	 * Member Forgot Password Form
+	 */
+	public function forgot_password($ret = '-3')
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -984,10 +1026,12 @@ class Member {
 		return $MA->forgot_password($ret);
 	}
 
-	/** ----------------------------------------
-	/**  Retreive Forgotten Password
-	/** ----------------------------------------*/
-	function retrieve_password()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Retreive Forgotten Password
+	 */
+	public function retrieve_password()
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -1004,10 +1048,12 @@ class Member {
 		$MA->retrieve_password();
 	}
 
-	/** ----------------------------------------
-	/**  Reset the user's password
-	/** ----------------------------------------*/
-	function reset_password()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Reset the user's password
+	 */
+	public function reset_password()
 	{
 		if ( ! class_exists('Member_auth'))
 		{
@@ -1024,11 +1070,12 @@ class Member {
 		$MA->reset_password();
 	}
 
-	/** ----------------------------------------
-	/**  Subscriptions Edit Form
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function edit_subscriptions()
+	/**
+	 * Subscriptions Edit Form
+	 */
+	public function edit_subscriptions()
 	{
 		if ( ! class_exists('Member_subscriptions'))
 		{
@@ -1045,11 +1092,12 @@ class Member {
 		return $MS->edit_subscriptions();
 	}
 
-	/** ----------------------------------------
-	/**  Update Subscriptions
-	/** ----------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function update_subscriptions()
+	/**
+	 * Update Subscriptions
+	 */
+	public function update_subscriptions()
 	{
 		if ( ! class_exists('Member_subscriptions'))
 		{
@@ -1066,10 +1114,12 @@ class Member {
 		return $MS->update_subscriptions();
 	}
 
-	/** -------------------------------------
-	/**  Edit Ignore List Form
-	/** -------------------------------------*/
-	function edit_ignore_list()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Edit Ignore List Form
+	 */
+	public function edit_ignore_list()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1086,11 +1136,12 @@ class Member {
 		return $MS->edit_ignore_list();
 	}
 
-	/** -------------------------------------
-	/**  Update Ignore List
-	/** -------------------------------------*/
+	// --------------------------------------------------------------------	
 
-	function update_ignore_list()
+	/**
+	 * Update Ignore List
+	 */
+	public function update_ignore_list()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1107,11 +1158,12 @@ class Member {
 		return $MS->update_ignore_list();
 	}
 
-	/** -------------------------------------
-	/**  Member Mini Search
-	/** -------------------------------------*/
+	// --------------------------------------------------------------------
 
-	function member_mini_search()
+	/**
+	 * Member Mini Search
+	 */
+	public function member_mini_search()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1129,13 +1181,12 @@ class Member {
 		return $MS->member_mini_search();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Do Member Mini Search
-	/** -------------------------------------*/
-
-	function do_member_mini_search()
+	/**
+	 * Do Member Mini Search
+	 */
+	public function do_member_mini_search()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1153,12 +1204,12 @@ class Member {
 		return $MS->do_member_mini_search();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Member Registration Form
-	/** ----------------------------------------*/
-	function registration_form()
+	/**
+	 * Member Registration Form
+	 */
+	public function registration_form()
 	{
 		if ( ! class_exists('Member_register'))
 		{
@@ -1175,10 +1226,12 @@ class Member {
 		return $MR->registration_form();
 	}
 
-	/** ----------------------------------------
-	/**  Register Member
-	/** ----------------------------------------*/
-	function register_member()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Register Member
+	 */
+	public function register_member()
 	{
 		if ( ! class_exists('Member_register'))
 		{
@@ -1195,11 +1248,12 @@ class Member {
 		$MR->register_member();
 	}
 
+	// --------------------------------------------------------------------
 
-	/** ----------------------------------------
-	/**  Member Self-Activation
-	/** ----------------------------------------*/
-	function activate_member()
+	/**
+	 * Member Self-Activation
+	 */
+	public function activate_member()
 	{
 		if ( ! class_exists('Member_register'))
 		{
@@ -1216,26 +1270,24 @@ class Member {
 		$MR->activate_member();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Delete Page
-	/** -------------------------------------*/
-	function delete()
+	/**
+	 * Delete Page
+	 */
+	public function delete()
 	{
 		return $this->confirm_delete_form();
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** -------------------------------------
-	/**  Self-delete confirmation form
-	/** -------------------------------------*/
-
-	function confirm_delete_form()
+	/**
+	 * Self-delete confirmation form
+	 */
+	public function confirm_delete_form()
 	{
-		if ($this->EE->session->userdata['can_delete_self'] !== 'y')
+		if ($this->EE->session->userdata('can_delete_self') !== 'y')
 		{
 			return $this->EE->output->show_user_error('general', $this->EE->lang->line('cannot_delete_self'));
 		}
@@ -1253,19 +1305,14 @@ class Member {
 		}
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** -------------------------------------
-	/**  Member self-delete
-	/** -------------------------------------*/
-
-	function member_delete()
+	/**
+	 * Member self-delete
+	 */
+	public function member_delete()
 	{
-		/** -------------------------------------
-		/**  Make sure they got here via a form
-		/** -------------------------------------*/
-
+		// Make sure they got here via a form
 		if ( ! $this->EE->input->post('ACT'))
 		{
 			// No output for you, Mr. URL Hax0r
@@ -1274,77 +1321,66 @@ class Member {
 
 		$this->EE->lang->loadfile('login');
 
-		/* -------------------------------------
-		/*  No sneakiness - we'll do this in case the site administrator
-		/*  has foolishly turned off secure forms and some monkey is
-		/*  trying to delete their account from an off-site form or
-		/*  after logging out.
-		/* -------------------------------------*/
+		// No sneakiness - we'll do this in case the site administrator
+		// has foolishly turned off secure forms and some monkey is
+		// trying to delete their account from an off-site form or
+		// after logging out.
 
-		if ($this->EE->session->userdata['member_id'] == 0 OR $this->EE->session->userdata['can_delete_self'] !== 'y')
+		if ($this->EE->session->userdata('member_id') == 0 OR 
+			$this->EE->session->userdata('can_delete_self') !== 'y')
 		{
 			return $this->EE->output->show_user_error('general', $this->EE->lang->line('not_authorized'));
 		}
 
-		/** -------------------------------------
-		/**  If the user is a SuperAdmin, then no deletion
-		/** -------------------------------------*/
-
-		if ($this->EE->session->userdata['group_id'] == 1)
+		// If the user is a SuperAdmin, then no deletion
+		if ($this->EE->session->userdata('group_id') == 1)
 		{
 			return $this->EE->output->show_user_error('general', $this->EE->lang->line('cannot_delete_super_admin'));
 		}
 
-		/** ----------------------------------------
-		/**  Is IP and User Agent required for login?  Then, same here.
-		/** ----------------------------------------*/
-
+		// Is IP and User Agent required for login?  Then, same here.
 		if ($this->EE->config->item('require_ip_for_login') == 'y')
 		{
-			if ($this->EE->session->userdata['ip_address'] == '' OR $this->EE->session->userdata['user_agent'] == '')
+			if ($this->EE->session->userdata('ip_address') == '' OR 
+				$this->EE->session->userdata('user_agent') == '')
 			{
 				return $this->EE->output->show_user_error('general', $this->EE->lang->line('unauthorized_request'));
 				}
 		}
 
-		/** ----------------------------------------
-		/**  Check password lockout status
-		/** ----------------------------------------*/
-
-		if ($this->EE->session->check_password_lockout($this->EE->session->userdata['username']) === TRUE)
+		// Check password lockout status
+		if ($this->EE->session->check_password_lockout($this->EE->session->userdata('username')) === TRUE)
 		{
 			return $this->EE->output->show_user_error('general', str_replace("%x", $this->EE->config->item('password_lockout_interval'), $this->EE->lang->line('password_lockout_in_effect')));
 		}
 
-		/* -------------------------------------
-		/*  Are you who you say you are, or someone sitting at someone
-		/*  else's computer being mean?!
-		/* -------------------------------------*/
-		$query = $this->EE->db->query("SELECT password FROM exp_members WHERE member_id = '".$this->EE->session->userdata['member_id']."'");
+		// Are you who you say you are, or someone sitting at someone
+		// else's computer being mean?!
+		$query = $this->EE->db->select('password')
+							  ->where('member_id', $this->EE->session->userdata('member_id'))
+							  ->get('members');
+
 		$password = $this->EE->functions->hash(stripslashes($this->EE->input->post('password')));
 
-		if ($query->row('password')  != $password)
+		if ($query->row('password') != $password)
 		{
-			$this->EE->session->save_password_lockout($this->EE->session->userdata['username']);
+			$this->EE->session->save_password_lockout($this->EE->session->userdata('username'));
 
 			return $this->EE->output->show_user_error('general', $this->EE->lang->line('invalid_pw'));
 		}
 
-		/** -------------------------------------
-		/**  No turning back, get to deletin'!
-		/** -------------------------------------*/
+		// No turning back, get to deletin'!
+		$id = $this->EE->session->userdata('member_id');
 
-		$id = $this->EE->session->userdata['member_id'];
-
-		$this->EE->db->query("DELETE FROM exp_members WHERE member_id = '{$id}'");
-		$this->EE->db->query("DELETE FROM exp_member_data WHERE member_id = '{$id}'");
-		$this->EE->db->query("DELETE FROM exp_member_homepage WHERE member_id = '{$id}'");
+		$this->EE->db->where('member_id', (int) $id)->delete('members');
+		$this->EE->db->where('member_id', (int) $id)->delete('member_data');
+		$this->EE->db->where('member_id', (int) $id)->delete('member_homepage');
+		$this->EE->db->where('sender_id', (int) $id)->delete('message_copies');
+		$this->EE->db->where('sender_id', (int) $id)->delete('message_data');
+		$this->EE->db->where('sender_id', (int) $id)->delete('message_folders');
+		$this->EE->db->where('sender_id', (int) $id)->delete('message_listed');
 
 		$message_query = $this->EE->db->query("SELECT DISTINCT recipient_id FROM exp_message_copies WHERE sender_id = '{$id}' AND message_read = 'n'");
-		$this->EE->db->query("DELETE FROM exp_message_copies WHERE sender_id = '{$id}'");
-		$this->EE->db->query("DELETE FROM exp_message_data WHERE sender_id = '{$id}'");
-		$this->EE->db->query("DELETE FROM exp_message_folders WHERE member_id = '{$id}'");
-		$this->EE->db->query("DELETE FROM exp_message_listed WHERE member_id = '{$id}'");
 
 		if ($message_query->num_rows() > 0)
 		{
@@ -1355,18 +1391,14 @@ class Member {
 			}
 		}
 
-		/** -------------------------------------
-		/**  Delete Forum Posts
-		/** -------------------------------------*/
-
+		// Delete Forum Posts
 		if ($this->EE->config->item('forum_is_installed') == "y")
 		{
-			$this->EE->db->query("DELETE FROM exp_forum_subscriptions  WHERE member_id = '{$id}'");
-			$this->EE->db->query("DELETE FROM exp_forum_pollvotes  WHERE member_id = '{$id}'");
-
-			$this->EE->db->query("DELETE FROM exp_forum_topics WHERE author_id = '{$id}'");
-			$this->EE->db->query("DELETE FROM exp_forum_administrators WHERE admin_member_id = '{$id}'");
-			$this->EE->db->query("DELETE FROM exp_forum_moderators WHERE mod_member_id = '{$id}'");
+			$this->EE->db->where('member_id', (int) $id)->delete('forum_subscriptions');
+			$this->EE->db->where('member_id', (int) $id)->delete('forum_pollvotes');
+			$this->EE->db->where('author_id', (int) $id)->delete('forum_topics');
+			$this->EE->db->where('admin_member_id', (int) $id)->delete('forum_administrators');
+			$this->EE->db->where('mod_member_id', (int) $id)->delete('forum_moderators');
 
 			// Snag the affected topic id's before deleting the member for the update afterwards
 			$query = $this->EE->db->query("SELECT topic_id FROM exp_forum_posts WHERE author_id = '{$id}'");
@@ -1383,9 +1415,8 @@ class Member {
 				$topic_ids = array_unique($topic_ids);
 			}
 
-			$this->EE->db->query("DELETE FROM exp_forum_posts  WHERE author_id = '{$id}'");
-			$this->EE->db->query("DELETE FROM exp_forum_polls  WHERE author_id = '{$id}'");
-
+			$this->EE->db->where('author_id', (int) $id)->delete('forum_posts');
+			$this->EE->db->where('author_id', (int) $id)->delete('forum_polls');
 
 			// Kill any attachments
 			$query = $this->EE->db->query("SELECT attachment_id, filehash, extension, board_id FROM exp_forum_attachments WHERE member_id = '{$id}'");
@@ -1414,7 +1445,8 @@ class Member {
 					@unlink($file);
 					@unlink($thumb);
 
-					$this->EE->db->query("DELETE FROM exp_forum_attachments WHERE attachment_id = '{$row['attachment_id']}'");
+					$this->EE->db->where('attachment_id', (int) $row['attachment_id'])
+								 ->delete('forum_attachments');
 				}
 			}
 
@@ -1423,8 +1455,8 @@ class Member {
 
 			if ( ! class_exists('Forum'))
 			{
-				require PATH_MOD.'forum/mod.forum'.EXT;
-				require PATH_MOD.'forum/mod.forum_core'.EXT;
+				require PATH_MOD.'forum/mod.forum.php';
+				require PATH_MOD.'forum/mod.forum_core.php';
 			}
 
 			$FRM = new Forum_Core;
@@ -1443,10 +1475,7 @@ class Member {
 			}
 		}
 
-		/** -------------------------------------
-		/**  Va-poo-rize Channel Entries and Comments
-		/** -------------------------------------*/
-
+		// Va-poo-rize Channel Entries and Comments
 		$entry_ids			= array();
 		$channel_ids			= array();
 		$recount_ids		= array();
@@ -1508,17 +1537,16 @@ class Member {
 				$this->EE->stats->update_comment_stats($channel_id);
 			}
 		}
-
-		/** -------------------------------------
-		/**  Email notification recipients
-		/** -------------------------------------*/
-		if ($this->EE->session->userdata['mbr_delete_notify_emails'] != '')
+		
+		// Email notification recipients
+		if ($this->EE->session->userdata('mbr_delete_notify_emails') != '')
 		{
-			$notify_address = $this->EE->session->userdata['mbr_delete_notify_emails'];
+			
+			$notify_address = $this->EE->session->userdata('mbr_delete_notify_emails');
 
 			$swap = array(
-							'name'				=> $this->EE->session->userdata['screen_name'],
-							'email'				=> $this->EE->session->userdata['email'],
+							'name'				=> $this->EE->session->userdata('screen_name'),
+							'email'				=> $this->EE->session->userdata('email'),
 							'site_name'			=> stripslashes($this->EE->config->item('site_name'))
 						 );
 
@@ -1528,7 +1556,7 @@ class Member {
 			// No notification for the user themselves, if they're in the list
 			if (strpos($notify_address, $this->EE->session->userdata('email')) !== FALSE)
 			{
-				$notify_address = str_replace($this->EE->session->userdata['email'], "", $notify_address);
+				$notify_address = str_replace($this->EE->session->userdata('email'), "", $notify_address);
 			}
 
 			$this->EE->load->helper('string');
@@ -1537,10 +1565,7 @@ class Member {
 
 			if ($notify_address != '')
 			{
-				/** ----------------------------
-				/**  Send email
-				/** ----------------------------*/
-
+				// Send email
 				$this->EE->load->library('email');
 
 				// Load the text helper
@@ -1560,30 +1585,25 @@ class Member {
 			}
 		}
 
-		/** -------------------------------------
-		/**  Trash the Session and cookies
-		/** -------------------------------------*/
-		$this->EE->db->query("DELETE FROM exp_online_users WHERE site_id = '".$this->EE->db->escape_str($this->EE->config->item('site_id'))."' AND ip_address = '".$this->EE->input->ip_address()."' AND member_id = '{$id}'");
+		// Trash the Session and cookies
+		$this->EE->db->where('site_id', $this->EE->config->item('site_id'))
+					 ->where('ip_address', $this->EE->input->ip_address())
+					 ->where('member_id', (int) $id)
+					 ->delete('online_users');
 
-		$this->EE->db->query("DELETE FROM exp_sessions WHERE session_id = '".$this->EE->session->userdata['session_id']."'");
+		$this->EE->db->where('session_id', $this->EE->session->userdata('session_id'))
+					 ->delete('sessions');
 
-		$this->EE->functions->set_cookie($this->EE->session->c_uniqueid);
-		$this->EE->functions->set_cookie($this->EE->session->c_password);
 		$this->EE->functions->set_cookie($this->EE->session->c_session);
 		$this->EE->functions->set_cookie($this->EE->session->c_expire);
 		$this->EE->functions->set_cookie($this->EE->session->c_anon);
 		$this->EE->functions->set_cookie('read_topics');
 		$this->EE->functions->set_cookie('tracker');
 
-		/** -------------------------------------
-		/**  Update		/** -------------------------------------*/
-
+		// Update
 		$this->EE->stats->update_member_stats();
 
-		/** -------------------------------------
-		/**  Build Success Message
-		/** -------------------------------------*/
-
+		// Build Success Message
 		$url	= $this->EE->config->item('site_url');
 		$name	= stripslashes($this->EE->config->item('site_name'));
 
@@ -1597,27 +1617,24 @@ class Member {
 		$this->EE->output->show_message($data);
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** -----------------------------------
-	/**  Login Page
-	/** -----------------------------------*/
-	function login()
+	/**
+	 * Login Page
+	 */
+	public function login()
 	{
 		return $this->profile_login_form();
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------------
-	/**  Manual Login Form
-	/** ----------------------------------------*/
-
-	// This lets users create a stand-alone login form in any template
-
-	function login_form()
+	/**
+	 * Manual Login Form
+	 *
+	 * This lets users create a stand-alone login form in any template
+	 */
+	public function login_form()
 	{
 		if ($this->EE->config->item('user_session_type') != 'c')
 		{
@@ -1628,10 +1645,7 @@ class Member {
 			$this->EE->TMPL->tagdata = preg_replace("/{if\s+auto_login}(.*?){".'\/'."if}/s", "\\1", $this->EE->TMPL->tagdata);
 		}
 
-		/** ----------------------------------------
-		/**  Create form
-		/** ----------------------------------------*/
-
+		// Create form
 		$data['hidden_fields'] = array(
 										'ACT' => $this->EE->functions->fetch_action_id('Member', 'member_login'),
 										'RET' => ($this->EE->TMPL->fetch_param('return') && $this->EE->TMPL->fetch_param('return') != "") ? $this->EE->TMPL->fetch_param('return') : '-2'
@@ -1643,11 +1657,19 @@ class Member {
 			$data['name'] = $this->EE->TMPL->fetch_param('name');
 		}
 
-		if ($this->EE->TMPL->fetch_param('id') !== FALSE &&
-			preg_match("#^[a-zA-Z0-9_\-]+$#i", $this->EE->TMPL->fetch_param('id'), $match))
+		if ($this->EE->TMPL->fetch_param('id') !== FALSE && 
+			preg_match("#^[a-zA-Z0-9_\-]+$#i", $this->EE->TMPL->fetch_param('id')))
 		{
 			$data['id'] = $this->EE->TMPL->fetch_param('id');
+			$this->EE->TMPL->log_item('Member Login Form:  The \'id\' parameter has been deprecated.  Please use form_id');
 		}
+		else
+		{
+			$data['id'] = $this->EE->TMPL->form_id;
+		}
+		
+		$data['class'] = $this->EE->TMPL->form_class;
+
 
 		$res  = $this->EE->functions->form_declaration($data);
 
@@ -1658,12 +1680,12 @@ class Member {
 		return $res;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Username/password update
-	/** ----------------------------------*/
-	function unpw_update()
+	/**
+	 * Username/password update
+	 */
+	public function unpw_update()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1680,13 +1702,12 @@ class Member {
 		return $MS->unpw_update();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Update the username/password
-	/** ----------------------------------*/
-
-	function update_un_pw()
+	/**
+	 * Update the username/password
+	 */
+	public function update_un_pw()
 	{
 		if ( ! class_exists('Member_settings'))
 		{
@@ -1703,12 +1724,12 @@ class Member {
 		$MS->update_un_pw();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Member Email Form
-	/** ----------------------------------*/
-	function email_console()
+	/**
+	 * Member Email Form
+	 */
+	public function email_console()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1725,10 +1746,12 @@ class Member {
 		return $MM->email_console();
 	}
 
-	/** ----------------------------------
-	/**  Send Member Email
-	/** ----------------------------------*/
-	function send_email()
+	// --------------------------------------------------------------------
+
+	/**
+	 * Send Member Email
+	 */
+	public function send_email()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1745,10 +1768,12 @@ class Member {
 		return $MM->send_email();
 	}
 
-	/** ----------------------------------
-	/**  AIM Console
-	/** ----------------------------------*/
-	function aim_console()
+	// --------------------------------------------------------------------
+
+	/**
+	 * AIM Console
+	 */
+	public function aim_console()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1765,15 +1790,12 @@ class Member {
 		return $MM->aim_console();
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-
-	/** ----------------------------------
-	/**  ICQ Console
-	/** ----------------------------------*/
-
-	function icq_console()
+	/**
+	 * ICQ Console
+	 */
+	public function icq_console()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1790,13 +1812,12 @@ class Member {
 		return $MM->icq_console();
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------------
-	/**  Member List
-	/** ----------------------------------------*/
-	function memberlist()
+	/**
+	 * Member List
+	 */
+	public function memberlist()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1813,12 +1834,12 @@ class Member {
 		return $MM->memberlist();
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Member Search Results
-	/** ----------------------------------------*/
-	function member_search()
+	/**
+	 * Member Search Results
+	 */
+	public function member_search()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1835,11 +1856,12 @@ class Member {
 		return $MM->memberlist();
 	}
 
+	// --------------------------------------------------------------------
 
-	/** ----------------------------------------
-	/**  Do A Member Search
-	/** ----------------------------------------*/
-	function do_member_search()
+	/**
+	 * Do A Member Search
+	 */
+	public function do_member_search()
 	{
 		if ( ! class_exists('Member_memberlist'))
 		{
@@ -1856,20 +1878,19 @@ class Member {
 		return $MM->do_member_search();
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** -----------------------------------------------------------
-	/**  Emoticons
-	/** -----------------------------------------------------------*/
-	function smileys()
+	/**
+	 * Emoticons
+	 */
+	public function smileys()
 	{
 		if ($this->EE->session->userdata('member_id') == 0)
 		{
 			return $this->EE->output->fatal_error($this->EE->lang->line('must_be_logged_in'));
 		}
 
-		$class_path = PATH_MOD.'emoticon/emoticons'.EXT;
+		$class_path = PATH_MOD.'emoticon/emoticons.php';
 
 		if ( ! is_file($class_path) OR ! @include_once($class_path))
 		{
@@ -1963,21 +1984,21 @@ class Member {
 		return str_replace('{include:smileys}', $r, $this->_load_element('emoticon_page'));
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Convet special characters
-	/** ----------------------------------------*/
+	/**
+	 * Convet special characters
+	 */
 	function _convert_special_chars($str)
 	{
 		return str_replace(array('<', '>', '{', '}', '\'', '"', '?'), array('&lt;', '&gt;', '&#123;', '&#125;', '&apos;', '&quot;', '&#63;'), $str);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Parse the index template
-	/** ----------------------------------*/
+	/**
+	 * Parse the index template
+	 */
 	function _parse_index_template($str)
 	{
 		$req = ($this->request == '') ? 'profile' : $this->request;
@@ -1986,24 +2007,23 @@ class Member {
 		$breadcrumb = $this->breadcrumb();
 
 		return $this->_var_swap($this->EE->TMPL->tagdata,
-								array(
-										'stylesheet'	=>	"<style type='text/css'>\n\n".$this->_load_element('stylesheet')."\n\n</style>",
-										'javascript'	=>	$this->javascript,
-										'heading'		=>	$this->page_title,
-										'breadcrumb'	=>	$breadcrumb,
-										'content'		=>	$str,
-										'copyright'		=>	$this->_load_element('copyright')
-									 )
-								 );
+			array(
+					'stylesheet'	=>	"<style type='text/css'>\n\n".$this->_load_element('stylesheet')."\n\n</style>",
+					'javascript'	=>	$this->javascript,
+					'heading'		=>	$this->page_title,
+					'breadcrumb'	=>	$breadcrumb,
+					'content'		=>	$str,
+					'copyright'		=>	$this->_load_element('copyright')
+				 )
+			 );
 
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------
-	/**  Member Home Page
-	/** ----------------------------------*/
+	/**
+	 * Member Home Page
+	 */
 	function _member_page($str)
 	{
 		$template = $this->_load_element('member_page');
@@ -2042,12 +2062,11 @@ class Member {
 
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------
-	/**  Load theme element
-	/** ----------------------------------*/
+	/**
+	 * Load theme element
+	 */
 	function _load_element($which)
 	{
 		if ($this->theme_path == '')
@@ -2071,11 +2090,11 @@ class Member {
 		return $this->_prep_element(trim(file_get_contents($this->theme_path.$which.'.html')));
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Trigger Error Template
-	/** -------------------------------------*/
+	/**
+	 * Trigger Error Template
+	 */
 	function _trigger_error($heading, $message = '', $use_lang = TRUE)
 	{
 		return $this->_var_swap($this->_load_element('error'),
@@ -2086,11 +2105,11 @@ class Member {
 								);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Sets the title of the page
-	/** -------------------------------------*/
+	/**
+	 * Sets the title of the page
+	 */
 	function _set_page_title($title)
 	{
 		if ($this->page_title == '')
@@ -2099,13 +2118,12 @@ class Member {
 		}
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------------
-	/**  Member Breadcrumb
-	/** ----------------------------------------*/
-	function breadcrumb()
+	/**
+	 * Member Breadcrumb
+	 */
+	public function breadcrumb()
 	{
 		if ($this->breadcrumb == FALSE)
 		{
@@ -2177,11 +2195,11 @@ class Member {
 			}
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Breadcrumb trail links
-	/** -------------------------------------*/
+	/**
+	 * Breadcrumb trail links
+	 */
 	function _crumb_trail($data)
 	{
 		$trail	= $this->_load_element('breadcrumb_trail');
@@ -2197,11 +2215,11 @@ class Member {
 		return $crumbs;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Finalize the Crumbs
-	/** -------------------------------------*/
+	/**
+	 * Finalize the Crumbs
+	 */
 	function _build_crumbs($title, $crumbs, $str)
 	{
 		$this->_set_page_title(($title == '') ? 'Powered By ExpressionEngine' : $title);
@@ -2215,11 +2233,11 @@ class Member {
 		return str_replace('{breadcrumb_links}', $crumbs, $breadcrumb);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Fetch member profile crumb item
-	/** -------------------------------------*/
+	/**
+	 * Fetch member profile crumb item
+	 */
 	function _fetch_member_crumb($item = '')
 	{
 		if ($item == '')
@@ -2228,11 +2246,11 @@ class Member {
 		return ( ! isset($this->crumb_map[$item])) ? FALSE : $this->crumb_map[$item];
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Create the "year" pull-down menu
-	/** ----------------------------------------*/
+	/**
+	 * Create the "year" pull-down menu
+	 */
 	function _birthday_year($year = '')
 	{
 		$r = "<select name='bday_y' class='select'>\n";
@@ -2253,10 +2271,11 @@ class Member {
 		return $r;
 	}
 
+	// --------------------------------------------------------------------
 
-	/** ----------------------------------------
-	/**  Create the "month" pull-down menu
-	/** ----------------------------------------*/
+	/**
+	 * Create the "month" pull-down menu
+	 */
 	function _birthday_month($month = '')
 	{
 		$months = array('01' => 'January','02' => 'February','03' => 'March', '04' => 'April', '05' => 'May', '06' => 'June', '07' => 'July', '08' => 'August', '09' => 'September', '10' => 'October', '11' => 'November', '12' => 'December');
@@ -2282,11 +2301,11 @@ class Member {
 		return $r;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Create the "day" pull-down menu
-	/** ----------------------------------------*/
+	/**
+	 * Create the "day" pull-down menu
+	 */
 	function _birthday_day($day = '')
 	{
 		$r = "<select name='bday_d' class='select'>\n";
@@ -2307,19 +2326,19 @@ class Member {
 		return $r;
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** -------------------------------------
-	/**  Prep Element Data
-	/** -------------------------------------*/
-
-	// Right now we only use this to parse the logged-in/logged-out vars
-
+	/**
+	 * Prep Element Data
+	 *
+	 * Right now we only use this to parse the logged-in/logged-out vars 
+	 */
 	function _prep_element($str)
 	{
 		if ($str == '')
-			return '';
+		{
+			return '';			
+		}
 
 		if ($this->EE->session->userdata('member_id') == 0)
 		{
@@ -2332,10 +2351,7 @@ class Member {
 			$str = $this->_deny_if('logged_out', $str);
 		}
 
-		/** ----------------------------------------
-		/**  Parse the forum conditional
-		/** ----------------------------------------*/
-
+		// Parse the forum conditional
 		if ($this->EE->config->item('forum_is_installed') == "y")
 		{
 			$str = $this->_allow_if('forum_installed', $str);
@@ -2345,11 +2361,9 @@ class Member {
 			$str = $this->_deny_if('forum_installed', $str);
 		}
 
-		/** -------------------------------------
-		/**  Parse the self deletion conditional
-		/** -------------------------------------*/
-
-		if ($this->EE->session->userdata['can_delete_self'] == 'y' && $this->EE->session->userdata['group_id'] != 1)
+		// Parse the self deletion conditional
+		if ($this->EE->session->userdata('can_delete_self') == 'y' && 
+			$this->EE->session->userdata('group_id') != 1)
 		{
 			$str = $this->_allow_if('can_delete', $str);
 		}
@@ -2361,19 +2375,15 @@ class Member {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Finalize a few things
-	/** ----------------------------------*/
+	/**
+	 * Finalize a few things
+	 */ 
 	function _final_prep($str)
 	{
-		/** ------------------------------
-		/**  Which mode are we in?
-		/** ------------------------------*/
-
+		// Which mode are we in?
 		// This class can either be run in "stand-alone" mode or through the template engine.
-
 		$template_parser = FALSE;
 
 		if (class_exists('Template'))
@@ -2391,10 +2401,7 @@ class Member {
 			$str = $this->_member_page($str);
 		}
 
-
-		/** ----------------------------------------
-		/**  Parse the language text
-		/** ----------------------------------------*/
+		// Parse the language text
 		if (preg_match_all("/{lang:(.+?)\}/i", $str, $matches))
 		{
 			for ($j = 0; $j < count($matches['0']); $j++)
@@ -2405,10 +2412,7 @@ class Member {
 			}
 		}
 
-		/** ----------------------------------------
-		/**  Parse old style path variables
-		/** ----------------------------------------*/
-
+		// Parse old style path variables
 		// This is here for backward compatibility for people with older templates
 		$str = preg_replace_callback("/".LD."\s*path=(.*?)".RD."/", array(&$this->EE->functions, 'create_url'), $str);
 
@@ -2417,16 +2421,13 @@ class Member {
 			$i = 0;
 			foreach ($matches['1'] as $val)
 			{
-				$path = $this->EE->functions->create_url($this->EE->functions->extract_path($val).'/'.$this->EE->session->userdata['member_id']);
+				$path = $this->EE->functions->create_url($this->EE->functions->extract_path($val).'/'.$this->EE->session->userdata('member_id'));
 				$str = preg_replace("#".$matches['0'][$i++]."#", $path, $str, 1);
 			}
 		}
 		// -------
 
-		/** ----------------------------------------
-		/**  Set some paths
-		/** ----------------------------------------*/
-
+		// Set some paths
 		$theme_images = $this->EE->config->slash_item('theme_folder_url', 1).'profile_themes/'.$this->EE->config->item('member_theme').'/images/';
 
 		if ($this->EE->session->userdata('profile_theme') != '')
@@ -2445,10 +2446,7 @@ class Member {
 			$this->css_file_path = $this->EE->config->slash_item('theme_folder_url', 1).'profile_themes/'.$this->EE->config->item('member_theme').'profile.css';
 		}
 		
-		/** ----------------------------------------
-		/**  Parse {switch="foo|bar"} variables
-		/** ----------------------------------------*/
-
+		// Parse {switch="foo|bar"} variables
 		if (preg_match_all("/".LD."(switch\s*=.+?)".RD."/i", $str, $matches, PREG_SET_ORDER))
 		{
 			foreach ($matches as $match)
@@ -2468,11 +2466,7 @@ class Member {
 			}
 		}
 
-
-		/** ----------------------------------------
-		/**  Finalize the output
-		/** ----------------------------------------*/
-		
+		// Finalize the output		
 		$str = $this->EE->functions->prep_conditionals($str, array('current_request' => $this->request));
 		
 		$str = $this->_var_swap($str,
@@ -2537,11 +2531,11 @@ class Member {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------
-	/**  Set base values of class vars
-	/** ----------------------------------*/
+	/**
+	 * Set base values of class vars
+	 */
 	function _set_properties($props = array())
 	{
 		if (count($props) > 0)
@@ -2553,21 +2547,21 @@ class Member {
 		}
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Sets the member basepath
-	/** ----------------------------------------*/
+	/**
+	 * Sets the member basepath
+	 */
 	function _member_set_basepath()
 	{
 		$this->basepath = $this->EE->functions->create_url($this->trigger);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** ----------------------------------------
-	/**  Compiles a path string
-	/** ----------------------------------------*/
+	/**
+	 * Compiles a path string
+	 */
 	function _member_path($uri = '')
 	{
 		if ($this->basepath == '')
@@ -2578,11 +2572,11 @@ class Member {
 		return $this->EE->functions->remove_double_slashes($this->basepath.'/'.$uri);
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Helpers for "if" conditions
-	/** -------------------------------------*/
+	/**
+	 * Helpers for "if" conditions
+	 */
 	function _deny_if($cond, $str, $replace = '')
 	{
 		return preg_replace("/\{if\s+".$cond."\}.+?\{\/if\}/si", $replace, $str);
@@ -2593,11 +2587,11 @@ class Member {
 		return preg_replace("/\{if\s+".$cond."\}(.+?)\{\/if\}/si", "\\1", $str);
 	}
 
+	// --------------------------------------------------------------------
 
-	/** ----------------------------------------
-	/**  Replace variables
-	/** ----------------------------------------*/
-
+	/**
+	 * Replace variables
+	 */
 	function _var_swap($str, $data)
 	{
 		if ( ! is_array($data))
@@ -2613,34 +2607,27 @@ class Member {
 		return $str;
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-
-	/** ---------------------------------------
-	/**  Swap single variables with final value
-	/** ---------------------------------------*/
+	/**
+	 * Swap single variables with final value
+	 */
 	function _var_swap_single($search, $replace, $source)
 	{
 		return str_replace(LD.$search.RD, $replace, $source);
 	}
 
+	// --------------------------------------------------------------------
 
-
-
-	/** ----------------------------------------
-	/**  Custom Member Profile Data
-	/** ----------------------------------------*/
-
+	/**
+	 * Custom Member Profile Data
+	 */
 	function custom_profile_data()
 	{
 
-		$member_id = ( ! $this->EE->TMPL->fetch_param('member_id')) ? $this->EE->session->userdata['member_id'] : $this->EE->TMPL->fetch_param('member_id');
+		$member_id = ( ! $this->EE->TMPL->fetch_param('member_id')) ? $this->EE->session->userdata('member_id') : $this->EE->TMPL->fetch_param('member_id');
 
-		/** ----------------------------------------
-        /**  Default Member Data
-        /** ----------------------------------------*/
-
+		// Default Member Data
 		$this->EE->db->select('m.member_id, m.group_id, m.username, m.screen_name, m.email, m.signature,
 							m.avatar_filename, m.avatar_width, m.avatar_height,
 							m.photo_filename, m.photo_width, m.photo_height,
@@ -2663,12 +2650,7 @@ class Member {
 
 		$default_fields = $query->row_array();
 		
-		
-
-		/** ----------------------------------------
-		/**  Is there an avatar?
-		/** ----------------------------------------*/
-
+		// Is there an avatar?
 		if ($this->EE->config->item('enable_avatars') == 'y' AND $query->row('avatar_filename') != '')
 		{
 			$avatar_path	= $this->EE->config->item('avatar_url').$query->row('avatar_filename');
@@ -2684,10 +2666,7 @@ class Member {
 			$avatar			= 'FALSE';
 		}
 
-		/** ----------------------------------------
-		/**  Is there a member photo?
-		/** ----------------------------------------*/
-
+		// Is there a member photo?
 		if ($this->EE->config->item('enable_photos') == 'y' AND $query->row('photo_filename') != '')
 		{
 			$photo_path		= $this->EE->config->item('photo_url').$query->row('photo_filename');
@@ -2703,10 +2682,7 @@ class Member {
 			$photo			= 'FALSE';
 		}
 
-		/** ----------------------------------------
-		/**  Is there a signature image?
-		/** ----------------------------------------*/
-						
+		// Is there a signature image?
 		if ($this->EE->config->item('enable_signatures') == 'y' AND $query->row('sig_img_filename') != '')
 		{
 			$sig_img_path	= $this->EE->config->item('sig_img_url').$query->row('sig_img_filename');
@@ -2722,11 +2698,7 @@ class Member {
 			$sig_img		= 'FALSE';
 		}
 
-
-		/** ----------------------------------------
-		/**  Parse variables
-		/** ----------------------------------------*/
-
+		// Parse variables
 		if ($this->in_forum == TRUE)
 		{
 			$search_path = $this->forum_path.'member_search/'.$this->cur_id.'/';
@@ -2755,10 +2727,7 @@ class Member {
 
 		$default_fields = array_merge($default_fields, $more_fields);
 
-		/** ----------------------------------------
-		/**  Fetch the custom member field definitions
-		/** ----------------------------------------*/
-
+		// Fetch the custom member field definitions
 		$fields = array();
 
 		$this->EE->db->select('m_field_id, m_field_name, m_field_fmt');
@@ -2809,15 +2778,10 @@ class Member {
 
 			$this->EE->TMPL->tagdata = $this->EE->functions->prep_conditionals($this->EE->TMPL->tagdata, $cond);
 
-			/** ----------------------------------------
-			/**  Swap Variables
-			/** ----------------------------------------*/
-
+			// Swap Variables
 			foreach ($this->EE->TMPL->var_single as $key => $val)
 			{
-				/** ----------------------------------------
-                /**  parse default member data
-                /** ----------------------------------------*/
+				// parse default member data
 
 				//  Format URLs
 				if ($key == 'url')
@@ -2975,19 +2939,13 @@ class Member {
 					$this->EE->TMPL->tagdata = $this->_var_swap_single($key, $total_posts, $this->EE->TMPL->tagdata);
 				}
 
-				/** ----------------------------------------
-				/**  parse basic fields (username, screen_name, etc.)
-				/** ----------------------------------------*/
-
+				// parse basic fields (username, screen_name, etc.)
 				if (array_key_exists($key, $default_fields))
 				{
 					$this->EE->TMPL->tagdata = $this->_var_swap_single($val, $default_fields[$val], $this->EE->TMPL->tagdata);
 				}
 
-				/** ----------------------------------------
-				/**  parse custom member fields
-				/** ----------------------------------------*/
-				
+				// parse custom member fields
 				if (isset($fields[$val]) && array_key_exists('m_field_id_'.$fields[$val]['0'], $row))
 				{
 					$this->EE->TMPL->tagdata = $this->EE->TMPL->swap_var_single(
@@ -3011,12 +2969,11 @@ class Member {
 		return $this->EE->TMPL->tagdata;
 	}
 
+	// --------------------------------------------------------------------
 
-
-	/** -------------------------------------
-	/**  Ignore List
-	/** -------------------------------------*/
-
+	/**
+	 * Ignore List
+	 */
 	function ignore_list()
 	{
 		$pre = 'ignore_';
@@ -3035,7 +2992,7 @@ class Member {
 		}
 		else
 		{
-			$ignored = $this->EE->session->userdata['ignore_list'];
+			$ignored = $this->EE->session->userdata('ignore_list');
 		}
 
 		$query = $this->EE->db->query("SELECT m.member_id, m.group_id, m.username, m.screen_name, m.email, m.ip_address, m.location, m.total_entries, m.total_comments, m.private_messages, m.total_forum_topics, m.total_forum_posts AS total_forum_replies, m.total_forum_topics + m.total_forum_posts AS total_forum_posts,

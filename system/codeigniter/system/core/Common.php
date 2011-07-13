@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -128,13 +128,13 @@
 		// thenin the local application/libraries folder
 		foreach (array(BASEPATH, APPPATH) as $path)
 		{
-			if (file_exists($path.$directory.'/'.$class.EXT))
+			if (file_exists($path.$directory.'/'.$class.'.php'))
 			{
 				$name = $prefix.$class;
 
 				if (class_exists($name) === FALSE)
 				{
-					require($path.$directory.'/'.$class.EXT);
+					require($path.$directory.'/'.$class.'.php');
 				}
 
 				break;
@@ -142,13 +142,13 @@
 		}
 
 		// Is the request a class extension?  If so we load it too
-		if (file_exists(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.EXT))
+		if (file_exists(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php'))
 		{
 			$name = config_item('subclass_prefix').$class;
 
 			if (class_exists($name) === FALSE)
 			{
-				require(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.EXT);
+				require(APPPATH.$directory.'/'.config_item('subclass_prefix').$class.'.php');
 			}
 		}
 
@@ -157,7 +157,7 @@
 		{
 			// Note: We use exit() rather then show_error() in order to avoid a
 			// self-referencing loop with the Excptions class
-			exit('Unable to locate the specified class: '.$class.EXT);
+			exit('Unable to locate the specified class: '.$class.'.php');
 		}
 
 		// Keep track of what we just loaded
@@ -209,13 +209,13 @@
 		}
 
 		// Fetch the config file
-		if ( ! file_exists(APPPATH.'config/config'.EXT))
+		if ( ! file_exists(APPPATH.'config/config.php'))
 		{
 			exit('The configuration file does not exist.');
 		}
 		else
 		{
-			require(APPPATH.'config/config'.EXT);
+			require(APPPATH.'config/config.php');
 		}
 
 		// Does the $config array exist in the file?
@@ -419,7 +419,7 @@
 /**
 * Exception Handler
 *
-* This is the custom exception handler that is declaired at the top
+* This is the custom exception handler that is declared at the top
 * of Codeigniter.php.  The main reason we use this is to permit
 * PHP errors to be logged in our own log files since the user may
 * not have access to server logs. Since this function
@@ -472,32 +472,29 @@
 	 * @param	string
 	 * @return	string
 	 */
-	function remove_invisible_characters($str)
+	function remove_invisible_characters($str, $url_encoded = TRUE)
 	{
-		static $non_displayables;
-
-		if ( ! isset($non_displayables))
+		$non_displayables = array();
+		
+		// every control character except newline (dec 10)
+		// carriage return (dec 13), and horizontal tab (dec 09)
+		
+		if ($url_encoded)
 		{
-			// every control character except newline (dec 10), carriage return (dec 13), and horizontal tab (dec 09),
-			$non_displayables = array(
-										'/%0[0-8bcef]/',			// url encoded 00-08, 11, 12, 14, 15
-										'/%1[0-9a-f]/',				// url encoded 16-31
-										'/[\x00-\x08]/',			// 00-08
-										'/\x0b/', '/\x0c/',			// 11, 12
-										'/[\x0e-\x1f]/'				// 14-31
-									);
+			$non_displayables[] = '/%0[0-8bcef]/';	// url encoded 00-08, 11, 12, 14, 15
+			$non_displayables[] = '/%1[0-9a-f]/';	// url encoded 16-31
 		}
+		
+		$non_displayables[] = '/[\x00-\x08\x0B\x0C\x0E-\x1F\x7F]+/S';	// 00-08, 11, 12, 14-31, 127
 
 		do
 		{
-			$cleaned = $str;
-			$str = preg_replace($non_displayables, '', $str);
+			$str = preg_replace($non_displayables, '', $str, -1, $count);
 		}
-		while ($cleaned != $str);
+		while ($count);
 
 		return $str;
 	}
-
 
 /* End of file Common.php */
 /* Location: ./system/core/Common.php */

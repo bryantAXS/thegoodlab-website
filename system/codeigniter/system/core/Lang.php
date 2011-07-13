@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -51,14 +51,14 @@ class CI_Lang {
 	 */
 	function load($langfile = '', $idiom = '', $return = FALSE, $add_suffix = TRUE, $alt_path = '')
 	{
-		$langfile = str_replace(EXT, '', $langfile);
+		$langfile = str_replace('.php', '', $langfile);
 
 		if ($add_suffix == TRUE)
 		{
 			$langfile = str_replace('_lang.', '', $langfile).'_lang';
 		}
 
-		$langfile .= EXT;
+		$langfile .= '.php';
 
 		if (in_array($langfile, $this->is_loaded, TRUE))
 		{

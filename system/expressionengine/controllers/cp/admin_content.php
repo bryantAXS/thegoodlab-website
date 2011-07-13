@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -24,7 +24,10 @@
  */
 class Admin_content extends CI_Controller {
 
-	var $reserved = array('random', 'date', 'title', 'url_title', 'edit_date', 'comment_total', 'username', 'screen_name', 'most_recent_comment', 'expiration_date');
+	var $reserved = array(
+					'random', 'date', 'title', 'url_title', 'edit_date', 
+					'comment_total', 'username', 'screen_name', 
+					'most_recent_comment', 'expiration_date');
 
 	// Default "open" and "closed" status colors
 	var $status_color_open	= '009933';
@@ -44,7 +47,8 @@ class Admin_content extends CI_Controller {
 		parent::__construct();
 
 		$this->lang->loadfile('admin');
-
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', lang('admin_content'));
+		
 		// Note- no access check here to allow the publish page access to categories
 	}
 
@@ -58,16 +62,16 @@ class Admin_content extends CI_Controller {
 	 */
 	function index()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
+		if ( ! $this->cp->allowed_group('can_access_admin', 'can_access_content_prefs'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('admin'));
+		$this->cp->set_variable('cp_page_title', lang('admin'));
 
 		$this->javascript->compile();
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('admin_content'));
+		$this->cp->set_variable('cp_page_title', lang('admin_content'));
 
 		$this->load->vars(array('controller'=>'admin'));
 		
@@ -86,20 +90,23 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_management()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
         $this->cp->set_right_nav(array('create_new_channel' => BASE.AMP.'C=admin_content'.AMP.'M=channel_add'));
 
+		$this->load->library('table');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('channel_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('channel_management'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', $this->lang->line('admin_content'));
+		$this->cp->set_variable('cp_page_title', lang('channels'));
+
+		$this->jquery->tablesorter('.mainTable', '{
+			headers: {2: {sorter: false}, 3: {sorter: false}, 4: {sorter: false}},
+			widgets: ["zebra"]
+		}');
+
+		$this->javascript->compile();
 		
-		$this->load->library('table');
 
 		$vars['channel_data'] = $this->channel_model->get_channels();
 
@@ -118,10 +125,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_add()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 		
 		$this->_channel_validation_rules();
 
@@ -135,18 +139,23 @@ class Admin_content extends CI_Controller {
 		$this->load->model('channel_model');
 		$this->load->model('category_model');
 
+		$this->cp->add_js_script('plugin', 'ee_url_title');
+
 		$this->javascript->output('
 			$("#edit_group_prefs").hide();
+			$("#channel_title").bind("keyup keydown", function() {
+				$(this).ee_url_title("#channel_name");
+			});
 		');
 
 		$this->javascript->click("#edit_group_prefs_y", '$("#edit_group_prefs").show();', FALSE);
 		$this->javascript->click("#edit_group_prefs_n", '$("#edit_group_prefs").hide();', FALSE);
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('create_new_channel'));
+		$this->cp->set_variable('cp_page_title', lang('create_new_channel'));
 
 		$channels = $this->channel_model->get_channels($this->config->item('site_id'), array('channel_id', 'channel_title'));
 
-		$vars['duplicate_channel_prefs_options'][''] = $this->lang->line('do_not_duplicate');
+		$vars['duplicate_channel_prefs_options'][''] = lang('do_not_duplicate');
 
 		if ($channels->num_rows() > 0)
 		{
@@ -156,7 +165,7 @@ class Admin_content extends CI_Controller {
 			}
 		}
 
-		$vars['cat_group_options'][''] = $this->lang->line('none');
+		$vars['cat_group_options'][''] = lang('none');
 
 		$groups = $this->category_model->get_categories('', $this->config->item('site_id'));
 
@@ -168,7 +177,7 @@ class Admin_content extends CI_Controller {
 			}
 		}
 
-		$vars['status_group_options'][''] = $this->lang->line('none');
+		$vars['status_group_options'][''] = lang('none');
 
 		$this->db->select('group_id, group_name');
 		$this->db->where('site_id', $this->config->item('site_id'));
@@ -184,7 +193,7 @@ class Admin_content extends CI_Controller {
 			}
 		}
 
-		$vars['field_group_options'][''] = $this->lang->line('none');
+		$vars['field_group_options'][''] = lang('none');
 
 		$this->db->select('group_id, group_name');
 		$this->db->where('site_id', $this->config->item('site_id'));
@@ -238,6 +247,8 @@ class Admin_content extends CI_Controller {
 			$vars['old_group_id'][$row['group_id']] = ($this->config->item('multiple_sites_enabled') == 'y') ? $row['site_label'].NBS.'-'.NBS.$row['group_name'] : $row['group_name'];
 		}
 
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', lang('channels'));
+
 		$this->javascript->compile();
 		$this->load->view('admin/channel_add', $vars);
 	}
@@ -254,10 +265,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_edit()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 		
 		// Get modules that are installed
 		$this->cp->get_installed_modules();
@@ -305,7 +313,7 @@ class Admin_content extends CI_Controller {
 		// live_look_template
 		$query = $this->template_model->get_templates();
 
-		$vars['live_look_template_options'][0] = $this->lang->line('no_live_look_template');
+		$vars['live_look_template_options'][0] = lang('no_live_look_template');
 
 		if ($query->num_rows() > 0)
 		{
@@ -318,19 +326,19 @@ class Admin_content extends CI_Controller {
 		// Default status menu
 		$query = $this->status_model->get_statuses($vars['status_group']);
 
-		$vars['deft_status_options']['open'] = $this->lang->line('open');
-		$vars['deft_status_options']['closed'] = $this->lang->line('closed');
+		$vars['deft_status_options']['open'] = lang('open');
+		$vars['deft_status_options']['closed'] = lang('closed');
 
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result() as $row)
 			{
-				$status_name = ($row->status == 'open' OR $row->status == 'closed') ? $this->lang->line($row->status) : $row->status;
+				$status_name = ($row->status == 'open' OR $row->status == 'closed') ? lang($row->status) : $row->status;
 				$vars['deft_status_options'][$row->status] = $status_name;
 			}
 		}
 		
-		$vars['deft_category_options'][''] = $this->lang->line('none');
+		$vars['deft_category_options'][''] = lang('none');
 		
 		$cats = $vars['cat_group'] ? explode('|', $vars['cat_group']) : array();
 
@@ -373,32 +381,32 @@ class Admin_content extends CI_Controller {
 
 		// HTML formatting
 		$vars['channel_html_formatting_options'] = array(
-			'none'	=> $this->lang->line('convert_to_entities'),
-			'safe'	=> $this->lang->line('allow_safe_html'),
-			'all'	=> $this->lang->line('allow_all_html')
+			'none'	=> lang('convert_to_entities'),
+			'safe'	=> lang('allow_safe_html'),
+			'all'	=> lang('allow_all_html')
 		);
 
 		if (isset($this->cp->installed_modules['comment']))
 		{
 			// Default comment text formatting
 			$vars['comment_text_formatting_options'] = array(
-				'none'	=> $this->lang->line('none'),
-				'xhtml'	=> $this->lang->line('xhtml'),
-				'br'	=> $this->lang->line('auto_br')
+				'none'	=> lang('none'),
+				'xhtml'	=> lang('xhtml'),
+				'br'	=> lang('auto_br')
 			);
 
 			// Comment HTML formatting
 			$vars['comment_html_formatting_options'] = array(
-				'none'	=> $this->lang->line('convert_to_entities'),
-				'safe'	=> $this->lang->line('allow_safe_html'),
-				'all'	=> $this->lang->line('allow_all_html_not_recommended')
+				'none'	=> lang('convert_to_entities'),
+				'safe'	=> lang('allow_safe_html'),
+				'all'	=> lang('allow_all_html_not_recommended')
 			);		
 		}
 
 		$this->javascript->compile();
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('channel_prefs').' - '.$vars['channel_title']);
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', $this->lang->line('channel_management'));
+		$this->cp->set_variable('cp_page_title', lang('channel_prefs').': '.$vars['channel_title']);
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', lang('channels'));
 
 
 		$this->load->view('admin/channel_edit', $vars);
@@ -432,7 +440,7 @@ class Admin_content extends CI_Controller {
 		{
 			return TRUE;
 		}
-		$this->form_validation->set_message('_valid_prefix', $this->lang->line('invalid_url_title_prefix'));
+		$this->form_validation->set_message('_valid_prefix', lang('invalid_url_title_prefix'));
 		return preg_match('/^[\w\-]+$/', $str) ? TRUE : FALSE;
 	}
 	
@@ -441,7 +449,7 @@ class Admin_content extends CI_Controller {
 		// Check short name characters
 		if (preg_match('/[^a-z0-9\-\_]/i', $str))
 		{
-			$this->form_validation->set_message('_valid_channel_name', $this->lang->line('invalid_short_name'));
+			$this->form_validation->set_message('_valid_channel_name', lang('invalid_short_name'));
 			return FALSE;
 		}
 		
@@ -456,7 +464,7 @@ class Admin_content extends CI_Controller {
 
 		if ($this->db->count_all_results('channels') > 0)
 		{
-			$this->form_validation->set_message('_valid_channel_name', $this->lang->line('taken_channel_name'));
+			$this->form_validation->set_message('_valid_channel_name', lang('taken_channel_name'));
 			return FALSE;
 		}
 		
@@ -476,10 +484,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_update()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->lang->loadfile('admin_content');
 
@@ -526,7 +531,6 @@ class Admin_content extends CI_Controller {
 
 		if ($edit == FALSE)
 		{
-			$this->load->library('security');
 			$create_templates	= $this->input->get_post('create_templates');
 			$old_group_id		= $this->input->get_post('old_group_id');
 			$group_name			= $this->input->post('group_name');
@@ -544,17 +548,17 @@ class Admin_content extends CI_Controller {
 
 				if ( ! $this->cp->allowed_group('can_admin_templates'))
 				{
-					show_error($this->lang->line('unauthorized_access'));
+					show_error(lang('unauthorized_access'));
 				}
 
 				if ( ! $group_name)
 				{
-					show_error($this->lang->line('group_required'));
+					show_error(lang('group_required'));
 				}
 
 				if ( ! preg_match("#^[a-zA-Z0-9_\-/]+$#i", $group_name))
 				{
-					show_error($this->lang->line('illegal_characters'));
+					show_error(lang('illegal_characters'));
 				}
 
 				$reserved[] = 'act';
@@ -566,7 +570,7 @@ class Admin_content extends CI_Controller {
 
 				if (in_array($group_name, $reserved))
 				{
-					show_error($this->lang->line('reserved_name'));
+					show_error(lang('reserved_name'));
 				}
 
 				$this->db->where('site_id', $this->config->item('site_id'));
@@ -576,7 +580,7 @@ class Admin_content extends CI_Controller {
 
 				if ($count > 0)
 				{
-					show_error($this->lang->line('template_group_taken'));
+					show_error(lang('template_group_taken'));
 				}
 			}
 		}
@@ -634,7 +638,7 @@ class Admin_content extends CI_Controller {
 
 			// Assign field group if there is only one
 
-			if ( ! isset($_POST['field_group']) OR (isset($_POST['field_group']) && ! is_numeric($_POST['field_group'])))
+			if ($dupe_id != '' && ( ! isset($_POST['field_group']) OR (isset($_POST['field_group']) && ! is_numeric($_POST['field_group']))))
 			{
 				$this->db->select('group_id');
 				$this->db->where('site_id', $this->config->item('site_id'));
@@ -754,7 +758,7 @@ class Admin_content extends CI_Controller {
 				$this->layout->duplicate_layout($dupe_id, $channel_id);
 			}
 
-			$success_msg = $this->lang->line('channel_created');
+			$success_msg = lang('channel_created');
 
 			$this->logger->log_action($success_msg.NBS.NBS.$_POST['channel_title']);
 		}
@@ -777,7 +781,7 @@ class Admin_content extends CI_Controller {
 			$this->db->query($sql);
 			$channel_id = $this->db->escape_str($_POST['channel_id']);
 
-			$success_msg = $this->lang->line('channel_updated');
+			$success_msg = lang('channel_updated');
 		}
 		
 		/** -----------------------------------------
@@ -969,10 +973,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_update_group_assignments()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$update_fields = FALSE;
 		$channel_id = $this->input->post('channel_id');
@@ -1056,7 +1057,7 @@ class Admin_content extends CI_Controller {
 		}
 
 
-		$success_msg = $this->lang->line('channel_updated');
+		$success_msg = lang('channel_updated');
 		$cp_message = $success_msg.NBS.NBS.$_POST['channel_title'];
 
 		$this->session->set_flashdata('message_success', $cp_message);
@@ -1077,10 +1078,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_edit_group_assignments()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		// If we don't have the $channel_id variable, bail out.
 		$channel_id = $this->input->get_post('channel_id');
@@ -1092,13 +1090,9 @@ class Admin_content extends CI_Controller {
 
 		$this->lang->loadfile('admin_content');
 		$this->load->helper('form');
-		$this->load->model('channel_model');
-		$this->load->model('category_model');
-		$this->load->model('status_model');
-		$this->load->model('field_model');
-
-		$this->cp->set_variable('cp_page_title', $this->lang->line('edit_group_assignments'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', $this->lang->line('channel_management'));
+		$this->load->model(array(
+ 			'channel_model', 'category_model', 'status_model', 'field_model'
+		));
 
 		$query = $this->channel_model->get_channel_info($channel_id);
 
@@ -1111,17 +1105,19 @@ class Admin_content extends CI_Controller {
 			
 			$vars[$key] = $val;  
 		}
-
-		$vars['form_hidden']['channel_id'] = $channel_id;
-		$vars['form_hidden']['channel_name'] = $vars['channel_name'];
-		$vars['form_hidden']['channel_title'] = $vars['channel_title'];
-		$vars['form_hidden']['return'] = 1;
+		
+		$vars['form_hidden'] = array(
+			'channel_id'	=> $channel_id,
+			'channel_name'	=> $vars['channel_name'],
+			'channel_title'	=> $vars['channel_title'],
+			'return'		=> 1
+		);
 
 
 		// Category Select List
-		$query = $this->category_model->get_categories('', FALSE);
+		$query = $this->category_model->get_category_groups('', FALSE, 2);
 
-		$vars['cat_group_options'][''] = $this->lang->line('none');
+		$vars['cat_group_options'][''] = lang('none');
 
 		if ($query->num_rows() > 0)
 		{
@@ -1138,7 +1134,7 @@ class Admin_content extends CI_Controller {
 		
 		$query = $this->db->get('status_groups');
 
-		$vars['status_group_options'][''] = $this->lang->line('none');
+		$vars['status_group_options'][''] = lang('none');
 
 		if ($query->num_rows() > 0)
 		{
@@ -1155,7 +1151,7 @@ class Admin_content extends CI_Controller {
 		
 		$query = $this->db->get('field_groups');
 
-		$vars['field_group_options'][''] = $this->lang->line('none');
+		$vars['field_group_options'][''] = lang('none');
 
 		if ($query->num_rows() > 0)
 		{
@@ -1166,6 +1162,9 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->javascript->compile();
+
+		$this->cp->set_variable('cp_page_title', lang('edit_group_assignments'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', lang('channels'));
 
 		$this->load->view('admin/channel_edit_group_assignments', $vars);
 	}
@@ -1180,10 +1179,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_delete_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$channel_id = $this->input->get_post('channel_id');
 
@@ -1196,13 +1192,13 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('channel_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_channel'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', $this->lang->line('channel_management'));
+		$this->cp->set_variable('cp_page_title', lang('delete_channel'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=channel_management', lang('channels'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=channel_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['channel_id'] = $channel_id;
-		$vars['message'] = $this->lang->line('delete_channel_confirmation');
+		$vars['message'] = lang('delete_channel_confirmation');
 
 		// Grab category_groups locations with this id
 		$items = $this->channel_model->get_channel_info($channel_id);
@@ -1230,10 +1226,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function channel_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$channel_id = $this->input->get_post('channel_id');
 
@@ -1254,7 +1247,7 @@ class Admin_content extends CI_Controller {
 
 		$channel_title = $query->row('channel_title') ;
 
-		$this->logger->log_action($this->lang->line('channel_deleted').NBS.NBS.$channel_title);
+		$this->logger->log_action(lang('channel_deleted').NBS.NBS.$channel_title);
 
 		$this->db->select('entry_id, author_id');
 		$this->db->where('channel_id', $channel_id);
@@ -1280,7 +1273,7 @@ class Admin_content extends CI_Controller {
 		$this->load->library('layout');
 		$this->layout->delete_channel_layouts($channel_id);
 
-		$this->session->set_flashdata('message_success', $this->lang->line('channel_deleted').NBS.$channel_title);
+		$this->session->set_flashdata('message_success', lang('channel_deleted').NBS.$channel_title);
 		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=channel_management');
 	}
 
@@ -1296,24 +1289,26 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_management()
 	{
-
-		if ( ! ($this->cp->allowed_group('can_edit_categories') OR 
-				$this->cp->allowed_group('can_delete_categories') OR
-				$this->cp->allowed_group('can_access_admin') OR
-				$this->cp->allowed_group('can_access_content_prefs')))
-		{		
-			show_error($this->lang->line('unauthorized_access'));
+		if (AJAX_REQUEST)
+		{
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
+		}
+		else
+		{
+			$this->_restrict_prefs_access();
 		}		
 
 		$this->load->library('table');
 		$this->load->model('category_model');
 		$this->lang->loadfile('admin_content');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('categories'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', $this->lang->line('admin_content'));
+		$this->cp->set_variable('cp_page_title', lang('categories'));
 
 		$this->jquery->tablesorter('.mainTable', '{
-			headers: {1: {sorter: false}, 2: {sorter: false}, 3: {sorter: false}, 4: {sorter: false}},
+			headers: {2: {sorter: false}, 3: {sorter: false}, 4: {sorter: false}, 5: {sorter: false}},
 			widgets: ["zebra"]
 		}');
 
@@ -1370,10 +1365,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function edit_category_group()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->model('admin_model');
 		$this->load->model('category_model');
@@ -1381,10 +1373,10 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->library('table');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		// Set default values
-		$vars['cp_page_title'] = $this->lang->line('create_new_category_group');
+		$vars['cp_page_title'] = lang('create_new_category_group');
 		$vars['submit_lang_key'] = 'submit';
 		$vars['form_hidden'] = array(); // nothing needs to be passed into a new cat group
 		$vars['group_name'] = '';
@@ -1394,9 +1386,9 @@ class Admin_content extends CI_Controller {
 		$vars['can_edit_selected'] = array();
 		$vars['can_delete_selected'] = array();
 		$vars['formatting_options'] = array(
-												'none'	=> $this->lang->line('convert_to_entities'),
-												'safe'	=> $this->lang->line('allow_safe_html'),
-												'all'	=> $this->lang->line('allow_all_html')
+												'none'	=> lang('convert_to_entities'),
+												'safe'	=> lang('allow_safe_html'),
+												'all'	=> lang('allow_all_html')
 											);
 		$can_edit_selected = array();
 		$can_delete_selected = array();
@@ -1414,7 +1406,7 @@ class Admin_content extends CI_Controller {
 			}
 
 			// some defaults to overwrite if we're editing
-			$vars['cp_page_title'] = $this->lang->line('edit_category_group');
+			$vars['cp_page_title'] = lang('edit_category_group');
 			$vars['submit_lang_key'] = 'update';
 			$vars['form_hidden']['group_id'] = $group_id;
 
@@ -1465,7 +1457,10 @@ class Admin_content extends CI_Controller {
 				$vars['can_delete'][$row['group_id']] = $row['group_title'];
 			}
 		}
-
+		
+		// Get the selected 'excluded' group
+		$vars['exclude_selected'] = (isset($vars['exclude_group'])) ? $vars['exclude_group'] : FALSE;
+		
 		$this->javascript->compile();
 
 		$this->load->view('admin/edit_category_group', $vars);
@@ -1484,10 +1479,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function update_category_group()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		// If the $group_id variable is present we are editing an
 		// existing group, otherwise we are creating a new one
@@ -1510,7 +1502,7 @@ class Admin_content extends CI_Controller {
 		// check for bad characters in group name
 		if ( ! preg_match("#^[a-zA-Z0-9_\-/\s]+$#i", $_POST['group_name']))
 		{
-			show_error($this->lang->line('illegal_characters'));
+			show_error(lang('illegal_characters'));
 		}
 
 		$this->load->model('category_model');
@@ -1518,7 +1510,7 @@ class Admin_content extends CI_Controller {
 		// Is the group name taken?
 		if ($this->category_model->is_duplicate_category_group($this->input->post('group_name'), $this->input->post('group_id')))
 		{
-			show_error($this->lang->line('taken_category_group_name'));
+			show_error(lang('taken_category_group_name'));
 		}
 
 		// make data array of variables from our POST data
@@ -1559,8 +1551,8 @@ class Admin_content extends CI_Controller {
 		{
 			$this->category_model->insert_category_group($data);
 
-			$cp_message = $this->lang->line('category_group_created').' '.$data['group_name'];
-			$this->logger->log_action($this->lang->line('category_group_created').NBS.NBS.$data['group_name']);
+			$cp_message = lang('category_group_created').' '.$data['group_name'];
+			$this->logger->log_action(lang('category_group_created').NBS.NBS.$data['group_name']);
 
 			$this->db->select('channel_id');
 			$this->db->where('site_id', $this->config->item('site_id'));
@@ -1568,7 +1560,7 @@ class Admin_content extends CI_Controller {
 
 			if ($query->num_rows() > 0)
 			{
-				$cp_message .= '<br />'.$this->lang->line('assign_group_to_channel');
+				$cp_message .= '<br />'.lang('assign_group_to_channel');
 
 				if ($query->num_rows() == 1)
 				{
@@ -1579,13 +1571,13 @@ class Admin_content extends CI_Controller {
 					$link = 'C=admin_content'.AMP.'M=channel_management';
 				}
 			
-				$cp_message .= '<br /><a href="'.BASE.AMP.$link.'">'. $this->lang->line('click_to_assign_group').'</a>';
+				$cp_message .= '<br /><a href="'.BASE.AMP.$link.'">'. lang('click_to_assign_group').'</a>';
 			}
 		}
 		else
 		{
 			$this->category_model->update_category_group($data['group_id'], $data);
-			$cp_message = $this->lang->line('category_group_updated').NBS.$data['group_name'];
+			$cp_message = lang('category_group_updated').NBS.$data['group_name'];
 		}
 
 		$this->session->set_flashdata('message_success', $cp_message);
@@ -1604,10 +1596,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_group_delete_conf()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -1620,13 +1609,13 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_group'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_variable('cp_page_title', lang('delete_group'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=category_group_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['group_id'] = $group_id;
-		$vars['message'] = $this->lang->line('delete_cat_group_confirmation');
+		$vars['message'] = lang('delete_cat_group_confirmation');
 
 		// Grab category_groups locations with this id
 		$items = $this->category_model->get_category_group_name($group_id);
@@ -1654,10 +1643,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_group_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -1681,11 +1667,11 @@ class Admin_content extends CI_Controller {
 		//  Delete from exp_category_posts
 		$this->category_model->delete_category_group($group_id);
 
-		$this->logger->log_action($this->lang->line('category_group_deleted').NBS.NBS.$name);
+		$this->logger->log_action(lang('category_group_deleted').NBS.NBS.$name);
 
 		$this->functions->clear_caching('all', '', TRUE);
 
-		$this->session->set_flashdata('message_success', $this->lang->line('category_group_deleted').NBS.NBS.$name);
+		$this->session->set_flashdata('message_success', lang('category_group_deleted').NBS.NBS.$name);
 		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=category_management');
 	}
 
@@ -1705,15 +1691,16 @@ class Admin_content extends CI_Controller {
 		if (AJAX_REQUEST)
 		{
 			$vars['EE_view_disable'] = TRUE;
+			
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
 		}
-		
-		if ( ! ($this->cp->allowed_group('can_edit_categories') OR 
-				$this->cp->allowed_group('can_access_admin') OR
-				$this->cp->allowed_group('can_access_content_prefs')))
-		{		
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
+		else
+		{
+			$this->_restrict_prefs_access();
+		}	
 
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
@@ -1723,7 +1710,7 @@ class Admin_content extends CI_Controller {
 		
 		$this->api->instantiate('channel_categories');
 		
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		$vars['message'] = ''; // override lower down if needed
 		$vars['form_action'] = '';
@@ -1740,7 +1727,7 @@ class Admin_content extends CI_Controller {
 		{
 			if (($group_id = $this->input->get_post('group_id')) === FALSE OR ! is_numeric($group_id))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
 
@@ -1753,14 +1740,14 @@ class Admin_content extends CI_Controller {
 			
 			if ($query->num_rows() == 0)
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 
 			$can_edit = explode('|', rtrim($query->row('can_edit_categories') , '|'));
 
 			if ($this->session->userdata['group_id'] != 1 AND ! in_array($this->session->userdata['group_id'], $can_edit))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
 
@@ -1782,17 +1769,15 @@ class Admin_content extends CI_Controller {
 
 		if ($update != FALSE)
 		{
-			$vars['message'] = $this->lang->line('category_updated');
+			$vars['message'] = lang('category_updated');
 		}
 
 		// Fetch the category tree
 		$this->api_channel_categories->category_tree($group_id, '', $sort_order);
 
-		if (count($this->api_channel_categories->categories) == 0)
-		{
-			$vars['categories'] = array();
-		}
-		else
+		$vars['categories'] = array();
+		
+		if (count($this->api_channel_categories->categories) > 0)
 		{
 			$vars['categories'] = $this->api_channel_categories->categories;
 
@@ -1809,9 +1794,9 @@ class Admin_content extends CI_Controller {
 		$vars['can_delete'] = ($this->session->userdata('can_delete_categories') == 'y') ? TRUE : FALSE;
 		$vars['group_id'] = $group_id;
 
-        $this->cp->set_right_nav(array(
-                'new_category'  => BASE.AMP.'C=admin_content'.AMP.'M=category_edit'.AMP.'group_id='.$group_id
-            ));
+		$this->cp->set_right_nav(array(
+			'new_category'  => BASE.AMP.'C=admin_content'.AMP.'M=category_edit'.AMP.'group_id='.$group_id
+		));
 
 		$this->load->view('admin/category_editor', $vars);
 	}
@@ -1828,9 +1813,16 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_edit()
 	{
-		if ( ! $this->cp->allowed_group('can_edit_categories'))
+		if (AJAX_REQUEST)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
+		}
+		else
+		{
+			$this->_restrict_prefs_access();
 		}
 
 		$this->load->model('category_model');
@@ -1845,7 +1837,7 @@ class Admin_content extends CI_Controller {
 		{
 			if ( ! is_numeric($group_id))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
 
@@ -1858,17 +1850,17 @@ class Admin_content extends CI_Controller {
 
 			if ($query->num_rows() == 0)
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 
 			$can_edit = explode('|', rtrim($query->row('can_edit_categories') , '|'));
 
 			if ($this->session->userdata['group_id'] != 1 AND ! in_array($this->session->userdata['group_id'], $can_edit))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
-
+		
 		$vars['cat_id'] = $this->input->get_post('cat_id');
 
 		$default = array('cat_name', 'cat_url_title', 'cat_description', 'cat_image', 'cat_id', 'parent_id');
@@ -1880,7 +1872,7 @@ class Admin_content extends CI_Controller {
 
 			if ($query->num_rows() == 0)
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 
 			$row = $query->row_array();
@@ -1909,14 +1901,12 @@ class Admin_content extends CI_Controller {
 			$vars['parent_id'] = $this->input->post('parent_id');
 		}
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
-		$this->cp->set_variable('cp_page_title', ($vars['cat_id'] == '') ? $this->lang->line('new_category') : $this->lang->line('edit_category'));
-
-		$word_separator = $this->config->item('word_separator') != "dash" ? '_' : '-';
-
-		//  Create Foreign Character Conversion JS
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
+		$this->cp->set_variable('cp_page_title', ($vars['cat_id'] == '') ? lang('new_category') : lang('edit_category'));
+		
+		//	Create Foreign Character Conversion JS
 		include(APPPATH.'config/foreign_chars.php');
-
+		
 		/* -------------------------------------
 		/*  'foreign_character_conversion_array' hook.
 		/*  - Allows you to use your own foreign character conversion array
@@ -1929,68 +1919,23 @@ class Admin_content extends CI_Controller {
 			}
 		/*
 		/* -------------------------------------*/
-
-		$foreign_replace = '';
-
-		foreach($foreign_characters as $old => $new)
-		{
-			$foreign_replace .= "if (c == '$old') {NewTextTemp += '$new'; continue;}\n\t\t\t\t";
-		}
-
-		$live_title_js = $this->javascript->inline("
-			/** ------------------------------------
-			/**  Live URL Title Function
-			/** -------------------------------------*/
-			function liveUrlTitle()
-			{
-				var NewText = document.getElementById('cat_name').value;
-
-				NewText = NewText.toLowerCase();
-
-				var separator = '{$word_separator}';
-
-				// Foreign Character Attempt
-
-				var NewTextTemp = '';
-				for(var pos=0; pos<NewText.length; pos++)
-				{
-					var c = NewText.charCodeAt(pos);
-
-					if (c >= 32 && c < 128)
-					{
-						NewTextTemp += NewText.charAt(pos);
-					}
-					else
-					{
-						{$foreign_replace}
-					}
-				}
-
-				var multiReg = new RegExp(separator + '{2,}', 'g');
-
-				NewText = NewTextTemp;
-
-				NewText = NewText.replace('/<(.*?)>/g', '');
-				NewText = NewText.replace(/\s+/g, separator);
-				NewText = NewText.replace(/\//g, separator);
-				NewText = NewText.replace(/[^a-z0-9\-\._]/g,'');
-				NewText = NewText.replace(/\+/g, separator);
-				NewText = NewText.replace(multiReg, separator);
-				NewText = NewText.replace(/-$/g,'');
-				NewText = NewText.replace(/_$/g,'');
-				NewText = NewText.replace(/^_/g,'');
-				NewText = NewText.replace(/^-/g,'');
-				NewText = NewText.replace(/\.+$/g,'');
-
-				document.getElementById('cat_url_title').value = NewText;
-			}");
 		
-		$this->cp->add_to_foot($live_title_js);
-
 		// New entry gets URL title js
 		if ($vars['submit_lang_key'] == 'submit')
-		{		
-			$this->javascript->keyup('#cat_name', 'liveUrlTitle()');
+		{	
+			// Pipe in necessary globals
+			$this->javascript->set_global(array(
+				'publish.word_separator'   => $this->config->item('word_separator') != "dash" ? '_' : '-',
+				'publish.foreignChars'				=> $foreign_characters,
+			));
+			
+			// Load in necessary js files
+			$this->cp->add_js_script(array(
+				'file' => array('cp/global'),
+				'plugin' => array('ee_url_title'),
+			));
+			
+			$this->javascript->keyup('#cat_name', '$("#cat_name").ee_url_title($("#cat_url_title"));');
 		}
 
 		$vars['form_hidden']['group_id'] = $group_id;
@@ -2000,8 +1945,6 @@ class Admin_content extends CI_Controller {
 		$this->api_channel_categories->category_tree($group_id, $vars['parent_id']);
 
 		$vars['parent_id_options'] = $this->api_channel_categories->categories;
-
-		//$vars['parent_id_options'][0] = $this->lang->line('none');
 
 		// Display custom fields
 		
@@ -2036,9 +1979,7 @@ class Admin_content extends CI_Controller {
 				$vars['cat_custom_fields'][$row['field_id']]['field_required'] = $row['field_required'];					
 
 				$vars['cat_custom_fields'][$row['field_id']]['field_name'] = $row['field_name'];
-	
 				$vars['cat_custom_fields'][$row['field_id']]['field_input'] = $row['field_label'];
-
 
 				$vars['cat_custom_fields'][$row['field_id']]['field_type'] = $row['field_type'];
 				$vars['cat_custom_fields'][$row['field_id']]['field_text_direction'] = ($row['field_text_direction'] == 'rtl') ? 'rtl' : 'ltr';
@@ -2090,7 +2031,6 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->javascript->compile();
-
 		$this->load->view('admin/category_edit', $vars);
 	}
 
@@ -2106,10 +2046,18 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_delete_conf()
 	{
-		if ( ! $this->cp->allowed_group('can_delete_categories'))
+		if (AJAX_REQUEST)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			if ( ! $this->cp->allowed_group('can_delete_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
 		}
+		else
+		{
+			$this->_restrict_prefs_access();
+		}		
+		
 
 		$cat_id = $this->input->get_post('cat_id');
 
@@ -2127,8 +2075,8 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_category'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_variable('cp_page_title', lang('delete_category'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		// Grab category_groups locations with this id
 		$items = $this->category_model->get_category_name_group($cat_id);
@@ -2136,7 +2084,7 @@ class Admin_content extends CI_Controller {
 		$vars = array(
 			'form_action'	=> 'C=admin_content'.AMP.'M=category_delete'.$zurl,
 			'form_extra'	=> '',
-			'message'		=> $this->lang->line('delete_cat_confirmation'),
+			'message'		=> lang('delete_cat_confirmation'),
 			'items'			=> array(),
 			'form_hidden'	=> array(
 				'group_id'		=> $items->row('group_id'),
@@ -2165,11 +2113,18 @@ class Admin_content extends CI_Controller {
 	 */
 	function category_delete()
 	{
-		if ( ! ($this->cp->allowed_group('can_delete_categories') OR
-				$this->cp->allowed_group('can_access_admin')))
-		{		
-			show_error($this->lang->line('unauthorized_access'));
+		if (AJAX_REQUEST)
+		{
+			if ( ! $this->cp->allowed_group('can_delete_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
 		}
+		else
+		{
+			$this->_restrict_prefs_access();
+		}	
+
 
 		$cat_id = $this->input->get_post('cat_id');
 
@@ -2183,7 +2138,7 @@ class Admin_content extends CI_Controller {
 
 		$group_id = $this->category_model->delete_category($cat_id);
 
-		$this->session->set_flashdata('message_success', $this->lang->line('category_deleted'));
+		$this->session->set_flashdata('message_success', lang('category_deleted'));
 		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP.'group_id='.$group_id);
 	}
 
@@ -2199,16 +2154,23 @@ class Admin_content extends CI_Controller {
 
 	function category_update()
 	{
-		if ( ! $this->cp->allowed_group('can_edit_categories'))
+		if (AJAX_REQUEST)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
 		}
+		else
+		{
+			$this->_restrict_prefs_access();
+		}		
 
 		$group_id = $this->input->get_post('group_id');
 
 		if ($group_id == '' OR ! is_numeric($group_id))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$edit = ($this->input->post('cat_id') == '') ? FALSE : TRUE;
@@ -2297,14 +2259,7 @@ class Admin_content extends CI_Controller {
 		if ($this->form_validation->run() === FALSE)
 		{
 			return $this->category_edit();
-		}		
-	
-		/*
-		foreach ($fields as $id => $val)
-		{
-			unset($_POST[$id]);
 		}
-		*/
 
 		$_POST['site_id'] = $this->config->item('site_id');
 
@@ -2504,7 +2459,7 @@ class Admin_content extends CI_Controller {
 
 		$this->functions->clear_caching('relationships');
 
-		$this->session->set_flashdata('message_success', $this->lang->line('preference_updated'));
+		$this->session->set_flashdata('message_success', lang('preference_updated'));
 		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP."group_id={$group_id}");
 	}
 
@@ -2523,21 +2478,21 @@ class Admin_content extends CI_Controller {
 		// Is the cat_url_title a pure number?  If so we show an error.
 		if (is_numeric($str))
 		{
-			$this->form_validation->set_message('_cat_url_title', $this->lang->line('cat_url_title_is_numeric'));
+			$this->form_validation->set_message('_cat_url_title', lang('cat_url_title_is_numeric'));
 			return FALSE;			
 		}
 
 		// Is the Category URL Title still empty?  Can't have that
 		if (trim($str) == '')
 		{
-			$this->form_validation->set_message('_cat_url_title', $this->lang->line('unable_to_create_cat_url_title'));
+			$this->form_validation->set_message('_cat_url_title', lang('unable_to_create_cat_url_title'));
 			return FALSE;	
 		}
 
 		// Cat URL Title must be unique within the group
 		if ($this->category_model->is_duplicate_category_name($str, $this->input->post('cat_id'), $this->input->post('group_id')))
 		{
-			$this->form_validation->set_message('_cat_url_title', $this->lang->line('duplicate_cat_url_title'));
+			$this->form_validation->set_message('_cat_url_title', lang('duplicate_cat_url_title'));
 			return FALSE;			
 		}
 	}
@@ -2553,15 +2508,12 @@ class Admin_content extends CI_Controller {
 		{
 			if ( ! $this->cp->allowed_group('can_edit_categories'))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
 		else
 		{
-			if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-			{
-				show_error($this->lang->line('unauthorized_access'));
-			}		
+			$this->_restrict_prefs_access();
 		}
 
 		if (($group_id = $this->input->get_post('group_id')) === FALSE OR ! is_numeric($group_id))
@@ -2597,7 +2549,7 @@ class Admin_content extends CI_Controller {
 		// Clear 'ze cache
 		$this->functions->clear_caching('db');
 
-		$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+		$this->session->set_flashdata('message_success', lang('preferences_updated'));
 
 		// Return Location
 		$return = BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP.'group_id='.$group_id.$zurl;
@@ -2615,12 +2567,12 @@ class Admin_content extends CI_Controller {
 		{
 			if ( ! $this->cp->allowed_group('can_edit_categories'))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
-		elseif ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
+		else
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			$this->_restrict_prefs_access();
 		}
 
 		if (($group_id = $this->input->get_post('group_id')) === FALSE OR ! is_numeric($group_id))
@@ -2631,8 +2583,8 @@ class Admin_content extends CI_Controller {
 		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		
-		$this->cp->set_variable('cp_page_title', $this->lang->line('global_sort_order'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP.'group_id='.$group_id, $this->lang->line('categories'));
+		$this->cp->set_variable('cp_page_title', lang('global_sort_order'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP.'group_id='.$group_id, lang('categories'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=global_category_order'.AMP.'group_id='.$group_id;
 		
@@ -2654,15 +2606,12 @@ class Admin_content extends CI_Controller {
 		{
 			if ( ! $this->cp->allowed_group('can_edit_categories'))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
 		else
 		{
-			if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-			{
-				show_error($this->lang->line('unauthorized_access'));
-			}		
+			$this->_restrict_prefs_access();
 		}
 
 		if (($group_id = $this->input->get_post('group_id')) === FALSE OR ! is_numeric($group_id))
@@ -2693,9 +2642,16 @@ class Admin_content extends CI_Controller {
 
 	function process_category_group($group_id)
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
+		if (AJAX_REQUEST)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
+		}
+		else
+		{
+			$this->_restrict_prefs_access();
 		}
 
 		$sql = "SELECT cat_name, cat_id, parent_id FROM exp_categories WHERE group_id ='$group_id' ORDER BY parent_id, cat_name";
@@ -2736,9 +2692,16 @@ class Admin_content extends CI_Controller {
 		
 	function process_subcategories($parent_id)
 	{		
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
+		if (AJAX_REQUEST)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			if ( ! $this->cp->allowed_group('can_edit_categories'))
+			{
+				show_error(lang('unauthorized_access'));
+			}
+		}
+		else
+		{
+			$this->_restrict_prefs_access();
 		}
 		
 		$order = 0;
@@ -2765,18 +2728,18 @@ class Admin_content extends CI_Controller {
 		{
 			if ( ! $this->cp->allowed_group('can_edit_categories'))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 		}
-		elseif ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
+		else
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			$this->_restrict_prefs_access();
 		}
 
 		// Fetch required globals
 		foreach (array('cat_id', 'group_id', 'order') as $val)
 		{
-			if ($this->input->get($val) === FALSE)
+			if ( ! $this->input->get($val))
 			{
 				return FALSE;
 			}
@@ -2796,27 +2759,28 @@ class Admin_content extends CI_Controller {
 
 		// Fetch the parent ID
 
-		$this->db->select('parent_id');
-		$this->db->where('cat_id', $cat_id);
-		$query = $this->db->get('categories');
+		$qry = $this->db->select('parent_id')
+						->where('cat_id', $cat_id)
+						->get('categories');
 
-		$parent_id = $query->row('parent_id') ;
+		$parent_id = $qry->row('parent_id');
 
 		// Is the requested category already at the beginning/end of the list?
 
 		$dir = ($order == 'up') ? 'asc' : 'desc';
 
-		$this->db->select('cat_id');
-		$this->db->where('group_id', $group_id);
-		$this->db->where('parent_id', $parent_id);
-		$this->db->order_by('cat_order', $dir);
-		$this->db->limit(1);
-		$query = $this->db->get('categories');
+		$qry = $this->db->select('cat_id')
+						->where('group_id', $group_id)
+						->where('parent_id', $parent_id)
+						->order_by('cat_order', $dir)
+						->limit(1)
+						->get('categories');
 
-		if ($query->row('cat_id') == $cat_id)
+		if ($qry->row('cat_id') == $cat_id)
 		{
 			$this->functions->redirect($return);
 		}
+
 
 		// Fetch all the categories in the parent
 		$this->db->select('cat_id, cat_order');
@@ -2871,7 +2835,7 @@ class Admin_content extends CI_Controller {
 		$this->db->where("group_id", $group_id);
 		$this->db->update('category_groups', array('sort_order' => 'c'));
 
-		$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+		$this->session->set_flashdata('message_success', lang('preferences_updated'));
 		$this->functions->redirect($return);
 	}
 
@@ -2887,12 +2851,9 @@ class Admin_content extends CI_Controller {
 	*/
 	function category_custom_field_group_manager($message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
-		$vars['message'] = $message; //$this->lang->line('preferences_updated')
+		$vars['message'] = $message; //lang('preferences_updated')
 
 		$vars['group_id'] = $this->input->get_post('group_id');
 
@@ -2905,8 +2866,8 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('custom_category_fields'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_variable('cp_page_title', lang('custom_category_fields'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		// Fetch the name of the category group
 		$query = $this->category_model->get_category_group_name($vars['group_id']);
@@ -2931,11 +2892,11 @@ class Admin_content extends CI_Controller {
 
 				switch ($row->field_type)
 				{
-					case 'text' :  $field_type = $this->lang->line('text_input');
+					case 'text' :  $field_type = lang('text_input');
 						break;
-					case 'textarea' :  $field_type = $this->lang->line('textarea');
+					case 'textarea' :  $field_type = lang('textarea');
 						break;
-					case 'select' :  $field_type = $this->lang->line('select_list');
+					case 'select' :  $field_type = lang('select_list');
 						break;
 				}
 
@@ -2964,10 +2925,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function edit_custom_category_field()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 		
 		$vars['group_id'] = $this->input->get_post('group_id');
 		$group_id = $vars['group_id'];
@@ -2985,7 +2943,7 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->library('table');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		$this->javascript->change('#field_type', '
 			// hide all field format options
@@ -2998,7 +2956,7 @@ class Admin_content extends CI_Controller {
 		if ($vars['field_id'] == '')
 		{
 			$vars['update_formatting'] = FALSE;
-			$this->cp->set_variable('cp_page_title', $this->lang->line('create_new_cat_field'));
+			$this->cp->set_variable('cp_page_title', lang('create_new_cat_field'));
 
 			$vars['submit_lang_key'] = 'submit';
 
@@ -3025,7 +2983,7 @@ class Admin_content extends CI_Controller {
 
 				if ($gquery->row('count')  != 1)
 				{
-					show_error($this->lang->line('unauthorized_access'));
+					show_error(lang('unauthorized_access'));
 				}
 			}
 		}
@@ -3035,7 +2993,7 @@ class Admin_content extends CI_Controller {
 			
 			$this->javascript->output('$(".formatting_notice_info").hide();');
 			
-			$this->cp->set_variable('cp_page_title', $this->lang->line('edit_cat_field'));
+			$this->cp->set_variable('cp_page_title', lang('edit_cat_field'));
 
 			$vars['submit_lang_key'] = 'update';
 
@@ -3111,9 +3069,9 @@ class Admin_content extends CI_Controller {
 		$vars['field_ta_rows'] = ($vars['field_ta_rows'] == '') ? 6 : $vars['field_ta_rows'];
 
 		$vars['field_type_options'] = array(
-											'text' 		=> $this->lang->line('text_input'),
-											'textarea' 	=> $this->lang->line('textarea'),
-											'select' 	=> $this->lang->line('select_list')
+											'text' 		=> lang('text_input'),
+											'textarea' 	=> lang('textarea'),
+											'select' 	=> lang('select_list')
 		);
 
 		// Show field formatting?
@@ -3129,7 +3087,7 @@ class Admin_content extends CI_Controller {
 		}
 
 		// build list of formatting options
-		$vars['field_default_fmt_options']['none'] = $this->lang->line('none');
+		$vars['field_default_fmt_options']['none'] = lang('none');
 
 		// Fetch formatting plugins
 		$plugin_formatting = $this->addons_model->get_plugin_formatting();
@@ -3186,10 +3144,7 @@ class Admin_content extends CI_Controller {
 	//-----------------------------------------------------------
 	function update_custom_category_fields()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		// Are we editing or creating?
 
@@ -3199,7 +3154,7 @@ class Admin_content extends CI_Controller {
 
 		if ($group_id == '' OR ! is_numeric($group_id))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('admin_content');
@@ -3212,7 +3167,7 @@ class Admin_content extends CI_Controller {
 
 		if ($_POST['field_name'] == '')
 		{
-			$error[] = $this->lang->line('no_field_name');
+			$error[] = lang('no_field_name');
 		}
 		else
 		{
@@ -3220,21 +3175,21 @@ class Admin_content extends CI_Controller {
 
 			if (in_array($_POST['field_name'], $this->cp->invalid_custom_field_names()))
 			{
-				$error[] = $this->lang->line('reserved_word');
+				$error[] = lang('reserved_word');
 			}
 			$field_name = $_POST['field_name'];
 		}
 
 		if ($_POST['field_label'] == '')
 		{
-			$error[] = $this->lang->line('no_field_label');
+			$error[] = lang('no_field_label');
 		}
 
 		// Does field name contain invalid characters?
 
 		if (preg_match('/[^a-z0-9\_\-]/i', $_POST['field_name']))
 		{
-			$error[] = $this->lang->line('invalid_characters');
+			$error[] = lang('invalid_characters');
 		}
 
 		// Field name must be unique for across category groups
@@ -3245,7 +3200,7 @@ class Admin_content extends CI_Controller {
 
 			if ($query->row('count')  > 0)
 			{
-				$error[] = $this->lang->line('duplicate_field_name');
+				$error[] = lang('duplicate_field_name');
 			}
 		}
 
@@ -3300,7 +3255,7 @@ class Admin_content extends CI_Controller {
 
 			$this->db->query($this->db->update_string('exp_category_fields', $_POST, "field_id='".$field_id."'"));
 			
-			$cp_message = $this->lang->line('cat_field_edited');
+			$cp_message = lang('cat_field_edited');
 		}
 		else
 		{
@@ -3323,7 +3278,7 @@ class Admin_content extends CI_Controller {
 			$this->db->query("ALTER TABLE exp_category_field_data ADD COLUMN field_ft_{$insert_id} varchar(40) NULL default 'none'");
 			$this->db->query("UPDATE exp_category_field_data SET field_ft_{$insert_id} = '".$this->db->escape_str($_POST['field_default_fmt'])."'");
 			
-			$cp_message = $this->lang->line('cat_field_created');
+			$cp_message = lang('cat_field_created');
 		}
 
 		$this->functions->clear_caching('all', '', TRUE);
@@ -3342,10 +3297,7 @@ class Admin_content extends CI_Controller {
 	  */
 	function delete_custom_category_field_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -3365,14 +3317,14 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_field'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', $this->lang->line('categories'));
+		$this->cp->set_variable('cp_page_title', lang('delete_field'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=category_management', lang('categories'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=delete_custom_category_field';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['group_id'] = $group_id;
 		$vars['form_hidden']['field_id'] = $field_id;
-		$vars['message'] = $this->lang->line('delete_cat_field_confirmation');
+		$vars['message'] = lang('delete_cat_field_confirmation');
 
 		// Grab category_groups locations with this id
 		$items = $this->category_model->get_category_label_name($group_id, $field_id);
@@ -3397,10 +3349,7 @@ class Admin_content extends CI_Controller {
 	  */
 	function delete_custom_category_field()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -3423,12 +3372,12 @@ class Admin_content extends CI_Controller {
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->category_model->delete_category_field($group_id, $field_id);
 
-		$cp_message = $this->lang->line('cat_field_deleted').NBS.$query->row('field_label');
+		$cp_message = lang('cat_field_deleted').NBS.$query->row('field_label');
 		$this->logger->log_action($cp_message);
 
 		$this->functions->clear_caching('all', '', TRUE);
@@ -3449,19 +3398,17 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_group_management($message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->library('table');
 		$this->load->model('field_model');
 		$this->lang->loadfile('admin_content');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('field_management'));
+		$this->cp->set_variable('cp_page_title', lang('field_management'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', lang('admin_content'));
 
 		$this->jquery->tablesorter('.mainTable', '{
-			headers: {1: {sorter: false}, 2: {sorter: false}, 3: {sorter: false}},
+			headers: {1: {sorter: false}, 2: {sorter: false}},
 			widgets: ["zebra"]
 		}');
 
@@ -3487,17 +3434,14 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_group_edit()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->helper('form');
 		$this->load->model('status_model');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
 		// Set default values
 		$vars['group_name'] = '';
@@ -3508,7 +3452,7 @@ class Admin_content extends CI_Controller {
 
 		if ($group_id != '')
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('edit_field_group_name'));
+			$this->cp->set_variable('cp_page_title', lang('rename_group'));
 
 			$vars['form_hidden']['group_id'] = $group_id;
 
@@ -3528,7 +3472,7 @@ class Admin_content extends CI_Controller {
 		}
 		else
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('new_field_group'));
+			$this->cp->set_variable('cp_page_title', lang('new_field_group'));
 			$vars['submit_lang_key'] = 'submit';
 		}
 
@@ -3549,10 +3493,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_group_delete_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -3565,13 +3506,13 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_field_group'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
+		$this->cp->set_variable('cp_page_title', lang('delete_group'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=field_group_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['group_id'] = $group_id;
-		$vars['message'] = $this->lang->line('delete_field_group_confirmation');
+		$vars['message'] = lang('delete_field_group_confirmation');
 
 		// Grab category_groups locations with this id
 		$items = $this->field_model->get_field_group($group_id);
@@ -3599,10 +3540,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_group_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 		$tabs = array();
@@ -3624,7 +3562,7 @@ class Admin_content extends CI_Controller {
 		// Drop from custom layouts
 		$query = $this->field_model->get_assigned_channels($group_id);
 			
-		if ($query->num_rows() > 0 && count($deleted['field_ids']) > 0)
+		if ($query->num_rows() > 0 && isset($deleted['field_ids']) && count($deleted['field_ids']) > 0)
 		{
 			foreach ($query->result() as $row)
 			{
@@ -3637,7 +3575,7 @@ class Admin_content extends CI_Controller {
 		
 		$this->functions->clear_caching('all', '', TRUE);
 
-		$cp_message = $this->lang->line('field_group_deleted').NBS.NBS.$group_name->row('group_name');
+		$cp_message = lang('field_group_deleted').NBS.NBS.$group_name->row('group_name');
 
 		$this->logger->log_action($cp_message);
 
@@ -3659,10 +3597,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_group_update()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -3681,7 +3616,7 @@ class Admin_content extends CI_Controller {
 
 		if ( ! preg_match("#^[a-zA-Z0-9_\-/\s]+$#i", $group_name))
 		{
-			show_error($this->lang->line('illegal_characters'));
+			show_error(lang('illegal_characters'));
 		}
 
 		$this->load->model('field_model');
@@ -3689,7 +3624,7 @@ class Admin_content extends CI_Controller {
 		// Is the group name taken?
 		if ($this->field_model->is_duplicate_field_group_name($group_name, $group_id))
 		{
-			show_error($this->lang->line('taken_status_group_name'));
+			show_error(lang('taken_field_group_name'));
 		}
 
 		// Construct the query based on whether we are updating or inserting
@@ -3697,7 +3632,7 @@ class Admin_content extends CI_Controller {
 		{
 			$this->field_model->insert_field_group($group_name);
 
-			$cp_message = $this->lang->line('field_group_created').NBS.$group_name;
+			$cp_message = lang('field_group_created').NBS.$group_name;
 
 			$this->logger->log_action($cp_message);
 
@@ -3709,12 +3644,12 @@ class Admin_content extends CI_Controller {
 
 			if ($channel_info->num_rows() > 0)
 			{
-				$cp_message .= '<br />'.$this->lang->line('assign_group_to_channel').NBS;
+				$cp_message .= '<br />'.lang('assign_group_to_channel').NBS;
 
 				if ($channel_info->num_rows() == 1)
 				{
 					$link = 'C=admin_content'.AMP.'M=channel_edit_group_assignments'.AMP.'channel_id='.$channel_info->row('channel_id');
-					$cp_message .= '<a href="'.BASE.AMP.$link.'">'.$this->lang->line('click_to_assign_group').'</a>';
+					$cp_message .= '<a href="'.BASE.AMP.$link.'">'.lang('click_to_assign_group').'</a>';
 				}
 				else
 				{
@@ -3732,7 +3667,7 @@ class Admin_content extends CI_Controller {
 			$this->db->where('group_id', $group_id);
 			$this->db->update('field_groups', $data);
 			
-			$cp_message = $this->lang->line('field_group_updated').NBS.$group_name;
+			$cp_message = lang('field_group_updated').NBS.$group_name;
 		}
 
 		$this->session->set_flashdata('message_success', $cp_message);
@@ -3751,10 +3686,7 @@ class Admin_content extends CI_Controller {
 	  */
 	function field_management($group_id = '', $message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$vars['group_id'] = ($group_id != '') ? $group_id : $this->input->get_post('group_id');
 
@@ -3768,20 +3700,20 @@ class Admin_content extends CI_Controller {
 					BASE.AMP.'C=admin_content'.AMP.'M=field_edit'.AMP.'group_id='.$vars['group_id']
 		));
 
-		$vars['message'] = $message; //$this->lang->line('preferences_updated')
+		$vars['message'] = $message; //lang('preferences_updated')
 
 		$this->load->library('table');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('add_edit_fields'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
-
 		// Fetch the name of the category group
 		$query = $this->field_model->get_field_group($vars['group_id']);
 		$vars['group_name'] = $query->row('group_name');
 
-		$custom_fields = $this->field_model->get_fields($vars['group_id']);
+		$this->cp->set_variable('cp_page_title', lang('group').':'.NBS.$vars['group_name']);
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
+
+		$custom_fields = $this->field_model->get_fields($vars['group_id'], array('site_id' => $this->config->item('site_id')));
 
 		$vars['custom_fields'] = array();
 
@@ -3802,7 +3734,7 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->jquery->tablesorter('.mainTable', '{
-			headers: {3: {sorter: false}},
+			headers: {4: {sorter: false}},
 			widgets: ["zebra"]
 		}');
 
@@ -3822,12 +3754,9 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_edit()
 	{
-		$this->load->library('table');
+		$this->_restrict_prefs_access();
 		
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->load->library('table');
 
 		$this->load->library('api');
 		$this->load->helper(array('snippets_helper', 'form'));
@@ -3836,7 +3765,7 @@ class Admin_content extends CI_Controller {
 		$this->api->instantiate('channel_fields');
 		$this->lang->loadfile('admin_content');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
 		$vars = array(
 			'group_id' => $this->input->get_post('group_id'),
@@ -3851,20 +3780,10 @@ class Admin_content extends CI_Controller {
 		
 		$field_query = $this->db->get();
 
-		$this->jquery->tablesorter('.mainTable', '{
-			headers: {0: {sorter: false}, 1: {sorter: false}},
-			widgets: ["zebra"]
-		}');
-
-		$field_query = $this->db->query("SELECT f.* FROM exp_channel_fields AS f, exp_field_groups AS g
-						WHERE f.group_id = g.group_id
-						AND g.site_id = '".$this->db->escape_str($this->config->item('site_id'))."'
-						AND f.field_id = '{$vars['field_id']}'");
-
 		if ($vars['field_id'] == '')
 		{
 			$type = 'new';
-			$this->cp->set_variable('cp_page_title', $this->lang->line('create_new_custom_field'));
+			$this->cp->set_variable('cp_page_title', lang('create_new_custom_field'));
 
 			foreach ($field_query->list_fields() as $f)
 			{
@@ -3893,15 +3812,21 @@ class Admin_content extends CI_Controller {
 
 				if ($this->db->count_all_results('field_groups') != 1)
 				{
-					show_error($this->lang->line('unauthorized_access'));
+					show_error(lang('unauthorized_access'));
 				}
 			}
 		}
 		else
 		{
 			$type = 'edit';
-			$this->cp->set_variable('cp_page_title', $this->lang->line('edit_field'));
+			$this->cp->set_variable('cp_page_title', lang('edit_field'));
 			
+			// No valid edit id?  No access
+			if ($field_query->num_rows() == 0)
+			{
+				show_error(lang('unauthorized_access'));
+			}
+
 			foreach ($field_query->row_array() as $key => $val)
 			{
 				if ($key == 'field_settings' && $val)
@@ -3925,30 +3850,6 @@ class Admin_content extends CI_Controller {
 		
 		$vars['group_name']			= $query->row('group_name');
 		$vars['submit_lang_key']	= ($type == 'new') ? 'submit' : 'update';
-
-		// Content types
-		$all_content_types = $this->field_model->get_field_content_types();
-		
-		foreach($all_content_types as $parent => $content_types)
-		{
-			$vars['field_content_options_'.$parent]['any'] = $this->lang->line('any');
-			
-			foreach($content_types as $content_type)
-			{
-				$vars['field_content_options_'.$parent][$content_type] = $this->lang->line('type_'.$content_type);
-
-				if ($content_type == $vars['field_content_type'])
-				{
-					$vars['field_content_'.$parent] = $content_type;
-				}
-			}
-			
-			// Default
-			if ( ! isset($vars['field_content_'.$parent]))
-			{
-				$vars['field_content_'.$parent] = 'any';
-			}
-		}
 
 		// Fetch the channel names
 
@@ -3985,15 +3886,15 @@ class Admin_content extends CI_Controller {
 		{
 			$vars['edit_format_link'] = '';
 			$vars['field_fmt_options'] = array(
-				'none'		=> $this->lang->line('none'),
-				'br'		=> $this->lang->line('auto_br'),
-				'xhtml'		=> $this->lang->line('xhtml')
+				'none'		=> lang('none'),
+				'br'		=> lang('auto_br'),
+				'xhtml'		=> lang('xhtml')
 			);
 		}
 		else
 		{
-			$confirm = "onclick=\"if( !confirm('".$this->lang->line('list_edit_warning')."')) return false;\"";
-			$vars['edit_format_link'] = '<strong><a '.$confirm.' href="'.BASE.AMP.'C=admin_content'.AMP.'M=edit_formatting_options'.AMP.'id='.$field_id.'" title="'.$this->lang->line('edit_list').'">'.$this->lang->line('edit_list').'</a></strong>';
+			$confirm = "onclick=\"if( !confirm('".lang('list_edit_warning')."')) return false;\"";
+			$vars['edit_format_link'] = '<strong><a '.$confirm.' href="'.BASE.AMP.'C=admin_content'.AMP.'M=edit_formatting_options'.AMP.'id='.$field_id.'" title="'.lang('edit_list').'">'.lang('edit_list').'</a></strong>';
 
 			$this->db->select('field_fmt');
 			$this->db->where('field_id', $field_id);
@@ -4008,11 +3909,11 @@ class Admin_content extends CI_Controller {
 				
 					if ($name == 'Br')
 					{
-						$name = $this->lang->line('auto_br');
+						$name = lang('auto_br');
 					}
 					elseif ($name == 'Xhtml')
 					{
-						$name = $this->lang->line('xhtml');
+						$name = lang('xhtml');
 					}
 					$vars['field_fmt_options'][$row['field_fmt']] = $name;
 				}
@@ -4073,6 +3974,7 @@ class Admin_content extends CI_Controller {
 		{
 			// Global settings
 			$settings = unserialize(base64_decode($fts[$key]['settings']));
+			
 			$settings['field_type'] = $key;
 			
 			$this->table->clear();
@@ -4100,6 +4002,17 @@ class Admin_content extends CI_Controller {
 		);
 
 		$ft_selector = "#ft_".implode(", #ft_", array_keys($fts));
+
+		if ($type == 'new') {
+			$this->cp->add_js_script('plugin', 'ee_url_title');
+
+			$this->javascript->output('
+				$("#edit_group_prefs").hide();
+				$("#field_label").bind("keyup keydown", function() {
+					$(this).ee_url_title("#field_name");
+				});
+			');
+		}
 
 		$this->javascript->output('
 			var ft_divs = $("'.$ft_selector.'"),
@@ -4140,9 +4053,11 @@ class Admin_content extends CI_Controller {
 	  */
 	function field_update()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs') OR ! isset($_POST['group_id']))
+		$this->_restrict_prefs_access();
+		
+		if ( ! isset($_POST['group_id']))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$this->lang->loadfile('admin_content');
@@ -4156,7 +4071,7 @@ class Admin_content extends CI_Controller {
 
 		// We need this as a variable as we'll unset the array index
 
-		$group_id = $_POST['group_id'];
+		$group_id = $this->input->post('group_id');
 
 		// Check for required fields
 
@@ -4167,33 +4082,30 @@ class Admin_content extends CI_Controller {
 		// otherwise the landing page will be extremely confusing
 		if ( ! isset($_POST['site_id']) OR $_POST['site_id'] != $this->config->item('site_id'))
 		{
-			$error[] = $this->lang->line('site_id_mismatch');
+			$error[] = lang('site_id_mismatch');
 		}
 
+		// Was a field name supplied?
 		if ($_POST['field_name'] == '')
 		{
-			$error[] = $this->lang->line('no_field_name');
+			$error[] = lang('no_field_name');
 		}
-		else
+		// Is the field one of the reserved words?
+		else if (in_array($_POST['field_name'], $this->cp->invalid_custom_field_names()))
 		{
-			// Is the field one of the reserved words?
-
-			if (in_array($_POST['field_name'], $this->cp->invalid_custom_field_names()))
-			{
-				$error[] = $this->lang->line('reserved_word');
-			}
+			$error[] = lang('reserved_word');
 		}
 
+		// Was a field label supplied?
 		if ($_POST['field_label'] == '')
 		{
-			$error[] = $this->lang->line('no_field_label');
+			$error[] = lang('no_field_label');
 		}
 
 		// Does field name contain invalid characters?
-
 		if (preg_match('/[^a-z0-9\_\-]/i', $_POST['field_name']))
 		{
-			$error[] = $this->lang->line('invalid_characters').': '.$_POST['field_name'];
+			$error[] = lang('invalid_characters').': '.$_POST['field_name'];
 		}
 
 		// Is the field name taken?
@@ -4203,14 +4115,14 @@ class Admin_content extends CI_Controller {
 
 		if ($edit == TRUE)
 		{
-			$this->db->where('group_id !=', $group_id);
+			$this->db->where('field_id !=', $this->input->post('field_id'));
 		}
 
 		$query = $this->db->get('channel_fields');
 
 		if ($query->row('count')  > 0)
 		{
-			$error[] = $this->lang->line('duplicate_field_name');
+			$error[] = lang('duplicate_field_name');
 		}
 
 		$field_type = $_POST['field_type'];
@@ -4220,11 +4132,12 @@ class Admin_content extends CI_Controller {
 		{
 			$this->load->model('tools_model');
 			$upload_dir_prefs = $this->tools_model->get_upload_preferences();
-
+			
 			// count upload dirs
 			if ($upload_dir_prefs->num_rows() == 0)
 			{
-				$error[] = $this->lang->line('please_add_upload');
+				$this->lang->loadfile('filemanager');
+				$error[] = lang('please_add_upload');
 			}
 		}
 
@@ -4250,9 +4163,9 @@ class Admin_content extends CI_Controller {
 			'field_related_id', 'field_related_orderby', 'field_related_sort', 'field_related_max',
 			'field_ta_rows', 'field_maxl', 'field_required',
 			'field_text_direction', 'field_search', 'field_is_hidden', 'field_fmt', 'field_show_fmt',
-			'field_order', 'field_content_type'
+			'field_order'
 		);
-				
+		
 		$_posted = array();
 		$_field_posted = preg_grep('/^'.$field_type.'_.*/', array_keys($_POST));
 		$_keys = array_merge($native,  $_field_posted);
@@ -4292,8 +4205,6 @@ class Admin_content extends CI_Controller {
 		$native_settings['field_show_fmt']			= ($native_settings['field_show_fmt'] !== FALSE) ? $native_settings['field_show_fmt'] : 'n';
 		$native_settings['field_fmt']				= ($native_settings['field_fmt'] !== FALSE) ? $native_settings['field_fmt'] : 'xhtml';
 		
-		$native_settings['field_content_type']		= ($native_settings['field_content_type'] !== FALSE) ? $native_settings['field_content_type'] : 'any';
-		
 		if ($native_settings['field_list_items'] != '')
 		{
 			// This results in double encoding later on
@@ -4326,7 +4237,7 @@ class Admin_content extends CI_Controller {
 		// Construct the query based on whether we are updating or inserting
 		if ($edit === TRUE)
 		{
-			$cp_message = $this->lang->line('custom_field_edited');
+			$cp_message = lang('custom_field_edited');
 
 			if ( ! is_numeric($native_settings['field_id']))
 			{
@@ -4342,53 +4253,84 @@ class Admin_content extends CI_Controller {
 				
 			// Send it over to drop old fields, add new ones, and modify as needed
 			$this->api_channel_fields->edit_datatype(
-								$native_settings['field_id'], 
-								$field_type,
-								$native_settings
-				);
-
-
+				$native_settings['field_id'],
+				$field_type,
+				$native_settings
+			);
+			
 			unset($native_settings['group_id']);
-
+			
 			$this->db->where('field_id', $native_settings['field_id']);
 			$this->db->where('group_id', $group_id);
 			$this->db->update('channel_fields', $native_settings);
 
 			// Update saved layouts if necessary
-			
-			$collapse = ($native_settings['field_is_hidden'] == 'y') ? 'true' : 'false';
-			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? 'true' : 'false';
-			
-			$field_info[$native_settings['field_id']] = array(
-								'visible'		=> 'true',
-								'collapse'		=> $collapse,
-								'htmlbuttons'	=> $buttons,
-								'width'			=> '100%'
-			);
+			$collapse = ($native_settings['field_is_hidden'] == 'y') ? TRUE : FALSE;
+			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? TRUE : FALSE;
 			
 			// Add to any custom layouts
-
-			$query = $this->field_model->get_assigned_channels($group_id);
+			// First, figure out what channels are associated with this group
+			// Then using the list of channels, figure out the layouts associated with those channels
+			// Then update each layout individually
 			
-			if ($query->num_rows() > 0)
+			$channels_for_group = $this->field_model->get_assigned_channels($group_id);
+			
+			if ($channels_for_group->num_rows() > 0)
 			{
-				foreach ($query->result() as $row)
+				$this->load->model('layout_model');
+				
+				foreach ($channels_for_group->result() as $channel)
 				{
-					$channel_ids[] = $row->channel_id;
+					$channel_ids[] = $channel->channel_id;
 				}
 				
-				$this->load->library('layout');
-				$this->layout->edit_layout_fields($field_info, $channel_ids);
+				$this->db->select('layout_id');
+				$this->db->where_in('channel_id', $channel_ids);
+				$layouts_for_group = $this->db->get('layout_publish');
+				
+				foreach ($layouts_for_group->result() as $layout) 
+				{
+					// Figure out visibility for the field in the layout
+					$layout_settings = $this->layout_model->get_layout_settings(array('layout_id' => $layout->layout_id), TRUE);
+					
+					$visibility = TRUE;
+					$width = '100%';
+					
+					if (array_key_exists('field_id_'.$native_settings['field_id'], $layout_settings)) 
+					{
+						$field_settings = $layout_settings['field_id_'.$native_settings['field_id']];
+						
+						$width = ($field_settings['width'] !== NULL) ? 
+							$field_settings['width'] : 
+							$width;
+						
+						$visibility = ($field_settings['visible'] !== NULL) ? 
+							$field_settings['visible'] : 
+							$visibility;
+					}
+					
+					$field_info[$native_settings['field_id']] = array(
+						'visible'     => $visibility,
+						'collapse'    => $collapse,
+						'htmlbuttons' => $buttons,
+						'width'       => $width
+					);
+					
+					$this->layout_model->edit_layout_group_fields($field_info, $layout->layout_id);
+				}
 			}
 		}
 		else
 		{
-			$cp_message = $this->lang->line('custom_field_created');
+			$cp_message = lang('custom_field_created');
 
 			if ($_POST['field_order'] == 0 OR $_POST['field_order'] == '')
 			{
-				$query = $this->db->query("SELECT count(*) AS count FROM exp_channel_fields WHERE group_id = '".$this->db->escape_str($group_id)."'");
-				$_POST['field_order'] = $query->row('count')  + 1;
+				$query = $this->db->select('COUNT(*) as COUNT')
+								  ->get_where('group_id', (int) $group_id)
+								  ->get('channel_fields');
+				
+				$_POST['field_order'] = $query->row('count') + 1;
 			}
 			
 			if ( ! $native_settings['field_ta_rows'])
@@ -4404,15 +4346,12 @@ class Admin_content extends CI_Controller {
 			$insert_id = $this->db->insert_id();
 			$native_settings['field_id'] = $insert_id;
 
-			
 			$this->api_channel_fields->add_datatype(
-									$insert_id, 
-									$native_settings
-				);
-
+				$insert_id, 
+				$native_settings
+			);
 
 			$this->db->update('channel_data', array('field_ft_'.$insert_id => $native_settings['field_fmt'])); 
-
 
 			foreach (array('none', 'br', 'xhtml') as $val)
 			{
@@ -4420,8 +4359,8 @@ class Admin_content extends CI_Controller {
 				$this->db->insert('field_formatting', $f_data); 
 			}
 			
-			$collapse = ($native_settings['field_is_hidden'] == 'y') ? 'true' : 'false';
-			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? 'true' : 'false';
+			$collapse = ($native_settings['field_is_hidden'] == 'y') ? TRUE : FALSE;
+			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? TRUE : FALSE;
 			
 			$field_info['publish'][$insert_id] = array(
 								'visible'		=> 'true',
@@ -4431,7 +4370,6 @@ class Admin_content extends CI_Controller {
 			);
 			
 			// Add to any custom layouts
-
 			$query = $this->field_model->get_assigned_channels($group_id);
 			
 			if ($query->num_rows() > 0)
@@ -4459,7 +4397,7 @@ class Admin_content extends CI_Controller {
 
 		if ($strlen > 32)
 		{
-			$this->session->set_flashdata('message_failure', $this->lang->line('field_name_too_lrg'));
+			$this->session->set_flashdata('message_failure', lang('field_name_too_lrg'));
 		}
 		else
 		{
@@ -4499,10 +4437,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_delete_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$field_id = $this->input->get_post('field_id');
 
@@ -4515,14 +4450,14 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_field'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
+		$this->cp->set_variable('cp_page_title', lang('delete_field'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=field_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['field_id'] = $field_id;
 		$vars['form_hidden']['group_id'] = $this->input->get('group_id');
-		$vars['message'] = $this->lang->line('delete_field_confirmation');
+		$vars['message'] = lang('delete_field_confirmation');
 
 		// Grab status with this id
 		$items = $this->field_model->get_field($field_id);
@@ -4548,10 +4483,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function field_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$field_id = $this->input->get_post('field_id');
 
@@ -4579,7 +4511,7 @@ class Admin_content extends CI_Controller {
 			$this->layout->delete_layout_fields($field_id, $channel_ids);
 		}
 
-		$cp_message = $this->lang->line('field_deleted').NBS.$deleted['field_label'];
+		$cp_message = lang('field_deleted').NBS.$deleted['field_label'];
 
 		$this->logger->log_action($cp_message);
 
@@ -4601,10 +4533,7 @@ class Admin_content extends CI_Controller {
 
 	function edit_formatting_options()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		if ( ! $id = $this->input->get_post('id'))
 		{
@@ -4633,8 +4562,8 @@ class Admin_content extends CI_Controller {
 			widgets: ["zebra"]
 		}');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('formatting_options'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', $this->lang->line('field_management'));
+		$this->cp->set_variable('cp_page_title', lang('formatting_options'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=update_formatting_options'.AMP.'field_id='.$id.AMP.'group_id='.$group_id;
 
@@ -4676,10 +4605,7 @@ class Admin_content extends CI_Controller {
 	/** ---------------------------------------*/
 	function update_formatting_options()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		if ( ! $id = $this->input->post('field_id'))
 		{
@@ -4719,19 +4645,17 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_group_management($message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->library('table');
 		$this->load->model('status_model');
 		$this->lang->loadfile('admin_content');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('status_groups'));
+		$this->cp->set_variable('cp_page_title', lang('statuses'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', lang('admin_content'));
 
 		$this->jquery->tablesorter('.mainTable', '{
-			headers: {1: {sorter: false}, 2: {sorter: false}, 3: {sorter: false}},
+			headers: {1: {sorter: false}, 2: {sorter: false}},
 			widgets: ["zebra"]
 		}');
 
@@ -4757,33 +4681,32 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_group_edit()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->helper('form');
 		$this->load->model('status_model');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', $this->lang->line('status_management'));
-
-		// Set default values
-		$vars['group_id'] = '';
-		$vars['group_name'] = '';
-		$vars['form_hidden'] = array();
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', lang('statuses'));
 
 		// If we have the group_id variable it's an edit request, so fetch the status data
 		$group_id = $this->input->get_post('group_id');
 
+		// Set default values
+		$vars = array(
+			'group_id'			=> '',
+			'group_name'		=> '',
+			'form_hidden'		=> array(),
+			'submit_lang_key'	=> ($group_id != '') ? 'update' : 'submit',
+			'group_name'		=> ''
+		);
+
 		if ($group_id != '')
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('edit_status_group'));
+			$this->cp->set_variable('cp_page_title', lang('rename_group'));
 
 			$vars['form_hidden']['group_id'] = $group_id;
-
-			$vars['submit_lang_key'] = 'update';
 
 			if ( ! is_numeric($group_id))
 			{
@@ -4799,10 +4722,9 @@ class Admin_content extends CI_Controller {
 		}
 		else
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('create_new_status_group'));
-			$vars['submit_lang_key'] = 'submit';
+			$this->cp->set_variable('cp_page_title', lang('create_new_status_group'));
 		}
-
+		
 		$this->javascript->compile();
 		$this->load->view('admin/status_group_edit', $vars);
 	}
@@ -4819,10 +4741,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_group_delete_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -4835,13 +4754,13 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_group'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_management'.AMP.'group_id='.$group_id, $this->lang->line('status_management'));
+		$this->cp->set_variable('cp_page_title', lang('delete_group'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_management'.AMP.'group_id='.$group_id, lang('statuses'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=status_group_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['group_id'] = $group_id;
-		$vars['message'] = $this->lang->line('delete_status_group_confirmation');
+		$vars['message'] = lang('delete_status_group_confirmation');
 
 		// Grab category_groups locations with this id
 		$items = $this->status_model->get_status_group($group_id);
@@ -4869,10 +4788,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_group_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -4888,12 +4804,12 @@ class Admin_content extends CI_Controller {
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->status_model->delete_status_group($group_id);
 
-		$cp_message = $this->lang->line('status_group_deleted').NBS.$query->row('group_name');
+		$cp_message = lang('status_group_deleted').NBS.$query->row('group_name');
 
 		$this->logger->log_action($cp_message);
 
@@ -4916,10 +4832,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_group_update()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -4936,7 +4849,7 @@ class Admin_content extends CI_Controller {
 
 		if ( ! preg_match("#^[a-zA-Z0-9_\-/\s]+$#i", $group_name))
 		{
-			show_error($this->lang->line('illegal_characters'));
+			show_error(lang('illegal_characters'));
 		}
 
 		$this->load->model('status_model');
@@ -4945,7 +4858,7 @@ class Admin_content extends CI_Controller {
 		// Is the group name taken?
 		if ($this->status_model->is_duplicate_status_group_name($group_name, $group_id))
 		{
-			show_error($this->lang->line('taken_status_group_name'));
+			show_error(lang('taken_status_group_name'));
 		}
 
 		// Construct the query based on whether we are updating or inserting
@@ -4953,7 +4866,7 @@ class Admin_content extends CI_Controller {
 		{
 			$this->status_model->insert_statuses($group_name, $this->status_color_open, $this->status_color_closed);
 
-			$cp_message = $this->lang->line('status_group_created').NBS.$group_name;
+			$cp_message = lang('status_group_created').NBS.$group_name;
 
 			$this->logger->log_action($cp_message);
 
@@ -4965,12 +4878,12 @@ class Admin_content extends CI_Controller {
 
 			if ($channel_info->num_rows() > 0)
 			{
-				$cp_message .= $this->lang->line('assign_group_to_channel').NBS;
+				$cp_message .= lang('assign_group_to_channel').NBS;
 
 				if ($channel_info->num_rows() == 1)
 				{
 					$link = 'C=admin_content'.AMP.'M=channel_edit_group_assignments'.AMP.'channel_id='.$channel_info->row('channel_id');
-					$cp_message .= '<a href="'.BASE.AMP.$link.'">'.$this->lang->line('click_to_assign_group').'</a>';
+					$cp_message .= '<a href="'.BASE.AMP.$link.'">'.lang('click_to_assign_group').'</a>';
 				}
 				else
 				{
@@ -4982,7 +4895,7 @@ class Admin_content extends CI_Controller {
 		{
 			$this->status_model->update_statuses($group_name, $group_id, $this->status_color_open, $this->status_color_closed);
 
-			$cp_message = $this->lang->line('status_group_updated').NBS.$group_name;
+			$cp_message = lang('status_group_updated').NBS.$group_name;
 		}
 
 		$this->session->set_flashdata('message_success', $cp_message);
@@ -5001,10 +4914,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_management($message = '')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$group_id = $this->input->get_post('group_id');
 
@@ -5019,11 +4929,11 @@ class Admin_content extends CI_Controller {
 
 		$group_name = $this->status_model->get_status_group($group_id);
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('status_group').':'.NBS.$group_name->row('group_name'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', $this->lang->line('status_management'));
+		$this->cp->set_variable('cp_page_title', lang('group').':'.NBS.$group_name->row('group_name'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', lang('statuses'));
 
 		$this->jquery->tablesorter('.mainTable', '{
-			headers: {1: {sorter: false}, 2: {sorter: false}, 3: {sorter: false}, 4: {sorter: false}},
+			headers: {1: {sorter: false}},
 			widgets: ["zebra"]
 		}');
 
@@ -5051,10 +4961,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_edit()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$status_id = $this->input->get_post('status_id');
 
@@ -5062,6 +4969,10 @@ class Admin_content extends CI_Controller {
 		{
 			show_error(lang('not_authorized'));
 		}
+		
+		$this->cp->add_js_script(array(
+			'plugin' => array('jscolor')
+		));
 
 		$this->load->library('table');
 		$this->load->helper('form');
@@ -5070,7 +4981,7 @@ class Admin_content extends CI_Controller {
 
 		$query = $this->status_model->get_status($status_id);
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', $this->lang->line('status_management'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_group_management', lang('statuses'));
 
 		// Set default values
 		$vars['group_name'] = '';
@@ -5101,13 +5012,13 @@ class Admin_content extends CI_Controller {
 		{
 			$vars['submit_lang_key'] = 'submit';
 			$vars['form_hidden']['group_id'] = $this->input->get_post('group_id');
-			$this->cp->set_variable('cp_page_title', $this->lang->line('status_group'));
+			$this->cp->set_variable('cp_page_title', lang('status'));
 		}
 		else
 		{
 			$vars['form_hidden']['group_id'] = $query->row('group_id');
 			$vars['submit_lang_key'] = 'update';
-			$this->cp->set_variable('cp_page_title', $this->lang->line('status_group').':'.NBS.$vars['status']);
+			$this->cp->set_variable('cp_page_title', ucfirst($vars['status']));
 		}
 
 		if ($this->session->userdata['group_id'] == 1)
@@ -5164,10 +5075,7 @@ class Admin_content extends CI_Controller {
 	  */
 	function status_update()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$edit = ( ! $this->input->post('status_id')) ? FALSE : TRUE;
 
@@ -5178,7 +5086,7 @@ class Admin_content extends CI_Controller {
 
 		if (preg_match('/[^a-z0-9\_\-\+\s]/i', $this->input->post('status')))
 		{
-			show_error($this->lang->line('invalid_status_name'));
+			show_error(lang('invalid_status_name'));
 		}
 
 		$data = array(
@@ -5193,7 +5101,7 @@ class Admin_content extends CI_Controller {
 
 			if ($query->row('count')  > 0)
 			{
-				show_error($this->lang->line('duplicate_status_name'));
+				show_error(lang('duplicate_status_name'));
 			}
 
 			$data['group_id'] = $_POST['group_id'];
@@ -5202,7 +5110,7 @@ class Admin_content extends CI_Controller {
 			$this->db->insert('statuses', $data);
 			
 			$status_id = $this->db->insert_id();
-			$cp_message = $this->lang->line('status_created');
+			$cp_message = lang('status_created');
 		}
 		else
 		{
@@ -5210,7 +5118,7 @@ class Admin_content extends CI_Controller {
 
 			if ($query->row('count')  > 0)
 			{
-				show_error($this->lang->line('duplicate_status_name'));
+				show_error(lang('duplicate_status_name'));
 			}
 
 			$status_id = $this->input->get_post('status_id');
@@ -5246,7 +5154,7 @@ class Admin_content extends CI_Controller {
 				}
 			}
 
-			$cp_message = $this->lang->line('status_updated');
+			$cp_message = lang('status_updated');
 		}
 
 		// Set access privs
@@ -5275,10 +5183,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_delete_confirm()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$status_id = $this->input->get_post('status_id');
 
@@ -5291,13 +5196,13 @@ class Admin_content extends CI_Controller {
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_status'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_management', $this->lang->line('status_management'));
+		$this->cp->set_variable('cp_page_title', lang('delete_status'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=status_management', lang('statuses'));
 
 		$vars['form_action'] = 'C=admin_content'.AMP.'M=status_delete';
 		$vars['form_extra'] = '';
 		$vars['form_hidden']['status_id'] = $status_id;
-		$vars['message'] = $this->lang->line('delete_status_confirmation');
+		$vars['message'] = lang('delete_status_confirmation');
 
 		// Grab status with this id
 		$items = $this->status_model->get_status($status_id);
@@ -5323,10 +5228,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function status_delete()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$status_id = $this->input->get_post('status_id');
 
@@ -5354,301 +5256,8 @@ class Admin_content extends CI_Controller {
 			$this->db->query("DELETE FROM exp_statuses WHERE status_id = '$status_id' AND site_id = '".$this->db->escape_str($this->config->item('site_id'))."' AND group_id = '".$this->db->escape_str($group_id)."'");
 		}
 
-		$this->session->set_flashdata('message_success', $this->lang->line('status_deleted'));
+		$this->session->set_flashdata('message_success', lang('status_deleted'));
 		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=status_management'.AMP.'group_id='.$group_id);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * File Upload Preferences
-	 *
-	 * Creates the File Upload Preferences main page
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function file_upload_preferences($message = '')
-	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->load->library('table');
-		$this->load->model('tools_model');
-		$this->lang->loadfile('admin_content');
-
-		$this->cp->set_variable('cp_page_title', $this->lang->line('file_upload_prefs'));
-
-		$this->jquery->tablesorter('.mainTable', '{
-			headers: {1: {sorter: false}, 2: {sorter: false}},
-			widgets: ["zebra"]
-		}');
-
-		$vars['message'] = $message;
-		$vars['upload_locations'] = $this->tools_model->get_upload_preferences($this->session->userdata('member_group'));
-
-		$this->javascript->compile();
-
-		$this->cp->set_right_nav(array('create_new_upload_pref' => BASE.AMP.'C=admin_content'.AMP.'M=edit_upload_preferences'));
-		
-		$this->load->view('admin/file_upload_preferences', $vars);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 * File Upload Create
-	 *
-	 * Creates the New File Upload Destination page
-	 *
-	 * @access	public
-	 * @return	void
-	 */
-	function edit_upload_preferences()
-	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->load->helper(array('form', 'snippets'));
-		$this->lang->loadfile('admin_content');
-		$this->load->library('form_validation');
-		$this->load->library('table');
-		$this->load->model('tools_model');
-		$this->load->model('member_model');
-
-		$id = $this->input->get_post('id');
-
-		$type = ($id != '') ? 'edit' : 'new';
-
-		$upload_directories = $this->tools_model->get_upload_preferences($this->session->userdata('member_group'), ($id == '') ? 'null' : $id);
-
-		if ($upload_directories->num_rows() == 0)
-		{
-			if ($id != '')
-			{
-				show_error($this->lang->line('unauthorized_access'));
-			}
-
-			foreach ($upload_directories->list_fields() as $f)
-			{
-				$vars['field_'.$f] = '';
-			}
-
-			$vars['field_url'] = base_url(); // override blank with intelligent default
-			$vars['field_server_path'] = str_replace(SYSDIR.'/', '', FCPATH); // override blank with intelligent default
-			$vars['field_properties'] = "style=\"border: 0;\" alt=\"image\""; // override blank with intelligent default
-		}
-		else
-		{
-			foreach ($upload_directories->row_array() as $key => $val)
-			{
-				$vars['field_'.$key] = $val;
-			}
-		}
-
-		$vars['form_hidden']['id'] = $vars['field_id'];
-		$vars['form_hidden']['cur_name'] = $vars['field_name'];
-
-		$config = array(
-					   array(
-							 'field'   => 'name',
-							 'label'   => 'lang:upload_pref_name',
-							 'rules'   => 'required'
-						  ),
-					   array(
-							 'field'   => 'server_path',
-							 'label'   => 'lang:server_path',
-							 'rules'   => 'required'
-						  ),
-					   array(
-							 'field'   => 'url',
-							 'label'   => 'lang:url_to_upload_dir',
-							 'rules'   => 'callback_not_http'
-						  ),
-					   array(
-							 'field'   => 'allowed_types',
-							 'label'   => 'lang:allowed_types',
-							 'rules'   => 'required'
-						  ),
-					   array(
-							 'field'   => 'max_size',
-							 'label'   => 'lang:max_size',
-							 'rules'   => 'numeric'
-						  ),
-					   array(
-							 'field'   => 'max_height',
-							 'label'   => 'lang:max_height',
-							 'rules'   => 'numeric'
-						  ),
-					   array(
-							 'field'   => 'max_width',
-							 'label'   => 'lang:max_width',
-							 'rules'   => 'numeric'
-						  )
-					);
-
-		$this->form_validation->set_error_delimiters('<span class="notice">', '</span>');
-
-		$this->form_validation->set_rules($config);
-
-		if ($type == 'edit')
-		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('edit_file_upload_preferences'));
-			$vars['lang_line'] = 'update';
-		}
-		else
-		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('new_file_upload_preferences'));
-			$vars['lang_line'] = 'submit';
-		}
-
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=file_upload_preferences', $this->lang->line('file_upload_preferences'));
-
-		// Which file types are allowed.  Assume images only unless explicitly set to 'all types'
-		$vars['allowed_types'] = $upload_directories->row('allowed_types');
-
-		// The remaining fields are all the same, setup a loop for them in the view
-		$vars['upload_pref_fields'] = array('max_size', 'max_height', 'max_width', 'properties', 'pre_format', 'post_format', 'file_properties', 'file_pre_format', 'file_post_format');
-
-		$vars['upload_groups'] = $this->member_model->get_upload_groups();
-		$vars['banned_groups'] = array();
-
-		if ($vars['upload_groups']->num_rows() > 0)
-		{
-			$this->db->select('member_group');
-			
-			if ($id != '')
-			{
-				$this->db->where('upload_id', $id);
-			}
-
-			$result = $this->db->get('upload_no_access');
-
-			if ($result->num_rows() != 0)
-			{
-				foreach($result->result_array() as $row)
-				{
-					$vars['banned_groups'][] = $row['member_group'];
-				}
-			}
-		}
-
-		if ($this->form_validation->run() == FALSE)
-		{
-			$this->javascript->compile();
-			$this->load->view('admin/file_upload_create', $vars);
-		}
-		else
-		{
-			$this->_update_upload_preferences();
-		}
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Delete Upload Preferences Confirm
-	 *
-	 * @access	public
-	 * @return	mixed
-	 */
-	function delete_upload_preferences_conf()
-	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$id = $this->input->get_post('id');
-
-		if ( ! is_numeric($id))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->load->helper('form');
-		$this->lang->loadfile('admin_content');
-
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_upload_preference'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=file_upload_preferences', $this->lang->line('file_upload_preferences'));
-
-		$vars['form_action'] = 'C=admin_content'.AMP.'M=delete_upload_preferences'.AMP.'id='.$id;
-		$vars['form_extra'] = '';
-		$vars['form_hidden']['id'] = $id;
-		$vars['message'] = $this->lang->line('delete_upload_pref_confirmation');
-
-		// Grab all upload locations with this id
-		$this->db->where('id', $id);
-		$items = $this->db->get('upload_prefs');
-		$vars['items'] = array();
-		
-		foreach($items->result() as $item)
-		{
-			$vars['items'][] = $item->name;
-		}
-
-		$this->javascript->compile();
-		$this->load->view('admin/preference_delete_confirm', $vars);
-	}
-
-	// --------------------------------------------------------------------
-
-	/**
-	 *  Delete Upload Preferences
-	 *
-	 * @access	public
-	 * @return	null
-	 */
-	function delete_upload_preferences()
-	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$id = $this->input->get_post('id');
-
-		if ( ! is_numeric($id))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->load->model('tools_model');
-		$this->lang->loadfile('admin_content');
-
-		$name = $this->tools_model->delete_upload_preferences($id);
-
-		$this->logger->log_action($this->lang->line('upload_pref_deleted').NBS.NBS.$name);
-
-		// Clear database cache
-		$this->functions->clear_caching('db');
-
-		$this->session->set_flashdata('message_success', $this->lang->line('upload_pref_deleted').NBS.NBS.$name);
-		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=file_upload_preferences');
 	}
 
 	// --------------------------------------------------------------------
@@ -5665,113 +5274,11 @@ class Admin_content extends CI_Controller {
 	{
 		if ($str == 'http://' OR $str == '')
 		{
-			$this->form_validation->set_message('not_http', $this->lang->line('no_upload_dir_url'));
+			$this->form_validation->set_message('not_http', lang('no_upload_dir_url'));
 			return FALSE;
 		}
-		else
-		{
-			return TRUE;
-		}
-	}
 
-	// --------------------------------------------------------------------
-
-	/**
-	 * Update upload preferences
-	 *
-	 * Processes the file upload preferences form
-	 *
-	 * @access	private
-	 * @return	void
-	 */
-	function _update_upload_preferences()
-	{
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->load->model('admin_model');
-
-		// If the $id variable is present we are editing an
-		// existing field, otherwise we are creating a new one
-
-		$edit = (isset($_POST['id']) AND $_POST['id'] != '' && is_numeric($_POST['id'])) ? TRUE : FALSE;
-
-		$server_path = $this->input->post('server_path');
-		$url = $this->input->post('url');
-
-		if (substr($server_path, -1) != '/' AND substr($server_path, -1) != '\\')
-		{
-			$_POST['server_path'] .= '/';
-		}
-
-		if (substr($url, -1) != '/')
-		{
-			$_POST['url'] .= '/';
-		}
-
-		$error = array();
-
-		// Is the name taken?
-		if ($this->admin_model->unique_upload_name(strtolower($this->input->post('name')), strtolower($this->input->post('cur_name')), $edit))
-		{
-			show_error($this->lang->line('duplicate_dir_name'));
-		}
-
-		$id = $this->input->get_post('id');
-
-		unset($_POST['id']);
-		unset($_POST['cur_name']);
-		unset($_POST['submit']); // submit button
-
-		$data = array();
-		$no_access = array();
-
-		$this->db->delete('upload_no_access', array('upload_id' => $id));
-
-		foreach ($_POST as $key => $val)
-		{
-			if (substr($key, 0, 7) == 'access_')
-			{
-				if ($val == 'n')
-				{
-					$no_access[] = substr($key, 7);
-				}
-			}
-			else
-			{
-				$data[$key] = $val;
-			}
-		}
-
-		// Construct the query based on whether we are updating or inserting
-		if ($edit === TRUE)
-		{
-			$this->db->update('upload_prefs', $data, array('id' => $id));
-			$cp_message = $this->lang->line('preferences_updated');
-		}
-		else
-		{
-			$data['site_id'] = $this->config->item('site_id');
-
-			$this->db->insert('upload_prefs', $data);
-			$id = $this->db->insert_id();
-			$cp_message = $this->lang->line('new_file_upload_created');
-		}
-
-		if (count($no_access) > 0)
-		{
-			foreach($no_access as $member_group)
-			{
-				$this->db->insert('upload_no_access', array('upload_id'=>$id, 'upload_loc'=>'cp', 'member_group'=>$member_group));
-			}
-		}
-
-		$this->functions->clear_caching('db'); // Clear database cache
-
-		$this->session->set_flashdata('message_success', $cp_message);
-		$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=edit_upload_preferences'.AMP.'id='.$id);
+		return TRUE;
 	}
 
 	// --------------------------------------------------------------------
@@ -5786,14 +5293,11 @@ class Admin_content extends CI_Controller {
 	 */
 	function default_ping_servers($message = '', $id = '0')
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
-		if ($id == 0 AND ! $this->cp->allowed_group('can_admin_channels'))
+		if ($id == 0 && ! $this->cp->allowed_group('can_admin_channels'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->helper(array('form', 'url'));
@@ -5807,13 +5311,13 @@ class Admin_content extends CI_Controller {
 
 		if ($id != 0)
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('ping_servers'));
+			$this->cp->set_variable('cp_page_title', lang('ping_servers'));
 			$vars['instructions'] = '';
 		}
 		else
 		{
-			$this->cp->set_variable('cp_page_title', $this->lang->line('default_ping_servers'));
-			$vars['instructions'] = $this->lang->line('define_ping_servers');
+			$this->cp->set_variable('cp_page_title', lang('default_ping_servers'));
+			$vars['instructions'] = lang('define_ping_servers');
 		}
 
 		$vars['form_hidden']['member_id'] = $id;
@@ -5825,7 +5329,7 @@ class Admin_content extends CI_Controller {
 		// ping protocols supported (currently only xmlrpc)
 		$vars['protocols'] = array('xmlrpc'=>'xmlrpc');
 
-		$vars['is_default_options'] = array('y'=>$this->lang->line('yes'), 'n'=>$this->lang->line('no'));
+		$vars['is_default_options'] = array('y'=>lang('yes'), 'n'=>lang('no'));
 
 		$i = 1;
 
@@ -5897,7 +5401,7 @@ class Admin_content extends CI_Controller {
 							setup_js_page();
 						}
 
-						$.ee_notice("'.$this->lang->line('preferences_updated').'", {"type" : "success"});
+						$.ee_notice("'.lang('preferences_updated').'", {"type" : "success"});
 					},
 				"html");
 			}
@@ -5918,15 +5422,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function save_ping_servers()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-		
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->model('admin_model');
 
@@ -5955,7 +5451,7 @@ class Admin_content extends CI_Controller {
 
 		$this->admin_model->update_ping_servers(0, $data);
 
-		$message = $this->lang->line('preferences_updated');
+		$message = lang('preferences_updated');
 
 		$this->default_ping_servers($message);
 	}
@@ -5972,15 +5468,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function default_html_buttons()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->helper(array('form', 'url'));
 		$this->load->library('table');
@@ -5989,12 +5477,12 @@ class Admin_content extends CI_Controller {
 
 		$member_id = (int) $this->input->get_post('member_id');
 
-		if ($member_id == 0 AND ! $this->cp->allowed_group('can_admin_channels'))
+		if ($member_id == 0)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			//show_error(lang('unauthorized_access'));
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('default_html_buttons'));
+		$this->cp->set_variable('cp_page_title', lang('default_html_buttons'));
 		
 		$this->cp->add_js_script(array('file' => 'cp/account_html_buttons'));
 
@@ -6020,7 +5508,7 @@ class Admin_content extends CI_Controller {
 
 			$this->admin_model->update_html_buttons(0, array($predefined_buttons[$button]), FALSE);
 
-			$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+			$this->session->set_flashdata('message_success', lang('preferences_updated'));
 			$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=default_html_buttons');
 		}
 		elseif (is_numeric($member_id) AND $member_id != 0 AND $this->input->get_post('button_submit') != '')
@@ -6048,7 +5536,7 @@ class Admin_content extends CI_Controller {
 
 			$this->admin_model->update_html_buttons(0, $data);
 
-			$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+			$this->session->set_flashdata('message_success', lang('preferences_updated'));
 			$this->functions->redirect(BASE.AMP.'C=admin_content'.AMP.'M=default_html_buttons');
 		}
 
@@ -6070,15 +5558,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function delete_html_button()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		$this->load->model('admin_model');
 
@@ -6095,15 +5575,7 @@ class Admin_content extends CI_Controller {
 	 */
 	function reorder_html_buttons()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
 
 		foreach($this->input->post('ajax_tag_order') as $order=>$tag_id)
 		{
@@ -6112,7 +5584,7 @@ class Admin_content extends CI_Controller {
 			$this->db->update('html_buttons');
 		}
 
-		$this->output->send_ajax_response($this->lang->line('preferences_updated'));
+		$this->output->send_ajax_response(lang('preferences_updated'));
 	}
 
 	// --------------------------------------------------------------------
@@ -6125,15 +5597,9 @@ class Admin_content extends CI_Controller {
 	 */
 	function global_channel_preferences()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
+		$this->_restrict_prefs_access();
+		
+		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content', lang('admin_content'));
 
 		$this->_config_manager('channel_cfg', __FUNCTION__);
 	}
@@ -6197,7 +5663,7 @@ class Admin_content extends CI_Controller {
 						)
 		)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		$vars['type'] = $type;
 
@@ -6247,7 +5713,7 @@ class Admin_content extends CI_Controller {
 			{
 				foreach ($subtext[$name] as $txt)
 				{
-					$sub .= $this->lang->line($txt);
+					$sub .= lang($txt);
 				}
 			}
 
@@ -6257,7 +5723,7 @@ class Admin_content extends CI_Controller {
 					// Select fields
 					foreach ($options[1] as $k => $v)
 					{
-						$details[$k] = $this->lang->line($v);
+						$details[$k] = lang($v);
 					}
 					$selected = $value;
 					break;
@@ -6313,7 +5779,7 @@ class Admin_content extends CI_Controller {
 							break;
 						case 'site_404'			:
 							$options[0] = 's';
-							$details = array('' => $this->lang->line('none'));
+							$details = array('' => lang('none'));
 							
 							if (is_array($list = $this->admin_model->get_template_list()))
 							{
@@ -6331,7 +5797,7 @@ class Admin_content extends CI_Controller {
 							$options[0] = 's';
 							foreach ($this->localize->zones as $k => $v)
 							{
-								$details[$k] = $this->lang->line($k);
+								$details[$k] = lang($k);
 							}
 							$selected = $value;
 							break;
@@ -6347,11 +5813,10 @@ class Admin_content extends CI_Controller {
 		}
 
 		// if this is an update, show the success message
-		//$vars['alert'] = ($this->input->get_post('U')) ? $this->lang->line('preferences_updated') : FALSE;
-		//$vars['return_loc'] = BASE.AMP.'C=admin_content'.AMP.'M='.$return_loc.AMP.'U=1';
+		//$vars['alert'] = ($this->input->get_post('U')) ? lang('preferences_updated') : FALSE;
 		$vars['return_loc'] = BASE.AMP.'C=admin_content'.AMP.'M='.$return_loc;
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line($type));
+		$this->cp->set_variable('cp_page_title', lang($type));
 
 		$this->javascript->compile();
 		$this->load->view('admin/config_pages', $vars);
@@ -6369,28 +5834,40 @@ class Admin_content extends CI_Controller {
 	 */
 	function update_config()
 	{
-		if ( ! $this->cp->allowed_group('can_access_admin') OR ! $this->cp->allowed_group('can_access_content_prefs'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ( ! $this->cp->allowed_group('can_admin_channels'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
+		$this->_restrict_prefs_access();
+		
 		$loc = $this->input->get_post('return_location');
 
 		$this->config->update_site_prefs($_POST);
 
 		if ($loc !== FALSE)
 		{
-			$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));
+			$this->session->set_flashdata('message_success', lang('preferences_updated'));
 			$this->functions->redirect($loc);
 		}
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Restrict Access
+	 *
+	 * Helper function for the most common access level in this class
+	 *
+	 * @access	private
+	 * @return	void
+	 */
+	private function _restrict_prefs_access()
+	{
+		if ( ! $this->cp->allowed_group(
+			'can_access_admin',
+			'can_admin_channels',
+			'can_access_content_prefs'
+		))
+		{
+			show_error(lang('unauthorized_access'));
+		}
+	}
 
 }
 // END CLASS

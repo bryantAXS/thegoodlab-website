@@ -1,0 +1,50 @@
+.TaggerTable {width:100%; border:1px solid #b6c0c2; border-radius:3px; -webkit-border-radius: 3px; -moz-border-radius:4px;}
+.TaggerTable thead {background:none !important}
+.TaggerTable th {text-align:left; font-size:12px; color:#505050 !important; line-height:13px; background:#fff url(img/thead_bg.png) repeat-x 0 1px !important; background: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), to(rgba(0,0,0,0.06))) !important; background:-moz-linear-gradient(top, transparent, rgba(0,0,0,0.06)) !important; border-bottom:1px solid #BBB !important; text-shadow:0 1px #fff; padding:5px 10px 6px 10px !important; border-left:0 !important; border-top:0 !important; cursor:default !important; text-shadow: none !important; border-right:1px solid #ccc; border-right-color:rgba(0,0,0,0.1) !important;}
+.TaggerTable th:last-child {border-right:none !important;}
+.TaggerTable td {padding:5px 8px; font-size:11px; background:#fff; border:solid #e3e3e3; border-width:1px 1px 0 0;}
+.TaggerTable td:last-child {border-right:none !important;}
+.TaggerTable td input[type=text] {border:0; padding:3px;}
+.TaggerTable td input[type=text]:focus {padding:3px;}
+.TaggerTable td select {padding:3px 5px; border:1px solid #ccc;}
+.TaggerTable td select option {padding:0 3px;}
+.TaggerTable td small {display:block; float:left; margin:0 5px 0 0; color:#505050 !important; font-weight:bold; display:block; font-size:12px; background:#fff url(img/thead_bg.png) repeat-x 0 1px; background: -webkit-gradient(linear, 0 0, 0 100%, from(transparent), to(rgba(0,0,0,0.06))); background:-moz-linear-gradient(top, transparent, rgba(0,0,0,0.06)); text-shadow:0 1px #fff; padding:2px 4px; border:1px solid #b6c0c2; border-radius:3px; -webkit-border-radius:3px; text-decoration:none; text-align:center;}
+.TaggerTable tr.odd td {background:#fff;}
+.TaggerTable tbody tr:last-child td:last-child {border-bottom-right-radius:4px; -webkit-border-bottom-right-radius: 4px;}
+.TaggerTable tbody tr:last-child td:first-child {border-bottom-left-radius:4px; -webkit-border-bottom-left-radius: 4px;}
+.TaggerTable .EditTag {width:16px; height:16px; background:url(img/tag-edit.png) no-repeat; display:block; float:left; margin:0 5px 0 0;}
+.TaggerTable .DelTag {width:16px; height:16px; background:url(img/delete.png) no-repeat; display:block; float:left;}
+.LoadingIcon {width:16px; height:16px; background:url(img/spinner.gif) no-repeat; display:block; float:left;}
+.SuccessIcon {width:16px; height:16px; background:url(img/tick.png) no-repeat; display:block; float:left;}
+
+.toptable {height:30px;}
+.toptable .dataTables_length {width:200px; float:left;}
+.toptable .dataTables_filter {width:350px; float:right;}
+.toptable .dataTables_filter input {width:200px;}
+
+.bottomtable {height:20px;}
+.bottomtable .dataTables_info {float:left;}
+.bottomtable .dataTables_paginate {float:right;}
+.bottomtable .dataTables_paginate .paginate_button {font-weight:bold; cursor:pointer;}
+.bottomtable .dataTables_paginate .paginate_button:hover {text-decoration:underline}
+.bottomtable .dataTables_paginate .paginate_button_disabled {font-weight:normal !important; cursor:default !important;}
+
+.DeleteIcon {width:16px; height:16px; background:url(img/delete.png) no-repeat; display:block; float:left;}
+
+
+.TaggerTable a.multiSelect {display:block; float:left; margin:0 5px 0 0; background: #FFF url(dropdown.gif) right center no-repeat; border: solid 1px #BBB; padding-right: 20px; position: relative; cursor: default; text-decoration: none; color: black; display: -moz-inline-stack; display: inline-block; vertical-align: top;}
+.TaggerTable a.multiSelect:link, a.multiSelect:visited, a.multiSelect:hover, a.multiSelect:active {color: black; text-decoration: none;}
+.TaggerTable a.multiSelect span {margin: 1px 0px 1px 3px; overflow: hidden; display: -moz-inline-stack; display: inline-block; white-space: nowrap;}
+.TaggerTable a.multiSelect.hover {background-image: url(img/dropdown_hover.gif);}
+.TaggerTable a.multiSelect.active, a.multiSelect.focus {border: inset 1px #000;}
+.TaggerTable a.multiSelect.active {background-image: url(img/dropdown_active.gif);}
+.TaggerTable .multiSelectOptions {margin-top: -1px; overflow-y: auto; overflow-x: hidden; border: solid 1px #B2B2B2; background: #FFF;}
+.TaggerTable .multiSelectOptions LABEL {padding:4px; display: block; white-space: nowrap;}
+.TaggerTable .multiSelectOptions LABEL.optGroup {font-weight: bold;}
+.TaggerTable .multiSelectOptions .optGroupContainer LABEL {padding-left: 10px;}
+.TaggerTable .multiSelectOptions.optGroupHasCheckboxes .optGroupContainer LABEL {padding-left: 18px;}
+.TaggerTable .multiSelectOptions input {vertical-align: middle; margin-right:5px;}
+.TaggerTable .multiSelectOptions LABEL.checked {background-color: #dce5f8;}
+.TaggerTable .multiSelectOptions LABEL.selectAll {border-bottom: dotted 1px #CCC;}
+.TaggerTable .multiSelectOptions LABEL.hover {background-color: #3399ff; color:white;}
+

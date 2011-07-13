@@ -15,13 +15,19 @@ class Wygwam_mcp {
 	/**
 	 * Constructor
 	 */
-	function Wygwam_mcp()
+	function __construct()
 	{
 		$this->EE =& get_instance();
 
-		if (isset($this->EE->cp))
+		if (REQ == 'CP')
 		{
 			$this->base = 'C=addons_modules'.AMP.'M=show_module_cp'.AMP.'module=wygwam';
+
+			// Set the right nav
+			$this->EE->cp->set_right_nav(array(
+				'wygwam_settings' => BASE.AMP.$this->base.AMP.'method=index',
+				'wygwam_configs'  => BASE.AMP.$this->base.AMP.'method=configs'
+			));
 		}
 
 		$this->helper = new Wygwam_Helper();
@@ -59,11 +65,15 @@ class Wygwam_mcp {
 		$query = $this->EE->db->get('wygwam_configs');
 		$vars['configs'] = $query->result_array();
 
-		// license key
-		$this->EE->db->select('settings');
-		$query = $this->EE->db->get_where('fieldtypes', array('name' => 'wygwam'));
+		// settings
+		$query = $this->EE->db->select('settings')
+		                      ->where('name', 'wygwam')
+		                      ->get('fieldtypes');
+
 		$settings = unserialize(base64_decode($query->row('settings')));
+
 		$vars['license_key'] = isset($settings['license_key']) ? $settings['license_key'] : '';
+		$vars['file_browser'] = isset($settings['file_browser']) ? $settings['file_browser'] : 'ee';
 
 		$this->EE->load->library('table');
 
@@ -71,22 +81,46 @@ class Wygwam_mcp {
 	}
 
 	/**
-	 * Save License Key
+	 * Save Settings
 	 */
-	function save_license_key()
+	function save_settings()
 	{
-		$settings['license_key'] = $this->EE->input->post('license_key');
+		$settings = array(
+			'license_key' => $this->EE->input->post('license_key'),
+			'file_browser' => $this->EE->input->post('file_browser')
+		);
+
 		$data['settings'] = base64_encode(serialize($settings));
 
 		$this->EE->db->where('name', 'wygwam');
 		$this->EE->db->update('fieldtypes', $data);
 
 		// redirect to Index
-		$this->EE->session->set_flashdata('message_success', lang('wygwam_license_key_saved'));
+		$this->EE->session->set_flashdata('message_success', lang('global_settings_saved'));
 		$this->EE->functions->redirect(BASE.AMP.$this->base);
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Configs
+	 */
+	function configs()
+	{
+		$this->EE->load->library('table');
+
+		$this->_set_page_title(lang('wygwam_configs'));
+
+		$vars['base'] = $this->base;
+
+		// configs
+		$this->EE->db->select('config_id, config_name');
+		$this->EE->db->order_by('config_name');
+		$query = $this->EE->db->get('wygwam_configs');
+		$vars['configs'] = $query->result_array();
+
+		return $this->EE->load->view('configs', $vars, TRUE);
+	}
 
 	/**
 	 * Edit Config
@@ -268,7 +302,7 @@ class Wygwam_mcp {
 
 		// redirect to Index
 		$this->EE->session->set_flashdata('message_success', lang('wygwam_config_saved'));
-		$this->EE->functions->redirect(BASE.AMP.$this->base);
+		$this->EE->functions->redirect(BASE.AMP.$this->base.AMP.'method=configs');
 	}
 
 	// --------------------------------------------------------------------
@@ -303,7 +337,7 @@ class Wygwam_mcp {
 
 		// redirect to Index
 		$this->EE->session->set_flashdata('message_success', lang('wygwam_config_deleted'));
-		$this->EE->functions->redirect(BASE.AMP.$this->base);
+		$this->EE->functions->redirect(BASE.AMP.$this->base.AMP.'method=configs');
 	}
 
 }

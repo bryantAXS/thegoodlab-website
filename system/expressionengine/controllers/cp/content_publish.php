@@ -1,11 +1,13 @@
 <?php if ( ! defined('BASEPATH')) exit('No direct script access allowed');
 
+
+
 /**
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -33,6 +35,7 @@ class Content_publish extends CI_Controller {
 	private $_publish_blocks 	= array();
 	private $_publish_layouts 	= array();
 	private $_errors			= array();
+	private $_assigned_channels = array();
 	private $_smileys_enabled	= FALSE;
 
 	/**
@@ -52,6 +55,8 @@ class Content_publish extends CI_Controller {
 		$this->load->model('channel_model');
 		$this->load->helper(array('typography', 'spellcheck'));
 		$this->cp->get_installed_modules();
+		
+		$this->_assigned_channels = $this->functions->fetch_assigned_channels();
 	}
 	
 	// --------------------------------------------------------------------
@@ -127,19 +132,35 @@ class Content_publish extends CI_Controller {
 		$channel_id	= (int) $this->input->get_post('channel_id');
 		
 		$autosave	= ($this->input->get_post('use_autosave') == 'y');
+		
+		// If we're autosaving and this isn't a submitted form
+		if ($autosave AND empty($_POST))
+		{
+			$autosave_entry_id = $entry_id;
+			
+			$autosave_data = $this->db->get_where('channel_entries_autosave', array(
+				'entry_id' => $entry_id
+			));
+			$autosave_data = $autosave_data->row();
+			
+			$entry_id = $autosave_data->original_entry_id;
+		}
+		else
+		{
+			$autosave_entry_id = FALSE;
+		}
 
 		$this->_smileys_enabled = (isset($this->cp->installed_modules['emoticon']) ? TRUE : FALSE);
 
 		if ($this->_smileys_enabled)
 		{
 			$this->load->helper('smiley');
-			$this->cp->add_to_foot(smiley_js());				
+			$this->cp->add_to_foot(smiley_js());
 		}
 
 		// Grab the channel_id associated with this entry if
 		// required and make sure the current member has access.
-		$channel_id = $this->_member_can_publish($channel_id, $entry_id, $autosave);
-		
+		$channel_id = $this->_member_can_publish($channel_id, $entry_id, $autosave_entry_id);
 		
 		// If they're loading a revision, we stop here
 		$this->_check_revisions($entry_id);
@@ -149,7 +170,7 @@ class Content_publish extends CI_Controller {
 		$this->_channel_data = $this->_load_channel_data($channel_id);
 		
 		// Grab, fields and entry data
-		$entry_data		= $this->_load_entry_data($channel_id, $entry_id, $autosave);
+		$entry_data		= $this->_load_entry_data($channel_id, $entry_id, $autosave_entry_id);
 		$field_data		= $this->_set_field_settings($entry_id, $entry_data);
 		$entry_id		= $entry_data['entry_id'];
 		
@@ -158,7 +179,6 @@ class Content_publish extends CI_Controller {
 
 		$field_data = array_merge($field_data, $deft_field_data);
 		$field_data = $this->_setup_field_blocks($field_data, $entry_data);
-		
 
 		$this->_set_field_validation($this->_channel_data, $field_data);
 		
@@ -220,19 +240,19 @@ class Content_publish extends CI_Controller {
 		
 		// Load layouts - we'll need them for the steps below
 		// if this is a layout group preview, we'll use it, otherwise, we'll use the author's group_id
-		
 		$layout_info = $this->_load_layout($channel_id);
 		
+		// Merge layout data (mostly width and visbility) into field data for use on the publish page
+		$field_data = $this->_set_field_layout_settings($field_data, $layout_info);
 
 		// First figure out what tabs to show, and what fields
 		// they contain. Then work through the details of how
 		// they are show.
-		
+
 		$tab_hierarchy	= $this->_setup_tab_hierarchy($field_data, $layout_info);
 		$layout_styles	= $this->_setup_layout_styles($field_data, $layout_info);
 		$field_list		= $this->_sort_field_list($field_data);		// @todo admin only? or use as master list? skip sorting for non admins, but still compile?
 		$field_list		= $this->_prep_field_wrapper($field_list);
-		
 		
 		$field_output	= $this->_setup_field_display($field_data);
 		
@@ -246,19 +266,17 @@ class Content_publish extends CI_Controller {
 		$this->filemanager->filebrowser('C=content_publish&M=filemanager_actions');
 		
 		$this->cp->add_js_script(array(
-		        'ui'        => array('datepicker', 'resizable', 'draggable', 'droppable'),
-		        'plugin'    => array('markitup', 'toolbox.expose', 'overlay'),
-				'file'		=> array('json2', 'cp/publish')
-		    )
-		);
-				
+			'ui'		=> array('datepicker', 'resizable', 'draggable', 'droppable'),
+			'plugin'	=> array('markitup', 'toolbox.expose', 'overlay', 'tmpl', 'ee_url_title'),
+			'file'		=> array('json2', 'cp/publish', 'cp/publish_tabs', 'cp/global')
+		));
+		
 		if ($this->session->userdata('group_id') == 1)
 		{
-			$this->cp->add_js_script(array('file' => 'cp/publish_admin'));			
+			$this->cp->add_js_script(array('file' => 'cp/publish_admin'));
 		}
 
 		$this->_set_global_js($entry_id);
-		
 		
 		reset($tab_hierarchy);
 		
@@ -268,9 +286,19 @@ class Content_publish extends CI_Controller {
 		unset($parts['S'], $parts['D']);
 		$current_url = http_build_query($parts, '', '&amp;');
 		
-		$autosave_id = isset($entry_data['autosave_entry_id']) ? $entry_data['autosave_entry_id'] : 0;
-	
-	
+		$autosave_id = ($autosave) ? $autosave_entry_id : 0;
+		
+		// Remove 'layout_preview' from the URL, stripping anything after it
+		if (strpos($current_url, 'layout_preview') !== FALSE) 
+		{
+			$preview_url = explode(AMP.'layout_preview=', $current_url, 2);
+			$preview_url = $preview_url[0];
+		} 
+		else 
+		{
+			$preview_url = $current_url;
+		}
+		
 		$data = array(
 			'message'			=> '',	// @todo consider pulling?
 			'cp_page_title'		=> $entry_id ? lang('edit_entry') : lang('new_entry') . ': '. $this->_channel_data['channel_title'],
@@ -288,21 +316,23 @@ class Content_publish extends CI_Controller {
 			'current_url'		=> $current_url,
 			'file_list'			=> $this->_file_manager['file_list'],
 			
-			'show_revision_cluster' => FALSE,
+			'show_revision_cluster' => $this->_channel_data['enable_versioning'],
 			'member_groups_laylist'	=> $member_groups_laylist,
+			
+			// For the autosaves, we're using the GET version of entry_id because
+			// it's the ID in the autosave table
 			
 			'hidden_fields'		=> array(
 				'entry_id'			=> $entry_id,
 				'channel_id'		=> $channel_id,
 				'autosave_entry_id'	=> $autosave_id,
 				'filter'			=> $this->input->get_post('filter')
-			)
+			),
+			
+			'preview_url' => $preview_url
 		);
 
-		$this->cp->set_breadcrumb(
-			BASE.AMP.'C=content_publish'.AMP.'M=entry_form'.AMP.'channel_id='.$channel_id,
-			$this->_channel_data['channel_title']
-		);
+		$this->cp->set_breadcrumb(BASE.AMP.'C=content_publish', lang('publish'));
 		
 		$this->javascript->compile();
 		$this->load->view('content/publish', $data);
@@ -320,10 +350,8 @@ class Content_publish extends CI_Controller {
 		$entry_id	= (int) $this->input->get_post('entry_id');
 		$channel_id	= (int) $this->input->get_post('channel_id');
 		
-		$assigned_channels = $this->functions->fetch_assigned_channels();
-		
 		// can they access this channel?
-		if ( ! $channel_id OR ! in_array($channel_id, $assigned_channels))
+		if ( ! $channel_id OR ! in_array($channel_id, $this->_assigned_channels))
 		{
 			show_error(lang('unauthorized_access'));
 		}
@@ -375,7 +403,8 @@ class Content_publish extends CI_Controller {
 		
 		$this->output->send_ajax_response(array(
 			'success' => $msg.$time,
-			'autosave_entry_id' => $id
+			'autosave_entry_id' => $id,
+			'original_entry_id'	=> $entry_id
 		));
 	}
 	
@@ -426,7 +455,7 @@ class Content_publish extends CI_Controller {
 			foreach ($field as $name => $info)
 			{
 				if (count($required) > 0)
-				{					
+				{
 					// Check for hiding a required field
 					if (in_array($name, $required) && $info['visible'] === FALSE)
 					{
@@ -493,6 +522,24 @@ class Content_publish extends CI_Controller {
 	
 	
 	// --------------------------------------------------------------------
+	
+	function preview_layout()
+	{
+		if ( ! $this->cp->allowed_group('can_admin_channels'))
+		{
+			show_error(lang('unauthorized_access'));
+		}
+
+		if (empty($_POST))
+		{
+			show_error(lang('unauthorized_access'));
+		}
+		
+		$member_group_name = $this->input->post('member_group');
+		$this->session->set_flashdata('message', lang('layout_preview') . $member_group_name);
+	}
+	
+	// --------------------------------------------------------------------
 
 	/**
 	 * View Entry
@@ -510,9 +557,7 @@ class Content_publish extends CI_Controller {
 			show_error(lang('unauthorized_access'));
 		}
 
-		$assigned_channels = $this->functions->fetch_assigned_channels();
-
-		if ( ! in_array($channel_id, $assigned_channels))
+		if ( ! in_array($channel_id, $this->_assigned_channels))
 		{
 			show_error(lang('unauthorized_for_this_channel'));
 		}
@@ -560,8 +605,7 @@ class Content_publish extends CI_Controller {
 		
 		$this->load->library('typography');
 		
-		$this->typography->initialize();
-		$this->typography->convert_curly = FALSE;
+		$this->typography->initialize(array('convert_curly' => FALSE));
 		
 		$show_edit_link = TRUE;
 		$show_comments_link = TRUE;
@@ -795,7 +839,7 @@ class Content_publish extends CI_Controller {
 			
 			if ( ! class_exists('EE_Spellcheck'))
 			{
-				require APPPATH.'libraries/Spellcheck'.EXT;
+				require APPPATH.'libraries/Spellcheck.php';
 			}
 			
 			if ($act == 'iframe' OR $act == 'check')
@@ -909,6 +953,42 @@ class Content_publish extends CI_Controller {
 	}
 	
 	// --------------------------------------------------------------------
+	
+	/**
+	 * Add the field layout settings array to the field data
+	 *
+	 * @param Array $field_data Multidimensional array containing all of the fields and their settings
+	 * @param Array $layout_info Multidimensional array containing the publish layout info
+	 */
+	private function _set_field_layout_settings($field_data, $layout_info)
+	{
+		if ($layout_info !== FALSE)
+		{
+			foreach ($layout_info as $layout_tab => $layout) 
+			{
+				foreach ($layout as $field_name => $field_layout_settings) 
+				{
+					if ($field_name !== '_tab_label' AND isset($field_data[$field_name]))
+					{
+						$field_data[$field_name]['field_visibility'] = ($field_layout_settings['visible']) ? 'y' : 'n';
+						$field_data[$field_name]['field_width'] = $field_layout_settings['width'];
+					}
+				}
+			}
+		}
+		else
+		{
+			foreach ($field_data as $field_name => &$field_settings) 
+			{
+				$field_settings['field_visibility'] = 'y';
+				$field_settings['field_width'] = '100%';
+			}
+		}
+		
+		return $field_data;
+	}
+	
+	// --------------------------------------------------------------------
 
 	/**
 	 * Setup channel field validation
@@ -938,18 +1018,16 @@ class Content_publish extends CI_Controller {
 	 *
 	 * @return	void
 	 */
-	private function _member_can_publish($channel_id, $entry_id, $autosave)
+	private function _member_can_publish($channel_id, $entry_id, $autosave_entry_id)
 	{
 		$this->load->model('channel_entries_model');
-		
-		$assigned_channels = $this->functions->fetch_assigned_channels();
 		
 		// A given entry id is either a real channel entry id
 		// or the unique id for an autosave row.
 		
 		if ($entry_id)
 		{
-			$query = $this->channel_entries_model->get_entry($entry_id, '', $autosave);
+			$query = $this->channel_entries_model->get_entry($entry_id, '', $autosave_entry_id);
 			
 			if ( ! $query->num_rows())
 			{
@@ -976,18 +1054,18 @@ class Content_publish extends CI_Controller {
 		
 		if ( ! $channel_id)
 		{
-			if ( ! count($assigned_channels))
+			if ( ! count($this->_assigned_channels))
 			{
 				show_error(lang('unauthorized_access'));
 			}
 			
-			if (count($assigned_channels) > 1)
+			if (count($this->_assigned_channels) > 1)
 			{
 				// go to the channel select list
 				$this->functions->redirect('C=content_publish');
 			}
 
-			$channel_id = $assigned_channels[0];
+			$channel_id = $this->_assigned_channels[0];
 		}
 		
 		// After all that mucking around, double check to make
@@ -995,7 +1073,7 @@ class Content_publish extends CI_Controller {
 				
 		$channel_id = (int) $channel_id;
 		
-		if ( ! $channel_id OR ! in_array($channel_id, $assigned_channels))
+		if ( ! $channel_id OR ! in_array($channel_id, $this->_assigned_channels))
 		{
 			show_error(lang('unauthorized_access'));
 		}
@@ -1022,7 +1100,7 @@ class Content_publish extends CI_Controller {
 	 *
 	 * @return	void
 	 */
-	function _load_entry_data($channel_id, $entry_id = FALSE, $autosave = FALSE)
+	function _load_entry_data($channel_id, $entry_id = FALSE, $autosave_entry_id = FALSE)
 	{
 		$result = array(
 			'title'		=> $this->_channel_data['default_entry_title'],
@@ -1030,11 +1108,11 @@ class Content_publish extends CI_Controller {
 			'entry_id'	=> 0
 		);
 		
-		if ($entry_id)
+		if ($entry_id OR $autosave_entry_id)
 		{
 			$this->load->model('channel_entries_model');
 			
-			$query = $this->channel_entries_model->get_entry($entry_id, $channel_id, $autosave);
+			$query = $this->channel_entries_model->get_entry($entry_id, $channel_id, $autosave_entry_id);
 			
 			if ( ! $query->num_rows())
 			{
@@ -1043,7 +1121,7 @@ class Content_publish extends CI_Controller {
 
 			$result = $query->row_array();
 			
-			if ($autosave)
+			if ($autosave_entry_id)
 			{
 				$res_entry_data = unserialize($result['entry_data']);
 
@@ -1153,7 +1231,6 @@ class Content_publish extends CI_Controller {
 		unset($data['author']);
 		unset($data['filter']);
 		unset($data['return_url']);
-		
 		
 		// New entry or saving an existing one?
 		if ($entry_id)
@@ -1273,7 +1350,7 @@ class Content_publish extends CI_Controller {
 
 		$this->javascript->set_global(array(
 			'date.format'						=> $date_fmt,
-			'add_new_html_button'				=> lang('add_new_html_button'),
+			'lang.add_new_html_button'			=> lang('add_new_html_button'),
 			'lang.add_tab' 						=> lang('add_tab'),
 			'lang.close' 						=> lang('close'),
 			'lang.confirm_exit'					=> lang('confirm_exit'),
@@ -1284,7 +1361,7 @@ class Content_publish extends CI_Controller {
 			'lang.tab_name'						=> lang('tab_name'),
 			'lang.show_toolbar' 				=> lang('show_toolbar'),
 			'lang.tab_name_required' 			=> lang('tab_name_required'),
-			'publish.autosave.interval'			=> $autosave_interval_seconds,
+			'publish.autosave.interval'			=> (int) $autosave_interval_seconds,
 			'publish.channel_id'				=> $this->_channel_data['channel_id'],
 			'publish.default_entry_title'		=> $this->_channel_data['default_entry_title'],
 			'publish.field_group'				=> $this->_channel_data['field_group'],
@@ -1467,11 +1544,11 @@ class Content_publish extends CI_Controller {
 			
 					if ($name == 'Br')
 					{
-						$name = $this->lang->line('auto_br');
+						$name = lang('auto_br');
 					}
 					elseif ($name == 'Xhtml')
 					{
-						$name = $this->lang->line('xhtml');
+						$name = lang('xhtml');
 					}
 					
 					$field_list['field_id_'.$format['field_id']]['field_fmt_options'][$format['field_fmt']] = $name;
@@ -1480,7 +1557,7 @@ class Content_publish extends CI_Controller {
 		}
 		
 		$this->javascript->set_global('publish.markitup', $markitup_buttons);
-
+		
 		return $field_list;
 	}
 	
@@ -1565,19 +1642,6 @@ class Content_publish extends CI_Controller {
 		if ( ! is_array($layout_info) OR ! count($layout_info))
 		{
 			return FALSE;
-		}
-
-		// turn # keys into field_id_#
-		foreach ($layout_info as $tab => &$fields)
-		{
-			foreach ($fields as $name => $data)
-			{
-				if (is_numeric($name))
-				{
-					$fields['field_id_'.$name] = $data;
-					unset($fields[$name]);
-				}
-			}
 		}
 		
 		return $layout_info;
@@ -1673,130 +1737,30 @@ class Content_publish extends CI_Controller {
 		$third_party  	= $this->_build_third_party_blocks($entry_data);
 
 		return array_merge(
-							$field_data, $categories, $pings, 
-							$options, $revisions, $third_party);
+			$field_data,
+			$categories,
+			$pings,
+			$options,
+			$revisions,
+			$third_party
+		);
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Categories Block
-	 *
-	 *
 	 */
 	private function _build_categories_block($entry_data)
 	{
-		$default	= array(
-			'string_override'		=> lang('no_categories'),
-			'field_id'				=> 'category',
-			'field_name'			=> 'category',
-			'field_label'			=> lang('categories'),
-			'field_required'		=> 'n',
-			'field_type'			=> 'multiselect',
-			'field_text_direction'	=> 'ltr',
-			'field_data'			=> '',
-			'field_fmt'				=> 'text',
-			'field_instructions'	=> '',
-			'field_show_fmt'		=> 'n',
-			'selected'				=> 'n',
-			'options'				=> array()
+		$this->load->library('publish');
+		
+		return $this->publish->build_categories_block(
+			$this->_channel_data['cat_group'], 
+			$entry_data['entry_id'], 
+			(isset($entry_data['category'])) ? $entry_data['category'] : NULL, 
+			$this->_channel_data['deft_category']
 		);
-		
-		// No categories? Easy peasy
-		if ( ! $this->_channel_data['cat_group'])
-		{
-			return array('category' => $default);
-		}
-		
-		$this->api->instantiate('channel_categories');
-				
-		$catlist	= array();
-		$categories	= array();
-
-		// Figure out selected categories
-		if ( ! count($_POST) && ! $entry_data['entry_id'] && $this->_channel_data['deft_category'])
-		{
-			// new entry and a default exists
-			$catlist = $this->_channel_data['deft_category'];
-		}
-		elseif (count($_POST) > 0)
-		{
-			$catlist = array();
-			
-			if (isset($_POST['category']) && is_array($_POST['category']))
-			{
-				foreach ($_POST['category'] as $val)
-				{
-					$catlist[$val] = $val;
-				}
-			}			
-		}
-		elseif ( ! isset($entry_data['category']))
-		{
-			$qry = $this->db->select('c.cat_name, p.*')
-							->from('categories AS c, category_posts AS p')
-							->where_in('c.group_id', explode('|', $this->_channel_data['cat_group']))
-							->where('p.entry_id', $entry_data['entry_id'])
-							->where('c.cat_id = p.cat_id', NULL, FALSE)
-							->get();
-
-			foreach ($qry->result() as $row)
-			{
-				$catlist[$row->cat_id] = $row->cat_id;
-			}			
-		}
-		elseif (is_array($entry_data['category']))
-		{
-			foreach ($entry_data['category'] as $val)
-			{
-				$catlist[$val] = $val;
-			}
-		}
-		
-		
-		// Figure out valid category options		
-		$this->api_channel_categories->category_tree($this->_channel_data['cat_group'], $catlist);
-
-		if (count($this->api_channel_categories->categories) > 0)
-		{  
-			// add categories in again, over-ride setting above
-			foreach ($this->api_channel_categories->categories as $val)
-			{
-				$categories[$val['3']][] = $val;
-			}
-		}
-		
-		
-		// If the user can edit categories, we'll go ahead and
-		// show the links to make that work
-		$edit_links = FALSE;
-		
-		if ($this->session->userdata('can_edit_categories') == 'y')
-		{
-			$link_info = $this->api_channel_categories->fetch_allowed_category_groups($this->_channel_data['cat_group']);
-
-			if (is_array($link_info) && count($link_info))
-			{
-				$edit_links = array();
-				
-				foreach ($link_info as $val)
-				{
-					$edit_links[] = array(
-						'url' => BASE.AMP.'C=admin_content'.AMP.'M=category_editor'.AMP.'group_id='.$val['group_id'],
-						'group_name' => $val['group_name']
-					);
-				}
-			}
-		}
-
-
-		// Build the mess
-		$data = compact('categories', 'edit_links');
-
-		$default['options']			= $categories;		
-		$default['string_override'] = $this->load->view('content/_assets/categories', $data, TRUE);
-		
-		return array('category' => $default);
 	}
 
 	// --------------------------------------------------------------------
@@ -1923,9 +1887,16 @@ class Content_publish extends CI_Controller {
 		
 		$versioning = '';
 		
-		$revisions_checked = (isset($entry_data['versioning_enabled']) 
-									&& $entry_data['versioning_enabled'] == 'y') ? TRUE : FALSE;
-	
+		// We default versioning to true
+		if ( ! isset($entry_data['versioning_enabled']))
+		{
+			$revisions_checked = TRUE;
+		}
+		else
+		{
+			$revisions_checked = ($entry_data['versioning_enabled'] == 'y') ? TRUE : FALSE;
+		}
+		
 		if ($revisions_checked)
 		{
 			$versioning = lang('no_revisions_exist');
@@ -2114,14 +2085,16 @@ class Content_publish extends CI_Controller {
 														$this->_channel_data['cat_group'], 
 														$this->_channel_data['field_group']
 													);
-
+		
 		if ($query->num_rows() > 0)
 		{
 			foreach ($query->result_array() as $row)
 			{
-				if ($this->session->userdata['group_id'] == 1 OR in_array($row['channel_id'], $assigned_channels))
+				if ($this->session->userdata('group_id') == 1 OR 
+					in_array($row['channel_id'], $this->_assigned_channels))
 				{
-					if (isset($_POST['new_channel']) && is_numeric($_POST['new_channel']) && $_POST['new_channel'] == $row['channel_id'])
+					if (isset($_POST['new_channel']) && is_numeric($_POST['new_channel']) && 
+						$_POST['new_channel'] == $row['channel_id'])
 					{
 						$menu_channel_selected = $row['channel_id'];
 					}
@@ -2186,16 +2159,21 @@ class Content_publish extends CI_Controller {
 				{
 					$no_status_access[] = $row['status_id'];
 				}
-			}
-			
-			// if there is no status group assigned, 
-			// only Super Admins can create 'open' entries
-			$menu_status_options['open'] = lang('open');		
+			}	
 		}
 		
 		$menu_status_options['closed'] = lang('closed');
 		
-		if (isset($this->_channel_data['status_group']))
+		if ( ! isset($this->_channel_data['status_group']))
+		{
+			if ($this->session->userdata('group_id') == 1)
+			{
+				// if there is no status group assigned, 
+				// only Super Admins can create 'open' entries
+				$menu_status_options['open'] = lang('open');
+			}	
+		}
+		else
 		{
 			$query = $this->status_model->get_statuses($this->_channel_data['status_group']);
 			

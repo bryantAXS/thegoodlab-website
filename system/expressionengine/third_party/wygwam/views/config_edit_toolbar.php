@@ -16,7 +16,7 @@
 			<span class="cke_clear tb-option tb-duplicate tb-selected">
 				<input type="hidden" name="settings[toolbar][]" value="/" <?php if (!$selections_pane) echo 'disabled' ?>>
 			</span>
-		<?php elseif (in_array($first, $selected_groups)): ?>
+		<?php elseif (array_intersect($group, $selected_groups)): ?>
 			<span id="<?php echo $id ?>-placeholder" class="tb-placeholder"></span>
 		<?php else:
 			$select = in_array($first, $vars['tb_selects']); ?>

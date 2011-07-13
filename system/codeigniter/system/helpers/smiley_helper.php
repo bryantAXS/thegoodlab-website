@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -229,12 +229,12 @@ if ( ! function_exists('_get_smiley_array'))
 {
 	function _get_smiley_array()
 	{
-		if ( ! file_exists(APPPATH.'config/smileys'.EXT))
+		if ( ! file_exists(APPPATH.'config/smileys.php'))
 		{
 			return FALSE;
 		}
 
-		include(APPPATH.'config/smileys'.EXT);
+		include(APPPATH.'config/smileys.php');
 
 		if ( ! isset($smileys) OR ! is_array($smileys))
 		{

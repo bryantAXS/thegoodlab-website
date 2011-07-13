@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -33,8 +33,7 @@ class Api_channel_entries extends Api {
 	var $meta		= array();
 	var $c_prefs	= array();
 	var $_cache		= array();
-	var $mod_fields	= array();
-	
+
 	var $autosave_entry_id = 0;
 	
 	/**
@@ -206,7 +205,7 @@ class Api_channel_entries extends Api {
 		
 		return TRUE;
 	}
-
+	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -581,7 +580,15 @@ class Api_channel_entries extends Api {
 				$this->EE->db->delete('comment_subscriptions', array('entry_id' => $val));
 			}
 			
+			// Delete entries in the channel_entries_autosave table
+			$this->EE->db->where('original_entry_id', $val)
+						 ->delete('channel_entries_autosave');
 			
+			// Delete entries from the versions table
+			$this->EE->db->where('entry_id', $val)
+						 ->delete('entry_versioning');
+
+
 			// -------------------------------------------
 			// 'delete_entries_loop' hook.
 			//  - Add additional processing for entry deletion in loop
@@ -620,7 +627,7 @@ class Api_channel_entries extends Api {
 		$this->EE->api_channel_fields->get_module_methods($methods, $params);
 		
 		// Clear caches
-		$this->EE->functions->clear_caching('all');
+		$this->EE->functions->clear_caching('all', '', TRUE);
 
 		// -------------------------------------------
 		// 'delete_entries_end' hook.
@@ -795,7 +802,7 @@ class Api_channel_entries extends Api {
 	 *
 	 * Trigger an entry related hook. Use the second parameter to pass a
 	 * variable that the hook would otherwise erroneously reassign. This
-	 * replaces the active_hook() check.
+	 * replaces the active_hook() check.  last_call?
 	 *
 	 * 
 	 * @access	public
@@ -938,7 +945,7 @@ class Api_channel_entries extends Api {
 					$nid = $id;
 					$id = 'field_id_'.$id;
 					
-					if ($data['entry_id'] == 0 && ! isset($data['field_ft_'.$id]))
+					if ($this->entry_id == 0 && ! isset($data['field_ft_'.$nid]))
 					{
 						$data['field_ft_'.$nid] = $this->EE->api_channel_fields->settings[$nid]['field_fmt'];
 					}
@@ -1074,7 +1081,6 @@ class Api_channel_entries extends Api {
 						//foreach ($v as $val)
 						//{
 							$name = $class.'__'.$v['field_id'];
-							$this->mod_fields[$name] = '';
 							//print_r($v);
 						//}
 				
@@ -1148,6 +1154,11 @@ class Api_channel_entries extends Api {
 					$this->_set_error('invalid_date_formatting', $date);
 				}
 			}
+
+			if (isset($data['revision_post'][$date]))
+			{
+				$data['revision_post'][$date] = $data[$date];
+			}
 		}
 		
 		// Required and custom fields
@@ -1170,7 +1181,7 @@ class Api_channel_entries extends Api {
 						continue;
 					}
 
-					if (isset($data['field_id_'.$row['field_id']]) AND $data['field_id_'.$row['field_id']] == '')
+					if (isset($data['field_id_'.$row['field_id']]) AND $data['field_id_'.$row['field_id']] === '')
 					{
 						$this->_set_error('custom_field_empty', $row['field_label']);
 						continue;
@@ -1576,10 +1587,21 @@ class Api_channel_entries extends Api {
 					if (isset($data[$field_name]))
 					{
 						$data[$field_name] = $this->EE->api_channel_fields->apply('save', array($data[$field_name]));
+						
+						if (isset($data['revision_post'][$field_name]))
+						{
+							$data['revision_post'][$field_name] = $data[$field_name];
+						}
+						
 					}
 					elseif (isset($mod_data[$field_name]))
 					{
 						$mod_data[$field_name] = $this->EE->api_channel_fields->apply('save', array($mod_data[$field_name]));
+
+						if (isset($data['revision_post'][$field_name]))
+						{
+							$data['revision_post'][$field_name] = $mod_data[$field_name];
+						}
 					}
 				}				
 			}
@@ -1670,7 +1692,7 @@ class Api_channel_entries extends Api {
 				}
 			}
 
-			if (is_numeric($data['field_id_'.$field_id]) AND $rel_exists == FALSE)
+			if (is_numeric($data['field_id_'.$field_id]) && $data['field_id_'.$field_id] != '0' && $rel_exists == FALSE)
 			{
 				$reldata = array(
 					'type'			=> $row['field_related_to'],
@@ -1716,6 +1738,12 @@ class Api_channel_entries extends Api {
 			}
 			else
 			{
+				// In the event there's no original_entry_id assign it to 0
+				if ( ! isset($meta['original_entry_id']))
+				{
+					$meta['original_entry_id'] = 0;
+				}
+				
 				$this->EE->db->insert('channel_entries_autosave', $meta);
 				$this->entry_id = $this->EE->db->insert_id();
 			}
@@ -1886,6 +1914,8 @@ class Api_channel_entries extends Api {
 			$this->EE->db->delete('channel_entries_autosave', array('original_entry_id' => $this->entry_id)); // remove all entries for this
 			$meta['original_entry_id'] = $this->entry_id;
 			$this->EE->db->insert('channel_entries_autosave', $meta); // reinsert
+			
+			$autosave_entry_id = $this->EE->db->insert_id();
 		}
 		else
 		{
@@ -1985,14 +2015,14 @@ class Api_channel_entries extends Api {
 
 		if ($this->autosave)
 		{
-			return $this->entry_id;
+			return $autosave_entry_id;
 		}
 
 		// Remove any autosaved data
 		$this->EE->db->delete('channel_entries_autosave', array('original_entry_id' => $this->entry_id));
 
 		// Delete Categories - resubmitted in the next step
-		$this->EE->db->delete('category_posts', array('entry_id' => $this->entry_id));		
+		$this->EE->db->delete('category_posts', array('entry_id' => $this->entry_id));
 	}
 
 	// --------------------------------------------------------------------

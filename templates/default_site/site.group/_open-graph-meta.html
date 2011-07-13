@@ -1,0 +1,22 @@
+{if segment_1 == "blog" AND segment_2 != "tag" AND segment_2 != ""}
+  
+  {exp:channel:entries
+    channel="articles"
+    disable="categories|category_fields|member_data|pagination|trackbacks"
+    require_entry="yes"
+    limit="1"
+    dynamic="yes"
+  }
+  
+  <meta property="og:title" content="{title}"/>
+  <meta property="og:type" content="article"/>
+  <meta property="og:url" content="{title_permalink='blog}"/>
+  {if article_main_image != ""}
+  <meta property="og:image" content="{article_main_image}"/>
+  {/if}
+  <meta property="og:site_name" content="The Good Lab"/>
+  <meta property="og:description" content="{exp:excerpt limit='100'}{article_content}{/exp:excerpt}"/>
+  
+  {/exp:channel:entries}
+
+{/if}

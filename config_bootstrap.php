@@ -56,7 +56,7 @@ $env_db_config = array();
 $env_global_vars = array();
 
 // Set the environmental config and global vars
-if (NSM_ENV == 'local') { 
+if (NSM_ENV == 'local') {
     $env_db_config = array(
         'hostname' => '127.0.0.1',
         'username' => 'root',
@@ -66,6 +66,7 @@ if (NSM_ENV == 'local') {
     $env_global_vars = array(
         'global:cm_subscriber_list_slug' => ''
     );
+    date_default_timezone_set('America/Chicago');
 }
 elseif(NSM_ENV == 'development') {
     $env_db_config = array(

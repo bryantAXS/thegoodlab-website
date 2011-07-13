@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -26,23 +26,21 @@
 class Members extends CI_Controller {
 
 	// Default member groups.  We used these for translation purposes
-	var $english		= array('Guests', 'Banned', 'Members', 'Pending', 'Super Admins');
-	var $no_delete		= array('1', '2', '3', '4'); // Member groups that can not be deleted
-	var $perpage		= 50;  // Number of results on the "View all member" page	
-	var $pipe_length	= 5;
+	private $english		= array('Guests', 'Banned', 'Members', 'Pending', 'Super Admins');
+	private $no_delete		= array('1', '2', '3', '4'); // Member groups that can not be deleted
+	private $perpage		= 50;  // Number of results on the "View all member" page	
+	private $pipe_length	= 5;
 	
 	/**
 	 * Constructor
-	 *
-	 * @access	public
 	 */
-	function __construct()
+	public function __construct()
 	{
 		parent::__construct();
 		
 		if ( ! $this->cp->allowed_group('can_access_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('members');
@@ -54,17 +52,16 @@ class Members extends CI_Controller {
 	/**
 	 * Index function
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */	
-	function index()
+	public function index()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('members'));
+		$this->cp->set_variable('cp_page_title', lang('members'));
 
 		$this->javascript->compile();
 
@@ -78,14 +75,13 @@ class Members extends CI_Controller {
 	/**
 	 * View all members
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */
-	function view_all_members()
+	public function view_all_members()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$message = $this->session->flashdata('message');
@@ -94,7 +90,7 @@ class Members extends CI_Controller {
 		$this->load->library('pagination');
 		$this->load->helper('form');
 	
-		$this->cp->set_variable('cp_page_title', $this->lang->line('view_members'));
+		$this->cp->set_variable('cp_page_title', lang('view_members'));
 
 		$this->cp->add_js_script(array('plugin' => 'dataTables'));
 
@@ -123,10 +119,10 @@ class Members extends CI_Controller {
 		$order	  = $this->input->get_post('order');		
 
 		$vars['column_filter_options'] = array(
-			'all'				=> $this->lang->line('all'),
-			'screen_name'		=> $this->lang->line('screen_name'),
-			'username'			=> $this->lang->line('username'),
-			'email'				=> $this->lang->line('email')
+			'all'				=> lang('all'),
+			'screen_name'		=> lang('screen_name'),
+			'username'			=> lang('username'),
+			'email'				=> lang('email')
 		);
 
 		$vars['column_filter_selected'] = ($this->input->get_post('column_filter')) ? $this->input->get_post('column_filter') : 'all';
@@ -145,7 +141,7 @@ class Members extends CI_Controller {
 		$member_groups = $this->member_model->get_member_groups();
 		
 		// first dropdown item is "all"
-		$vars['member_groups_dropdown'] = array('' => $this->lang->line('all'));
+		$vars['member_groups_dropdown'] = array('' => lang('all'));
 		
 		foreach($member_groups->result() as $group)
 		{
@@ -166,14 +162,14 @@ class Members extends CI_Controller {
 		// if we're looking at group 4 (pending), and require email activation, let's also give the option to resend their activation emails
 		if ($group_id == '4' && $this->config->item('req_mbr_activation') == 'email' && $this->cp->allowed_group('can_admin_members'))
 		{
-			$vars['member_action_options'] = array('delete' => $this->lang->line('delete_selected'), 'resend' => $this->lang->line('resend_activation_emails'));
-			$vars['delete_button_label'] = $this->lang->line('submit');
+			$vars['member_action_options'] = array('delete' => lang('delete_selected'), 'resend' => lang('resend_activation_emails'));
+			$vars['delete_button_label'] = lang('submit');
 		}
 		else
 		{
 			$vars['member_action_options'] = array();
 			$vars['form_hidden']['action'] = 'delete';
-			$vars['delete_button_label'] = $this->lang->line('delete_selected');
+			$vars['delete_button_label'] = lang('delete_selected');
 		}
 		
 		// creating a member automatically fills the search box
@@ -244,8 +240,19 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		group       = document.getElementById("group_id"),
 		column_filter       = document.getElementById("column_filter");
 
+	// for browsers that don\'t support the placeholder
+	// attribute. See global.js :: insert_placeholders()
+	// for more info. -pk
+	function k_search_value() {
+		if ($(k_search).data("user_data") == "n") {
+			return "";
+		}
+		
+		return k_search.value;
+	}
+
 	aoData.push( 
-		{ "name": "k_search", "value": k_search.value },
+		{ "name": "k_search", "value": k_search_value() },
 		{ "name": "group", "value": group.value },
 		{ "name": "column_filter", "value": column_filter.value }
 	 );
@@ -295,7 +302,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		fnSetKey( aoData, "iDisplayLength", iRequestLength*iPipe );
 		
 			aoData.push( 
-				{ "name": "k_search", "value": k_search.value },
+				{ "name": "k_search", "value": k_search_value() },
 				{ "name": "group", "value": group.value },
 				{ "name": "column_filter", "value": column_filter.value }
 			 );
@@ -338,7 +345,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			
 			
 		"oLanguage": {
-			"sZeroRecords": "'.$this->lang->line('no_members_matching_that_criteria').'",
+			"sZeroRecords": "'.lang('no_members_matching_that_criteria').'",
 			
 			"oPaginate": {
 				"sFirst": "<img src=\"'.$this->cp->cp_theme_url.'images/pagination_first_button.gif\" width=\"13\" height=\"13\" alt=\"&lt; &lt;\" />",
@@ -384,11 +391,18 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$this->load->view('members/view_members', $vars);
 	}
 
-	function member_search()
+	// ----------------------------------------------------------------
+
+	/**
+	 * member search
+	 *
+	 * @return void
+	 */
+	public function member_search()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->output->enable_profiler(FALSE);
@@ -479,11 +493,11 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_confirm()
+	public function member_confirm()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		if ($this->input->post('action') == 'resend')
@@ -503,14 +517,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Resend Pending Member's Activation Emails
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function resend_activation_emails()
+	public function resend_activation_emails()
 	{
-		if ( ! $this->cp->allowed_group('can_access_members') OR $this->config->item('req_mbr_activation') !== 'email')
+		if ( ! $this->cp->allowed_group('can_access_members') OR 
+			$this->config->item('req_mbr_activation') !== 'email')
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		if ($this->input->get('mid') !== FALSE)
@@ -574,7 +588,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			$this->email->send();
 		}
 
-		$this->session->set_flashdata('message_success', $this->lang->line(($this->input->get('mid') !== FALSE) ? 'activation_email_resent' : 'activation_emails_resent'));
+		$this->session->set_flashdata('message_success', lang(($this->input->get('mid') !== FALSE) ? 'activation_email_resent' : 'activation_emails_resent'));
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=view_all_members');
 	}
 
@@ -585,14 +599,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Warning message if you try to delete members
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_delete_confirm()
+	public function member_delete_confirm()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_delete_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->helper('form');
@@ -624,7 +637,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			// Is the user trying to delete himself?
 			if ($this->session->userdata('member_id') == $val)
 			{
-				show_error($this->lang->line('can_not_delete_self'));
+				show_error(lang('can_not_delete_self'));
 			}
 
 			$damned[] = $val;
@@ -666,7 +679,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_member'));
+		$this->cp->set_variable('cp_page_title', lang('delete_member'));
 		
 		$this->load->view('members/delete_confirm', $vars);
 	}
@@ -678,14 +691,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Login as Member - SuperAdmins only!
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function login_as_member()
+	public function login_as_member()
 	{
 		if ($this->session->userdata('group_id') != 1)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('myaccount');
@@ -694,16 +706,16 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		if ($id == '')
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		if ($this->session->userdata['member_id'] == $id)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->helper('form');
-		$this->cp->set_variable('cp_page_title', $this->lang->line('login_as_member'));
+		$this->cp->set_variable('cp_page_title', lang('login_as_member'));
 
 		// Fetch member data
 		$this->db->from('members, member_groups');
@@ -715,10 +727,10 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
-		$vars['message'] = str_replace('%screen_name%', $query->row('screen_name') , $this->lang->line('login_as_member_description'));
+		$vars['message'] = str_replace('%screen_name%', $query->row('screen_name') , lang('login_as_member_description'));
 
 		$vars['form_hidden']['mid'] = $id;
 
@@ -734,30 +746,23 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Do Login as Member - SuperAdmins only!
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */
-	function do_login_as_member()
+	public function do_login_as_member()
 	{
 		if ($this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$id = $this->input->get_post('mid');
 
-		if ($id == '')
+		if (($id == '') OR ($this->session->userdata('member_id') == $id))
 		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		if ($this->session->userdata['member_id'] == $id)
-		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		// Fetch member data
-
 		$this->db->from('members, member_groups');
 		$this->db->select('members.username, members.password, members.unique_id, members.member_id, members.group_id, member_groups.can_access_cp');
 		$this->db->where('member_id', $id);
@@ -767,7 +772,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		if ($query->num_rows() == 0)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('login');
@@ -794,14 +799,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 				if ($this->session->userdata['ip_address'] != $result->row('ip_address')  OR
 					$this->session->userdata['user_agent'] != $result->row('user_agent')  )
 				{
-					show_error($this->lang->line('multi_login_warning'));
+					show_error(lang('multi_login_warning'));
 				}
 			}
 		}
 
 		// Log the SuperAdmin login
 
-		$this->logger->log_action($this->lang->line('login_as_user').':'.NBS.$query->row('username') );
+		$this->logger->log_action(lang('login_as_user').':'.NBS.$query->row('username') );
 
 		// Set cookie expiration to one year if the "remember me" button is clicked
 
@@ -811,17 +816,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		if ($type != 's')
 		{
 			$this->functions->set_cookie($this->session->c_expire , time()+$expire, $expire);
-			$this->functions->set_cookie($this->session->c_uniqueid , $query->row('unique_id') , $expire);
-			$this->functions->set_cookie($this->session->c_password , $query->row('password') ,  $expire);
 			$this->functions->set_cookie($this->session->c_anon , 1,  $expire);
 		}
 
 		// Create a new session
-
 		$session_id = $this->session->create_new_session($query->row('member_id') , TRUE);
 
 		// Delete old password lockouts
-
 		$this->session->delete_password_lockout();
 
 		// Redirect the user to the return page
@@ -851,14 +852,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Delete Members
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_delete()
+	public function member_delete()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_delete_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		if ( ! $this->input->post('delete') OR ! is_array($this->input->post('delete')))
@@ -872,7 +872,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		$ids = array();
 		$mids = array();
-				
+		
 		foreach ($this->input->post('delete') as $key => $val)
 		{		
 			if ($val != '')
@@ -896,7 +896,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		{
 			if ($query->row('group_id')  == 1)
 			{
-				$super_admins++;			
+				$super_admins++;
 			}
 		}		
 		
@@ -906,7 +906,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		
 			if ($this->session->userdata['group_id'] != 1)
 			{
-				show_error($this->lang->line('must_be_superadmin_to_delete_one'));
+				show_error(lang('must_be_superadmin_to_delete_one'));
 			}
 			
 			// You can't delete the only Super Admin
@@ -914,12 +914,70 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			
 			if ($super_admins >= $query)
 			{
-				show_error($this->lang->line('can_not_delete_super_admin'));
+				show_error(lang('can_not_delete_super_admin'));
 			}
 		}
 		
 		// If we got this far we're clear to delete the members
+		
+		/** ----------------------------------
+		/**  Email notification recipients
+		/** ----------------------------------*/
+		$this->db->select('DISTINCT(member_id), screen_name, email, mbr_delete_notify_emails');
+		$this->db->join('member_groups', 'members.group_id = member_groups.group_id', 'left');
+		$this->db->where('mbr_delete_notify_emails !=', '');
+		$this->db->where_in('member_id', $mids);
+		$group_query = $this->db->get('members');
+		
+		foreach ($group_query->result() as $member) 
+		{
+			$notify_address = $member->mbr_delete_notify_emails;
+
+			$swap = array(
+				'name'		=> $member->screen_name,
+				'email'		=> $member->email,
+				'site_name'	=> stripslashes($this->config->item('site_name'))
+			);
+
+			$this->lang->loadfile('member');
+			$email_tit = $this->functions->var_swap(lang('mbr_delete_notify_title'), $swap);
+			$email_msg = $this->functions->var_swap(lang('mbr_delete_notify_message'), $swap);
+
+			// No notification for the user themselves, if they're in the list
+			if (strpos($notify_address, $member->email) !== FALSE)
+			{
+				$notify_address = str_replace($member->email, "", $notify_address);
+			}
+
+			$this->load->helper('string');
+			// Remove multiple commas
+			$notify_address = reduce_multiples($notify_address, ',', TRUE);
+
+			if ($notify_address != '')
+			{
+				// Send email
+				$this->load->library('email');
+
+				// Load the text helper
+				$this->load->helper('text');
+
+				foreach (explode(',', $notify_address) as $addy)
+				{
+					$this->email->EE_initialize();
+					$this->email->wordwrap = FALSE;
+					$this->email->from($this->config->item('webmaster_email'), $this->config->item('webmaster_name'));
+					$this->email->to($addy);
+					$this->email->reply_to($this->config->item('webmaster_email'));
+					$this->email->subject($email_tit);
+					$this->email->message(entities_to_ascii($email_msg));
+					$this->email->send();
+				}
+			}
+		}
 	
+		/** ----------------------------------
+		/**  Delete Member information
+		/** ----------------------------------*/
 		$this->db->query("DELETE FROM exp_members WHERE ".$IDS);
 		$this->db->query("DELETE FROM exp_member_data WHERE ".$IDS);
 		$this->db->query("DELETE FROM exp_member_homepage WHERE ".$IDS);
@@ -1017,8 +1075,8 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		
 			if ( ! class_exists('Forum'))
 			{
-				require PATH_MOD.'forum/mod.forum'.EXT;
-				require PATH_MOD.'forum/mod.forum_core'.EXT;
+				require PATH_MOD.'forum/mod.forum.php';
+				require PATH_MOD.'forum/mod.forum_core.php';
 			}
 			
 			$FRM = new Forum_Core;
@@ -1110,12 +1168,12 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			if ($this->extensions->end_script === TRUE) return;
 		/*
 		/* -------------------------------------------*/
-				
-		// Update		
+		
+		// Update
 		$this->stats->update_member_stats();
 			
-		$cp_message = (count($ids) == 1) ? $this->lang->line('member_deleted') :
-										$this->lang->line('members_deleted');
+		$cp_message = (count($ids) == 1) ? lang('member_deleted') :
+										lang('members_deleted');
 
 		$this->session->set_flashdata('message_success', $cp_message);
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=view_all_members');
@@ -1128,14 +1186,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Member group overview
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_group_manager()
+	public function member_group_manager()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_mbr_groups'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->library('table');
@@ -1155,13 +1212,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					
 			if (in_array($group_name, $this->english))
 			{
-				$group_name = $this->lang->line(strtolower(str_replace(" ", "_", $group_name)));
+				$group_name = lang(strtolower(str_replace(" ", "_", $group_name)));
 			}
 	
 			$groups[$row['group_id']]['group_id'] = $row['group_id'];
 			$groups[$row['group_id']]['title'] = $group_name;						
 			$groups[$row['group_id']]['can_access_cp'] = $row['can_access_cp'];
-			$groups[$row['group_id']]['security_lock'] = ($row['is_locked'] == 'y') ? $this->lang->line('locked') : $this->lang->line('unlocked');
+			$groups[$row['group_id']]['security_lock'] = ($row['is_locked'] == 'y') ? lang('locked') : lang('unlocked');
 			$groups[$row['group_id']]['member_count'] = $this->member_model->count_members($row['group_id']);
 			$groups[$row['group_id']]['delete'] = ( ! in_array($row['group_id'], $this->no_delete)) ? TRUE : FALSE;
 		}
@@ -1179,15 +1236,15 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 				'total_rows'	=> $g_query->num_rows(),
 				'per_page'		=> $row_limit,
 				'page_query_string'	=> TRUE,
-				'first_link'	=> $this->lang->line('pag_first_link'),
-				'last_link'		=> $this->lang->line('pag_last_link')
+				'first_link'	=> lang('pag_first_link'),
+				'last_link'		=> lang('pag_last_link')
 			);
 
 		$this->pagination->initialize($config);
 
 		$vars['paginate'] = $this->pagination->create_links();
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('member_groups'));
+		$this->cp->set_variable('cp_page_title', lang('member_groups'));
 
 		$this->jquery->tablesorter('.mainTable', '{headers: {1: {sorter: false}, 5: {sorter: false}}, widgets: ["zebra"]}');
 		
@@ -1207,23 +1264,19 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Edit/Create a member group form
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function edit_member_group()
+	public function edit_member_group()
 	{	
 		// Only super admins can administrate member groups
 		if ($this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('only_superadmins_can_admin_groups'));
+			show_error(lang('only_superadmins_can_admin_groups'));
 		}
 
-		$this->load->library('table');
+		$this->load->library(array('table', 'addons'));
 		$this->load->helper('form');
-		$this->load->model('channel_model');
-		$this->load->model('template_model');
-		$this->load->model('addons_model');
-		$this->load->model('site_model');
+		$this->load->model(array('channel_model', 'template_model', 'addons_model', 'site_model'));
 		$this->lang->loadfile('admin');
 
 		$this->cp->add_js_script('ui', 'accordion');
@@ -1255,7 +1308,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$id = ($group_id == '') ? '3' : $group_id;
 
 		// Assign the page title
-		$title = ($group_id != '') ? $this->lang->line('edit_member_group') : $this->lang->line('create_member_group');
+		$title = ($group_id != '') ? lang('edit_member_group') : lang('create_member_group');
 
 		// Fetch the Sites
 
@@ -1296,7 +1349,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			
 		if (isset($this->english[$group_title]))
 		{
-			$group_title = $this->lang->line(strtolower(str_replace(" ", "_", $group_title)));
+			$group_title = lang(strtolower(str_replace(" ", "_", $group_title)));
 		}
 
 		if ($clone_id != '')
@@ -1324,7 +1377,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$channel_names = array();
 		$channel_perms = array();
 		$channel_ids	= array();
-		
+
+		$mod_lang_files = $this->addons->get_files('modules');
+
+		foreach ($mod_lang_files as $m => $i)
+		{
+			$this->lang->loadfile($m);
+		}
+
         if ($id == 1)
         {
 			foreach($query->result_array() as $row)
@@ -1370,7 +1430,10 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
         {
 			foreach($query->result_array() as $row)
 			{
-				$module_names['module_id_'.$row['module_id']] = $row['module_name'];
+				$name = lang(strtolower($row['module_name'] . '_module_name'));
+				$name = ucwords(str_replace('_', ' ', $name));
+				
+				$module_names['module_id_'.$row['module_id']] = $name;
 				$module_perms['module_id_'.$row['module_id']] = 'y';
 			}
 		}
@@ -1387,14 +1450,17 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					$module_ids[$row['module_id']] = TRUE;
 				}
 			}
-						
+
 			foreach($query->result_array() as $row)
 			{
-				$module_names['module_id_'.$row['module_id']] = $row['module_name'];
+				$name = lang(strtolower($row['module_name'] . '_module_name'));
+				$name = ucwords(str_replace('_', ' ', $name));
+
+				$module_names['module_id_'.$row['module_id']] = $name;
 				$module_perms['module_id_'.$row['module_id']] = (isset($module_ids[$row['module_id']])) ? 'y' : 'n';
 			}
 		}
-		
+		//var_dump($module_names);
 		$vars['module_names'] = $module_names;
 		$vars['module_perms'] = $module_perms;
 		
@@ -1507,6 +1573,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 				'cp_admin_privs'	=> array (
 												'can_admin_channels'	 	=> 'n',
+												'can_admin_upload_prefs' 	=> 'n',
 												'can_admin_templates'		=> 'n',
 												'can_admin_design' 			=> 'n',												
 												'can_admin_members'	 		=> 'n',
@@ -1562,6 +1629,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 						'can_view_offline_system',
 						'can_access_cp',
 						'can_admin_channels',
+						'can_admin_upload_prefs',
 						'can_admin_templates',
 						'can_delete_members',
 						'can_admin_mbr_groups',
@@ -1584,7 +1652,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					  );
 
 		$s = 0;
-//echo '<pre>'; print_r($G); exit;
+
 		foreach($sites_query->result_array() as $sites)
 		{
 
@@ -1622,13 +1690,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					{
 						foreach($val as $p => $a)
 						{
-						$vars['group_data'][$sites['site_id']][$g_key][$add.$p] = $a;							
+						$vars['group_data'][$sites['site_id']][$g_key][$add.$p] = $a;
 						}
 					}
-					else  // probably redundant
+					else
 					{
-						//$vars['group_data'][$sites['site_id']][$g_key][$add.$key] = $val;
-					}					
+						$vars['group_data'][$sites['site_id']][$g_key][$add.$key] = $val;
+					}
 				}
 			}
 			
@@ -1648,14 +1716,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Member Config
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_config()
+	public function member_config()
 	{		
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('admin');
@@ -1665,80 +1732,80 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$f_data =  array(
 
 			'general_cfg'		=>	array(
-											'allow_member_registration'	=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'req_mbr_activation'		=> array('s', array('none' => 'no_activation', 'email' => 'email_activation', 'manual' => 'manual_activation')),
-											'require_terms_of_service'	=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'allow_member_localization'	=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'use_membership_captcha'	=> array('r', array('y' => 'yes', 'n' => 'no')),											
-											'default_member_group'		=> array('f', 'member_groups'),
-											'member_theme'				=> array('f', 'member_theme_menu'),
-											'profile_trigger'			=> ''
-											),
+					'allow_member_registration'	=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'req_mbr_activation'		=> array('s', array('none' => 'no_activation', 'email' => 'email_activation', 'manual' => 'manual_activation')),
+					'require_terms_of_service'	=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'allow_member_localization'	=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'use_membership_captcha'	=> array('r', array('y' => 'yes', 'n' => 'no')),											
+					'default_member_group'		=> array('f', 'member_groups'),
+					'member_theme'				=> array('f', 'member_theme_menu'),
+					'profile_trigger'			=> ''
+					),
 
 			'memberlist_cfg'		=>	array(
-											'memberlist_order_by'		=> array('s', array('total_posts'		=> 'total_posts',
-																							'screen_name'		=> 'screen_name',
-																							'total_comments'	=> 'total_comments',
-																							'total_entries'		=> 'total_entries',
-																							'join_date'			=> 'join_date')),
-											'memberlist_sort_order'		=> array('s', array('desc' => 'memberlist_desc', 'asc' => 'memberlist_asc')),
-											'memberlist_row_limit'		=> array('s', array('10' => '10', '20' => '20', '30' => '30', '40' => '40', '50' => '50', '75' => '75', '100' => '100'))
-											),
-									
-			'notification_cfg'		=>	array(
-											'new_member_notification'	=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'mbr_notification_emails'	=> ''
+					'memberlist_order_by'		=> array('s', array('total_posts'		=> 'total_posts',
+						'screen_name'		=> 'screen_name',
+						'total_comments'	=> 'total_comments',
+						'total_entries'		=> 'total_entries',
+						'join_date'			=> 'join_date')),
+					'memberlist_sort_order'		=> array('s', array('desc' => 'memberlist_desc', 'asc' => 'memberlist_asc')),
+					'memberlist_row_limit'		=> array('s', array('10' => '10', '20' => '20', '30' => '30', '40' => '40', '50' => '50', '75' => '75', '100' => '100'))
+					),
+			
+'notification_cfg'		=>	array(
+					'new_member_notification'	=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'mbr_notification_emails'	=> ''
 											),
 											
 			'pm_cfg'			=>	array(
-											'prv_msg_max_chars'			=> '',
-											'prv_msg_html_format'		=> array('s', array('safe' => 'html_safe', 'none' => 'html_none', 'all' => 'html_all')),
-											'prv_msg_auto_links'		=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'prv_msg_upload_path'		=> '',
-											'prv_msg_max_attachments'	=> '',
-											'prv_msg_attach_maxsize'	=> '',
-											'prv_msg_attach_total'		=> ''
+					'prv_msg_max_chars'			=> '',
+					'prv_msg_html_format'		=> array('s', array('safe' => 'html_safe', 'none' => 'html_none', 'all' => 'html_all')),
+					'prv_msg_auto_links'		=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'prv_msg_upload_path'		=> '',
+					'prv_msg_max_attachments'	=> '',
+					'prv_msg_attach_maxsize'	=> '',
+					'prv_msg_attach_total'		=> ''
 										 ),
 											
 			'avatar_cfg'		=>	array(
-											'enable_avatars'		=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'allow_avatar_uploads'	=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'avatar_url'			=> '',
-											'avatar_path'			=> '',
-											'avatar_max_width'		=> '',
-											'avatar_max_height'		=> '',
-											'avatar_max_kb'			=> ''
+					'enable_avatars'		=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'allow_avatar_uploads'	=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'avatar_url'			=> '',
+					'avatar_path'			=> '',
+					'avatar_max_width'		=> '',
+					'avatar_max_height'		=> '',
+					'avatar_max_kb'			=> ''
 											),
 			'photo_cfg'		=>	array(
-											'enable_photos'			=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'photo_url'				=> '',
-											'photo_path'			=> '',
-											'photo_max_width'		=> '',
-											'photo_max_height'		=> '',
-											'photo_max_kb'			=> ''
+					'enable_photos'			=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'photo_url'				=> '',
+					'photo_path'			=> '',
+					'photo_max_width'		=> '',
+					'photo_max_height'		=> '',
+					'photo_max_kb'			=> ''
 											),
 			'signature_cfg'		=>	array(
-											'allow_signatures'			=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'sig_maxlength'				=> '',
-											'sig_allow_img_hotlink'		=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'sig_allow_img_upload'		=> array('r', array('y' => 'yes', 'n' => 'no')),
-											'sig_img_url'				=> '',
-											'sig_img_path'				=> '',
-											'sig_img_max_width'			=> '',
-											'sig_img_max_height'		=> '',
-											'sig_img_max_kb'			=> ''
+					'allow_signatures'			=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'sig_maxlength'				=> '',
+					'sig_allow_img_hotlink'		=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'sig_allow_img_upload'		=> array('r', array('y' => 'yes', 'n' => 'no')),
+					'sig_img_url'				=> '',
+					'sig_img_path'				=> '',
+					'sig_img_max_width'			=> '',
+					'sig_img_max_height'		=> '',
+					'sig_img_max_kb'			=> ''
 											)
 			);
 
 		$subtext = array(	
-						'profile_trigger'			=> array('profile_trigger_notes'),
-						'mbr_notification_emails'	=> array('separate_emails'),
-						'default_member_group' 		=> array('group_assignment_defaults_to_two'),
-						'avatar_path'				=> array('must_be_path'),
-						'photo_path'				=> array('must_be_path'),
-						'sig_img_path'				=> array('must_be_path'),
-						'allow_member_localization'	=> array('allow_member_loc_notes')
-					);
+					'profile_trigger'			=> array('profile_trigger_notes'),
+					'mbr_notification_emails'	=> array('separate_emails'),
+					'default_member_group' 		=> array('group_assignment_defaults_to_two'),
+					'avatar_path'				=> array('must_be_path'),
+					'photo_path'				=> array('must_be_path'),
+					'sig_img_path'				=> array('must_be_path'),
+					'allow_member_localization'	=> array('allow_member_loc_notes')
+				);
 		
 		/** -----------------------------
 		/**  Blast through the array
@@ -1751,7 +1818,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			foreach ($menu_array as $key => $val)
 			{
 
-				$vars['menu_head'][$menu_head][$key]['preference'] = $this->lang->line($key, $key);
+				$vars['menu_head'][$menu_head][$key]['preference'] = lang($key, $key);
 				$vars['menu_head'][$menu_head][$key]['preference_subtext'] = '';
 			
 				// Preference sub-heading
@@ -1759,7 +1826,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 				{
 					foreach ($subtext[$key] as $sub)
 					{
-						$vars['menu_head'][$menu_head][$key]['preference_subtext'] = $this->lang->line($sub);
+						$vars['menu_head'][$menu_head][$key]['preference_subtext'] = lang($sub);
 					}
 				}
 
@@ -1779,14 +1846,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 						
 						foreach ($val['1'] as $k => $v)
 						{
-							$options[$k] = $this->lang->line($v);
+							$options[$k] = lang($v);
 						}
 
 						$preference_controls['type'] = "dropdown";
 						$preference_controls['id'] = $key;
 						$preference_controls['options'] = $options;
 						$preference_controls['default'] = $this->config->item($key);
-						}
+					}
 					elseif ($val['0'] == 'r')
 					{
 						/** -----------------------------
@@ -1800,7 +1867,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 							$selected = ($k == $this->config->item($key)) ? TRUE : FALSE;
 
 							$radios[] = array(
-											'label'		=> $this->lang->line($v, "{$key}_{$k}"),
+											'label'		=> lang($v, "{$key}_{$k}"),
 											'radio'		=> array(
 																	'name' 		=> $key,
 																	'id'		=> "{$key}_{$k}",
@@ -1824,19 +1891,20 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 							case 'member_groups' :	
 								$groups = $this->member_model->get_member_groups('', array('group_id !='=>'1'));
 								
-								$selected = ($this->config->item('default_member_group') != '') ? $this->config->item('default_member_group') : '4';
-								
 								$options = array();
 
 								foreach ($groups->result() as $group)
 								{
 									$options[$group->group_id] = $group->group_title;
 								}
+
+								// Remove the Pending group as it makes no sense for members to go from Pending to Pending
+								unset($options[4]);
 		
 								$preference_controls['type'] = "dropdown";
 								$preference_controls['id'] = 'default_member_group';
 								$preference_controls['options'] = $options;
-								$preference_controls['default'] = $selected;
+								$preference_controls['default'] = ($this->config->item('default_member_group') != '') ? $this->config->item('default_member_group') : '5';
 								
 								break;
 							case 'member_theme_menu' : 	
@@ -1878,7 +1946,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('member_cfg'));
+		$this->cp->set_variable('cp_page_title', lang('member_cfg'));
 
 		$this->cp->add_js_script('ui', 'accordion');
 
@@ -1903,17 +1971,23 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Update general preferences
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function update_config()
+	public function update_config()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$config_update = $this->config->update_site_prefs($_POST);
+		
+		// Member Avatars and Signatures are special little bunnies.  
+		// Deal with them now.
+		$this->db->update('members', array(
+			'display_signatures'	=> $this->input->post('allow_signatures'),
+			'display_avatars'		=> $this->input->post('enable_avatars')
+		));
 
  		$loc = BASE.AMP.'C=members'.AMP.'M=member_config';
 
@@ -1924,7 +1998,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		}
 		else
 		{
-			$this->session->set_flashdata('message_success', $this->lang->line('preferences_updated'));			
+			$this->session->set_flashdata('message_success', lang('preferences_updated'));			
 		}
 		
 		$this->functions->redirect($loc);
@@ -1937,15 +2011,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Create/update a member group
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function update_member_group()
+	public function update_member_group()
 	{
 		//  Only super admins can administrate member groups
 		if ($this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('only_superadmins_can_admin_groups'));
+			show_error(lang('only_superadmins_can_admin_groups'));
 		}
 
 		$edit = TRUE;
@@ -1959,13 +2032,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		// Only super admins can edit the "super admin" group
 		if ($group_id == 1  AND $this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		// No group name
 		if ( ! $this->input->post('group_title'))
 		{
-			show_error($this->lang->line('missing_group_title'));
+			show_error(lang('missing_group_title'));
 		}
 		
 		$return = ($this->input->get_post('return')) ? TRUE : FALSE;
@@ -1997,7 +2070,12 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 		
-		$query = $this->db->query("SELECT site_id FROM exp_sites");
+		if ($this->config->item('multiple_sites_enabled') == 'n')
+		{
+			$this->db->where('site_id', 1);
+		}
+		
+		$query = $this->db->select('site_id')->get('sites');
 		
 		$module_ids = array();
 		$channel_ids = array();
@@ -2083,7 +2161,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					}
 				}
 				
-				$cp_message = $this->lang->line('member_group_created').NBS.NBS.$_POST['group_title'];			
+				$cp_message = lang('member_group_created').NBS.NBS.$_POST['group_title'];			
 			}
 			else
 			{			
@@ -2115,7 +2193,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 					}
 				}
 				
-				$cp_message = $this->lang->line('member_group_updated').NBS.NBS.$_POST['group_title'];
+				$cp_message = lang('member_group_updated').NBS.NBS.$_POST['group_title'];
 			}
 		}
 
@@ -2167,10 +2245,9 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 * Updates exp_category_groups privilege lists for
 	 * editing and deleting categories
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function _update_cat_group_privs($params)
+	private function _update_cat_group_privs($params)
 	{
 		if ( ! is_array($params) OR empty($params))
 		{
@@ -2236,15 +2313,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Warning message shown when you try to delete a group
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function delete_member_group_conf()
+	public function delete_member_group_conf()
 	{
 		//  Only super admins can delete member groups
 		if ($this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('only_superadmins_can_admin_groups'));
+			show_error(lang('only_superadmins_can_admin_groups'));
 		}		
 
 		if ( ! $group_id = $this->input->get_post('group_id'))
@@ -2255,7 +2331,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		// You can't delete these groups
 		if (in_array($group_id, $this->no_delete))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$this->load->model('member_model');
@@ -2282,14 +2358,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 						
 				if (in_array($group_name, $this->english))
 				{
-					$group_name = $this->lang->line(strtolower(str_replace(" ", "_", $group_name)));
+					$group_name = lang(strtolower(str_replace(" ", "_", $group_name)));
 				}
 						
 				$vars['new_group_id'][$row->group_id] = $group_name;
 			}		
 		}			
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_member_group'));
+		$this->cp->set_variable('cp_page_title', lang('delete_member_group'));
 			
 		$this->javascript->compile();
 		
@@ -2301,15 +2377,14 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Delete Member Group
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function delete_member_group()
+	public function delete_member_group()
 	{
 		// Only super admins can delete member groups
 		if ($this->session->userdata['group_id'] != 1)
 		{
-			show_error($this->lang->line('only_superadmins_can_admin_groups'));
+			show_error(lang('only_superadmins_can_admin_groups'));
 		}
 
 		if ( ! $group_id = $this->input->post('group_id'))
@@ -2319,7 +2394,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 				
 		if (in_array($group_id, $this->no_delete))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$this->load->model('member_model');
@@ -2335,7 +2410,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		$this->member_model->delete_member_group($group_id, $new_group);
 
-		$this->session->set_flashdata('message_success', $this->lang->line('member_group_deleted'));
+		$this->session->set_flashdata('message_success', lang('member_group_deleted'));
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=member_group_manager');
 	}	
 
@@ -2346,14 +2421,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Create a member profile form
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function new_member_form()
+	public function new_member_form()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}		
 		
 		$this->load->library('form_validation');
@@ -2397,7 +2471,10 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 						)
 		            );
 
-		$stock_member_fields = array('url', 'location', 'occupation', 'interests', 'aol_im', 'yahoo_im', 'msn_im', 'icq', 'bio', 'bday_y', 'bday_m', 'bday_d');
+		$stock_member_fields = array(
+				'url', 'location', 'occupation', 'interests', 'aol_im', 
+				'yahoo_im', 'msn_im', 'icq', 'bio', 'bday_y', 'bday_m', 'bday_d'
+			);
 		
 		foreach ($stock_member_fields as $fname)
 		{
@@ -2413,7 +2490,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		// Birthday Options
 		$vars['bday_d_options'] = array();
 
-		$vars['bday_y_options'][''] = $this->lang->line('year');
+		$vars['bday_y_options'][''] = lang('year');
 		
 		for ($i = date('Y', $this->localize->now); $i > 1904; $i--)
 		{
@@ -2421,22 +2498,22 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		}
 
 		$vars['bday_m_options'] = array(
-							''	 => $this->lang->line('month'),
-							'01' => $this->lang->line('cal_january'),
-							'02' => $this->lang->line('cal_february'),
-							'03' => $this->lang->line('cal_march'),
-							'04' => $this->lang->line('cal_april'),
-							'05' => $this->lang->line('cal_mayl'),
-							'06' => $this->lang->line('cal_june'),
-							'07' => $this->lang->line('cal_july'),
-							'08' => $this->lang->line('cal_august'),
-							'09' => $this->lang->line('cal_september'),
-							'10' => $this->lang->line('cal_october'),
-							'11' => $this->lang->line('cal_november'),
-							'12' => $this->lang->line('cal_december')
+							''	 => lang('month'),
+							'01' => lang('cal_january'),
+							'02' => lang('cal_february'),
+							'03' => lang('cal_march'),
+							'04' => lang('cal_april'),
+							'05' => lang('cal_mayl'),
+							'06' => lang('cal_june'),
+							'07' => lang('cal_july'),
+							'08' => lang('cal_august'),
+							'09' => lang('cal_september'),
+							'10' => lang('cal_october'),
+							'11' => lang('cal_november'),
+							'12' => lang('cal_december')
 						);
 
-		$vars['bday_d_options'][''] = $this->lang->line('day');
+		$vars['bday_d_options'][''] = lang('day');
 		
 		for ($i = 1; $i <= 31; $i++)
 		{
@@ -2474,7 +2551,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$this->form_validation->set_rules($config);
 		$this->form_validation->set_error_delimiters('<br /><span class="notice">', '</span>');
 		
-		$this->cp->set_variable('cp_page_title', $this->lang->line('register_member'));
+		$this->cp->set_variable('cp_page_title', lang('register_member'));
 
 		if ($this->form_validation->run() === FALSE)
 		{
@@ -2506,10 +2583,9 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Create a member profile
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function _register_member()
+	public function _register_member()
 	{
 		$this->load->helper('security');
 
@@ -2519,7 +2595,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		{
 			if ( ! $this->cp->allowed_group('can_admin_mbr_groups'))
 			{
-				show_error($this->lang->line('unauthorized_access'));
+				show_error(lang('unauthorized_access'));
 			}
 
 			$data['group_id'] = $this->input->post('group_id');
@@ -2576,6 +2652,15 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 		
+		// Clear out invalid values for strict mode
+		foreach (array('bday_y', 'bday_m', 'bday_d') as $val)
+		{
+			if ($data[$val] == '')
+			{
+				unset($data[$val]);
+			}
+		}
+		
 		if ($data['url'] == 'http://')
 		{
 			$data['url'] = '';
@@ -2600,7 +2685,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		// Write log file
 
-		$message = $this->lang->line('new_member_added');
+		$message = lang('new_member_added');
 		$this->logger->log_action($message.NBS.NBS.stripslashes($data['username']));
 
 		// -------------------------------------------
@@ -2630,14 +2715,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Member banning forms
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_banning()
+	public function member_banning()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_ban_users'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$this->load->library('table');
@@ -2693,7 +2777,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('user_banning'));
+		$this->cp->set_variable('cp_page_title', lang('user_banning'));
 
 		$this->load->helper('form');
 
@@ -2705,14 +2789,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Update Banning Data
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function update_banning_data()
+	public function update_banning_data()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_ban_users'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->model('site_model');
@@ -2749,11 +2832,10 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		foreach($query->result() AS $row)
 		{
 			$prefs = array_merge(unserialize(base64_decode($row->site_system_preferences)), $data);
-			
-			$this->site_model->update_site_system_preferences($prefs);
+			$this->site_model->update_site_system_preferences($prefs, $row->site_id);
 		}
 		
-		$this->session->set_flashdata('message_success', $this->lang->line('ban_preferences_updated'));		
+		$this->session->set_flashdata('message_success', lang('ban_preferences_updated'));		
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=member_banning');
 	}
 
@@ -2765,14 +2847,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 * This function show a list of current member fields and the
 	 * form that allows you to create a new field.
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function custom_profile_fields($group_id = '')
+	public function custom_profile_fields($group_id = '')
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}		
 
 		// Fetch language file
@@ -2783,7 +2864,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		$vars['fields'] = $this->member_model->get_custom_member_fields();
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('custom_profile_fields'));
+		$this->cp->set_variable('cp_page_title', lang('custom_profile_fields'));
 
 		$this->jquery->tablesorter('.mainTable', '{headers: {3: {sorter: false}, 4: {sorter: false}},	widgets: ["zebra"]}');
 
@@ -2801,14 +2882,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * This function lets you edit an existing custom field
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function edit_profile_field()
+	public function edit_profile_field()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->library('form_validation');
@@ -2820,7 +2900,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		// There are some lines in the publish administration language file that we need.
 		$this->lang->loadfile('admin_content');
 
-		$this->cp->set_breadcrumb(BASE.AMP.'C=members'.AMP.'M=custom_profile_fields', $this->lang->line('custom_profile_fields'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=members'.AMP.'M=custom_profile_fields', lang('custom_profile_fields'));
 
 		$type = ($m_field_id = $this->input->get_post('m_field_id')) ? 'edit' : 'new';
 
@@ -2830,11 +2910,11 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		{
 			$query = $this->db->count_all('member_fields');
 			$total_fields = $query + 1;
-			$vars['submit_label'] = $this->lang->line('submit');
+			$vars['submit_label'] = lang('submit');
 		}
 		else
 		{
-			$vars['submit_label'] = $this->lang->line('update');
+			$vars['submit_label'] = lang('update');
 		}
 
 		$query = $this->db->get_where('member_fields', array('m_field_id'=>$m_field_id));
@@ -2935,18 +3015,18 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		/**  Create the pull-down menu **/
 		
 		$vars['m_field_type_options'] = array(
-											'text'=>$this->lang->line('text_input'),
-											'textarea'=>$this->lang->line('textarea'),
-											'select'=>$this->lang->line('select_list')
+											'text'=>lang('text_input'),
+											'textarea'=>lang('textarea'),
+											'select'=>lang('select_list')
 											);
 		$vars['m_field_type'] = $m_field_type;
 
 		/**  Field formatting **/
 		
 		$vars['m_field_fmt_options'] = array(
-											'none'=>$this->lang->line('none'),
-											'br'=>$this->lang->line('auto_br'),
-											'xhtml'=>$this->lang->line('xhtml')
+											'none'=>lang('none'),
+											'br'=>lang('auto_br'),
+											'xhtml'=>lang('xhtml')
 											);											
 		$vars['m_field_fmt'] = $m_field_fmt;
 
@@ -2990,7 +3070,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line($title));
+		$this->cp->set_variable('cp_page_title', lang($title));
 
 		$additional = '<script type="text/javascript">
 					function showhide_element(id)
@@ -3011,19 +3091,20 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$this->load->view('members/edit_profile_field', $vars);
 	}
 
-
-	function _validate_custom_field($edit)
+	// ------------------------------------------------------------------
+	
+	/**
+	 * Validate Custom Field
+	 *
+	 * @return void
+	 */
+	private function _validate_custom_field($edit)
 	{
 		$this->load->library('form_validation');
 		
 		$is_edit = ($edit == TRUE) ? 'y' : 'n';
 		$this->form_validation->set_rules("m_field_name", 'lang:fieldname', 'required|callback__valid_fieldname['.$is_edit.']');
 		$this->form_validation->set_rules("m_field_label", 'lang:fieldlabel', 'required');
-
-			//$error[] = $this->lang->line('no_field_name');
-			//$error[] = $this->lang->line('no_field_label');
-
-
 		$this->form_validation->set_rules("m_field_description", '', '');
 		$this->form_validation->set_rules("m_field_order", '', '');
 		$this->form_validation->set_rules("m_field_width", '', '');	
@@ -3033,22 +3114,29 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$this->form_validation->set_rules("m_field_fmt", '', '');
 				
 		$this->form_validation->set_error_delimiters('<br /><span class="notice">', '</span>');
-		
 	}
 
-	function _valid_fieldname($str, $edit)
+	// -------------------------------------------------------------------
+	
+	/**
+	 * Validate Fieldname
+	 *
+	 * @param	string
+	 * @param	string
+	 */
+	public function _valid_fieldname($str, $edit)
 	{
 		$this->lang->loadfile('admin_content');
 
 		if (in_array($str, $this->cp->invalid_custom_field_names()))
 		{
-			$this->form_validation->set_message('_valid_fieldname', $this->lang->line('reserved_word'));
+			$this->form_validation->set_message('_valid_fieldname', lang('reserved_word'));
 			return FALSE;
 		}
 
 		if (preg_match('/[^a-z0-9\_\-]/i', $str))
 		{
-			$this->form_validation->set_message('_valid_fieldname', $this->lang->line('invalid_characters'));
+			$this->form_validation->set_message('_valid_fieldname', lang('invalid_characters'));
 			return FALSE;
 		}
 				
@@ -3061,14 +3149,12 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		if (($edit == 'n' OR ($edit == 'y' && $str != $this->input->post('cur_field_name')))
 			&& $count  > 0)
 		{
-			$this->form_validation->set_message('_valid_fieldname', $this->lang->line('duplicate_field_name'));
+			$this->form_validation->set_message('_valid_fieldname', lang('duplicate_field_name'));
 			return FALSE;
 		}
 		
 		return TRUE;
-		
 	}
-
 
 	// --------------------------------------------------------------------
 
@@ -3078,14 +3164,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 * This function alters the "exp_member_data" table, adding
 	 * the new custom fields.
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function update_profile_fields()
+	public function update_profile_fields()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		// If the $field_id variable is present we are editing an
@@ -3189,8 +3274,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			}
 		}
 	
-	
-		$cp_message = ($edit) ? $this->lang->line('field_updated') : $this->lang->line('field_created');
+		$cp_message = ($edit) ? lang('field_updated') : lang('field_created');
 		$this->session->set_flashdata('message_success', $cp_message);
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=custom_profile_fields');
 	}
@@ -3202,14 +3286,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Warning message if you try to delete a custom profile field
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function delete_profile_field_conf()
+	public function delete_profile_field_conf()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		if ( ! ($m_field_id = $this->input->get_post('m_field_id')))
@@ -3229,7 +3312,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$vars['form_hidden'] = array('m_field_id'=>$m_field_id);
 		$vars['field_name'] = $query->row('m_field_label');
 				
-		$this->cp->set_variable('cp_page_title', $this->lang->line('delete_field'));
+		$this->cp->set_variable('cp_page_title', lang('delete_field'));
 		
 		$this->load->view('members/delete_profile_fields_confirm', $vars);
 	}
@@ -3239,14 +3322,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Delete member profile field
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function delete_profile_field()
+	public function delete_profile_field()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		if ( ! $m_field_id = $this->input->get_post('m_field_id'))
@@ -3260,7 +3342,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		$this->db->query("ALTER TABLE exp_member_data DROP COLUMN m_field_id_".$m_field_id);
 		$this->db->query("DELETE FROM exp_member_fields WHERE m_field_id = '$m_field_id'");
 		
-		$cp_message = $this->lang->line('profile_field_deleted').NBS.NBS.$m_field_label;
+		$cp_message = lang('profile_field_deleted').NBS.NBS.$m_field_label;
 		$this->logger->log_action($cp_message);		
 
 		$this->session->set_flashdata('message_success', $cp_message);
@@ -3272,14 +3354,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Edit Field Order
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function edit_field_order()
+	public function edit_field_order()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->load->model('member_model');
@@ -3303,8 +3384,8 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 				
 		$vars['fields'] = $fields;
 		
-		$this->cp->set_variable('cp_page_title', $this->lang->line('edit_field_order'));
-		$this->cp->set_breadcrumb(BASE.AMP.'C=members'.AMP.'M=custom_profile_fields', $this->lang->line('custom_profile_fields'));
+		$this->cp->set_variable('cp_page_title', lang('edit_field_order'));
+		$this->cp->set_breadcrumb(BASE.AMP.'C=members'.AMP.'M=custom_profile_fields', lang('custom_profile_fields'));
 
 		$this->load->view('members/edit_field_order', $vars);
 	}
@@ -3316,14 +3397,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * This function receives the field order submission
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function update_field_order()
+	public function update_field_order()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 				
 		foreach ($_POST as $key => $val)
@@ -3333,7 +3413,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 			$this->db->update('member_fields');
 		}
 
-		$this->session->set_flashdata('message_success', $this->lang->line('field_order_updated'));
+		$this->session->set_flashdata('message_success', lang('field_order_updated'));
 		$this->functions->redirect(BASE.AMP.'C=members'.AMP.'M=edit_field_order');
 	}
 
@@ -3344,14 +3424,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * IP Search Form
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function ip_search()
+	public function ip_search()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
 		$message = '';
@@ -3359,17 +3438,17 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		if ($this->input->get_post('error') == 2)
 		{
-			$message = $this->lang->line('ip_search_no_results');
+			$message = lang('ip_search_no_results');
 		}
 		elseif ($this->input->get_post('error') == 1)
 		{
-			$message = $this->lang->line('ip_search_too_short');
+			$message = lang('ip_search_too_short');
 		}
 		
 		$this->load->helper('form');
         $this->load->library('table');
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('ip_search'));
+		$this->cp->set_variable('cp_page_title', lang('ip_search'));
 		
 		$this->javascript->compile();
 
@@ -3385,14 +3464,13 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Executes the search for IP address
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function do_ip_search()
+	public function do_ip_search()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('members');
@@ -3570,7 +3648,7 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		
 		}
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('ip_search'));
+		$this->cp->set_variable('cp_page_title', lang('ip_search'));
 		
 		$this->javascript->compile();
 
@@ -3584,21 +3662,20 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	/**
 	 * Member Validation
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function member_validation()
+	public function member_validation()
 	{
 		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 				
 		$this->load->library('table');
 		$this->load->helper(array('form', 'url'));
 		$vars['message'] = FALSE;
 
-		$this->cp->set_variable('cp_page_title', $this->lang->line('member_validation'));
+		$this->cp->set_variable('cp_page_title', lang('member_validation'));
 	
 		$this->jquery->tablesorter('.mainTable', '{headers: {1: {sorter: false}},	widgets: ["zebra"]}');
 
@@ -3617,11 +3694,18 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 
 		if ($group_members->num_rows() == 0)
 		{
-			$vars['message'] = $this->lang->line('no_members_to_validate');
+			$vars['message'] = lang('no_members_to_validate');
 		}
 
 		$vars['member_list'] = $group_members;
+		
+		$vars['options']['activate'] = lang('validate_selected');
 
+		if ($this->cp->allowed_group('can_delete_members'))
+		{
+			$vars['options']['delete'] = lang('delete_selected');
+		}
+		
 		$this->load->view('members/activate', $vars);
 	}
 
@@ -3632,16 +3716,20 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 	 *
 	 * Validate/Delete Selected Members
 	 *
-	 * @access	public
 	 * @return	mixed
 	 */		
-	function validate_members()
+	public function validate_members()
 	{
-		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members') OR ! $this->cp->allowed_group('can_delete_members'))
+		if ( ! $this->cp->allowed_group('can_access_members') OR ! $this->cp->allowed_group('can_admin_members'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
-
+		
+		if ( ! $this->cp->allowed_group('can_delete_members') && $this->input->post('action') != 'activate')
+		{
+			show_error(lang('unauthorized_access'));
+		}
+		
 		if ( ! $this->input->post('toggle'))
 		{
 			return $this->member_validation();
@@ -3741,14 +3829,12 @@ function fnDataTablesPipeline ( sSource, aoData, fnCallback ) {
 		/*
 		/* -------------------------------------------*/
 			
-		$vars['message'] = ($this->input->post('action') == 'activate') ? $this->lang->line('members_are_validated') : $this->lang->line('members_are_deleted');
+		$vars['message'] = ($this->input->post('action') == 'activate') ? lang('members_are_validated') : lang('members_are_deleted');
 
 		$this->cp->set_variable('cp_page_title', $vars['message']);
 
 		$this->load->view("members/message", $vars);
 	}	
-	
 }
-
 /* End of file members.php */
 /* Location: ./system/expressionengine/controllers/cp/members.php */

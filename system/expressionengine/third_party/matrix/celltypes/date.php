@@ -6,7 +6,7 @@
  * 
  * @package   Matrix
  * @author    Brandon Kelly <brandon@pixelandtonic.com>
- * @copyright Copyright (c) 2010 Pixel & Tonic, LLC
+ * @copyright Copyright (c) 2011 Pixel & Tonic, Inc
  */
 class Matrix_date_ft {
 
@@ -17,7 +17,7 @@ class Matrix_date_ft {
 	/**
 	 * Constructor
 	 */
-	function Matrix_date_ft()
+	function __construct()
 	{
 		$this->EE =& get_instance();
 
@@ -35,6 +35,18 @@ class Matrix_date_ft {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Modify exp_matrix_data Column Settings
+	 */
+	function settings_modify_matrix_column($data)
+	{
+		return array(
+			'col_id_'.$data['col_id'] => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'default' => 0)
+		);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Display Cell
 	 */
 	function display_cell($data)
@@ -43,20 +55,21 @@ class Matrix_date_ft {
 		{
 			// include matrix_text.js
 			$theme_url = $this->EE->session->cache['matrix']['theme_url'];
-			$this->EE->cp->add_to_foot('<script type="text/javascript" src="'.$theme_url.'scripts/matrix_date.js"></script>');
+			$this->EE->cp->add_to_foot('<script type="text/javascript" src="'.$theme_url.'scripts/matrix_date_ee2.js"></script>');
 
 			$this->cache['displayed'] = TRUE;
 		}
 
 		$r['class'] = 'matrix-date matrix-text';
 
+		// quick save / validation error?
 		if (preg_match('/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2} \w{2}$/', $data))
 		{
 			// convert human time to a unix timestamp
 			$data = $this->EE->localize->convert_human_date_to_gmt($data);
 		}
 
-		// pass the default date to the JS
+		// set the default date to the current time
 		$r['settings']['defaultDate'] = ($data ? $this->EE->localize->set_localized_time($data) : $this->EE->localize->set_localized_time()) * 1000;
 
 		// get the initial input value
@@ -72,6 +85,20 @@ class Matrix_date_ft {
 	}
 
 	// --------------------------------------------------------------------
+
+	/**
+	 * Validate Cell
+	 */
+	function validate_cell($data)
+	{
+		// is this a required column?
+		if ($this->settings['col_required'] == 'y' && ! $data)
+		{
+			return lang('col_required');
+		}
+
+		return TRUE;
+	}
 
 	/**
 	 * Save Cell

@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -366,12 +366,12 @@ if ( ! function_exists('convert_accented_characters'))
 {
 	function convert_accented_characters($match)
 	{
-		if ( ! file_exists(APPPATH.'config/foreign_chars'.EXT))
+		if ( ! file_exists(APPPATH.'config/foreign_chars.php'))
 		{
 			return $match;
 		}
 
-		include APPPATH.'config/foreign_chars'.EXT;
+		include APPPATH.'config/foreign_chars.php';
 
 		if ( ! isset($foreign_characters))
 		{

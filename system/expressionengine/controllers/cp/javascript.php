@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -75,7 +75,7 @@ class Javascript extends CI_Controller {
 		
 		if ( ! class_exists('EE_Spellcheck'))
 		{
-			require APPPATH.'libraries/Spellcheck'.EXT; 
+			require APPPATH.'libraries/Spellcheck.php'; 
 		}
 
 		return EE_Spellcheck::iframe();
@@ -97,7 +97,7 @@ class Javascript extends CI_Controller {
 
 		if ( ! class_exists('EE_Spellcheck'))
 		{
-			require APPPATH.'libraries/Spellcheck'.EXT; 
+			require APPPATH.'libraries/Spellcheck.php'; 
 		}
 
 		return EE_Spellcheck::check();
@@ -158,20 +158,23 @@ class Javascript extends CI_Controller {
 		{
 			$contents = 'css';
 			
-			if ( ! is_array($this->load->_ci_view_path))
+			$css_paths = array(
+				PATH_CP_THEME.$this->session->userdata('cp_theme').'/',
+				PATH_CP_THEME.'default/'
+			);
+
+			if ($this->session->userdata('cp_theme') == 'default')
 			{
-				$file = $this->load->_ci_view_path.'css/advanced.css';
+				array_shift($css_paths);
 			}
-			else
+			
+			foreach ($css_paths as $a_path)
 			{
-				foreach ($this->load->_ci_view_path as $a_path)
+				$file = $a_path.'css/advanced.css';
+				
+				if (file_exists($file))
 				{
-					$file = $a_path.'css/advanced.css';
-					
-					if (file_exists($file))
-					{
-						break;
-					}
+					break;
 				}
 			}
 		}
@@ -191,7 +194,7 @@ class Javascript extends CI_Controller {
 		{
 			if ($this->config->item('debug') >= 1)
 			{
-				$this->output->fatal_error($this->lang->line('missing_jquery_file'));
+				$this->output->fatal_error(lang('missing_jquery_file'));
 			}
 			else
 			{
@@ -210,7 +213,7 @@ class Javascript extends CI_Controller {
 		if ($contents == 'css')
 		{
 			// File exists and not in client cache - reparse
-			$contents = $this->_css_javascript();
+			$contents = $this->_css_javascript($file);
 		}
 		else
 		{
@@ -270,7 +273,7 @@ class Javascript extends CI_Controller {
 		$contents	= '';
 		$folder 	= $this->config->item('use_compressed_js') == 'n' ? 'src' : 'compressed';
 		$types		= array(
-			'effect'	=> PATH_JQUERY.'ui/jquery.effect.',
+			'effect'	=> PATH_JQUERY.'ui/jquery.effects.',
 			'ui'		=> PATH_JQUERY.'ui/jquery.ui.',
 			'plugin'	=> PATH_JQUERY.'plugins/',
 			'file'		=> PATH_THEMES.'javascript/'.$folder.'/',
@@ -347,9 +350,9 @@ class Javascript extends CI_Controller {
 			// All we need is content type - we're done
 			return;
 		}
-		
+
 		$max_age		= 5184000;
-		$modified		= ($mtime !== FALSE) ? $mtime : filemtime($file);
+		$modified		= ($mtime !== FALSE) ? $mtime : @filemtime($file);
 		$modified_since	= $this->input->server('HTTP_IF_MODIFIED_SINCE');
 
 		// Remove anything after the semicolon
@@ -395,10 +398,10 @@ class Javascript extends CI_Controller {
 	 * @access	private
 	 * @return	string
 	 */
-	function _css_javascript()
+	function _css_javascript($file)
 	{
 		$js = '(function($, doc) {
-			var adv_css = '.$this->_advanced_css().', selector,
+			var adv_css = '.$this->_advanced_css($file).', selector,
 		 		compat_el = doc.createElement("ee_compat"),
 
 				supported = false,
@@ -471,7 +474,7 @@ class Javascript extends CI_Controller {
 						jQel = $(key).css(value);
 
 						if (apply_radius) {
-							jQel.uncorner().corner(apply_radius);
+							/* jQel.uncorner().corner(apply_radius); */
 						}
 					}
 				}
@@ -514,26 +517,8 @@ class Javascript extends CI_Controller {
 	 * @access	private
 	 * @return	mixed
 	 */	
-	function _advanced_css()
-	{
-		$paths = $this->load->_ci_view_path;
-		
-		if ( ! is_array($this->load->_ci_view_path))
-		{
-			$paths = array($this->load->_ci_view_path);
-		}
-		
-		$file = FALSE;
-		
-		foreach ($paths as $path)
-		{
-			if (file_exists($path.'css/advanced.css'))
-			{
-				$file = $path.'css/advanced.css';
-				break;
-			}
-		}
-		
+	function _advanced_css($file)
+	{		
 		if ( ! $file)
 		{
 			return array();

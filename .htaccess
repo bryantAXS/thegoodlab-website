@@ -4,7 +4,7 @@ Options +FollowSymLinks
   RewriteEngine On
   RewriteBase /
 
-  RewriteCond $1 ^(weblog|member|search|Forum_Name|home|work|about|contact|lib|P[0-9]{2,8}) [NC] 
+  RewriteCond $1 ^(weblog|member|search|Forum_Name|home|work|about|contact|blog|lib|P[0-9]{2,8}) [NC] 
   RewriteRule ^(.*)$ /index.php/$1 [L]
 </IfModule> 
 

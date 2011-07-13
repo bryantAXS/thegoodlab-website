@@ -130,7 +130,7 @@ class Api_channel_fields extends Api {
 	 */
 	function fetch_custom_channel_fields()
 	{
-		$this->EE->db->select('field_id, field_type, field_name, site_id, field_settings');
+		$this->EE->db->select('field_id, field_type, field_fmt, field_name, site_id, field_settings');
 		$query = $this->EE->db->get('channel_fields');
 		
 		$cfields = array();
@@ -173,7 +173,8 @@ class Api_channel_fields extends Api {
 			{
 				$settings = unserialize(base64_decode($row['field_settings']));
 				$settings['field_type'] = $row['field_type'];
-
+				$settings['field_fmt'] = $row['field_fmt'];
+				
 				$this->set_settings($row['field_id'], $settings);
 			}
 			
@@ -206,8 +207,10 @@ class Api_channel_fields extends Api {
 
 		if ( ! isset($this->field_types[$field_type]))
 		{
-			$file = 'ft.'.$field_type.EXT;
-			$path = PATH_FT;
+			$file = 'ft.'.$field_type.'.php';
+			$path = PATH_FT.$field_type.'/';
+			
+
 			
 			if ( ! file_exists($path.$file))
 			{
@@ -267,6 +270,7 @@ class Api_channel_fields extends Api {
 		if ( ! is_object($this->field_types[$field_type]))
 		{
 			$this->include_handler($field_type);
+
 			$this->field_types[$field_type] =& $this->_instantiate_handler($field_type);
 		}
 
@@ -316,8 +320,10 @@ class Api_channel_fields extends Api {
 		$class		= $this->field_types[$field_type];
 		$_ft_path	= $this->ft_paths[$field_type];
 		
-		$this->EE->load->add_package_path($_ft_path);
+		$this->EE->load->add_package_path($_ft_path, FALSE);
+		
 		$obj = new $class();
+		
 		$this->EE->load->remove_package_path($_ft_path);
 		
 		return $obj;
@@ -337,16 +343,13 @@ class Api_channel_fields extends Api {
 	 */
 	function apply($method, $parameters = array())
 	{
-		$_old_view_path = $this->EE->load->_ci_view_path;
 		$_ft_path = $this->ft_paths[$this->field_type];
 		
-		$this->EE->load->_ci_view_path = $_ft_path.'views/';
-		$this->EE->load->add_package_path($_ft_path);
+		$this->EE->load->add_package_path($_ft_path, FALSE);
 		
 		$res = call_user_func_array(array(&$this->field_types[$this->field_type], $method), $parameters);
 
 		$this->EE->load->remove_package_path($_ft_path);
-		$this->EE->load->_ci_view_path = $_old_view_path;
 		
 		return $res;
 	}
@@ -447,7 +450,6 @@ class Api_channel_fields extends Api {
 	function edit_datatype($field_id, $field_type, $data)
 	{
 		$old_fields = array();
-		$c_type = $data['field_content_type'];
 		
 		// First we get the data
 		$query = $this->EE->db->get_where('channel_fields', array('field_id' => $field_id));
@@ -523,12 +525,11 @@ class Api_channel_fields extends Api {
 	function set_datatype($field_id, $data, $old_fields = array(), $new = TRUE, $type_change = FALSE)
 	{		
 		$this->EE->load->dbforge();
-		$c_type = $data['field_content_type'];
 		
 		// merge in a few variables to the data array
 		$data['field_id'] = $field_id;
 		$data['ee_action'] = 'add';
-						
+		
 		// We have to get the new fields regardless to check whether they were modified
 		$fields = $this->apply('settings_modify_column', array($data));
 		
@@ -554,13 +555,12 @@ class Api_channel_fields extends Api {
 		
 			if ( ! empty($diff1) OR ! empty($diff2))
 			{
-				$modify = TRUE;	
+				$modify = TRUE;
 			}
 		}
 
-
 		// Add any new fields
-		if ($type_change == TRUE or $new == TRUE)
+		if ($type_change == TRUE OR $new == TRUE)
 		{
 			foreach ($fields as $field => $prefs)
 			{
@@ -571,19 +571,26 @@ class Api_channel_fields extends Api {
 						continue;
 					}
 				}
-					
-				$this->EE->dbforge->add_column('channel_data', array($field => $prefs));	
+				
+				$this->EE->dbforge->add_column('channel_data', array($field => $prefs));
+				
+				// Make sure the value is an empty string
+				$this->EE->db->update(
+					'channel_data',
+					array(
+						$field => (isset($prefs['default'])) ? $prefs['default'] : ''
+					)
+				);
 			}
 		}
-	
 		
 		// And modify any necessary fields
 		if ($modify == TRUE)
 		{
 			$mod['field_id_'.$field_id] = $fields['field_id_'.$field_id];
-			$mod['field_id_'.$field_id]['name'] = 'field_id_'.$field_id;			
+			$mod['field_id_'.$field_id]['name'] = 'field_id_'.$field_id;
 			
-			$this->EE->dbforge->modify_column('channel_data', $mod);	
+			$this->EE->dbforge->modify_column('channel_data', $mod);
 		}
 	}
 
@@ -661,7 +668,7 @@ class Api_channel_fields extends Api {
 			
 			$mod_base_path = $this->_include_tab_file($directory);
 
-			$this->EE->load->add_package_path($mod_base_path);
+			$this->EE->load->add_package_path($mod_base_path, FALSE);
 
 			$OBJ = new $class_name();
 
@@ -727,7 +734,7 @@ class Api_channel_fields extends Api {
 			
 			$mod_base_path = $this->_include_tab_file($directory);
 
-			$this->EE->load->add_package_path($mod_base_path);
+			$this->EE->load->add_package_path($mod_base_path, FALSE);
 
 			$OBJ = new $class_name();
 
@@ -751,10 +758,6 @@ class Api_channel_fields extends Api {
 						$params[$method] = '';
 					}
 
-					// add the view paths
-					$orig_view_path = $this->EE->load->_ci_view_path;
-					$this->EE->load->_ci_view_path = $mod_base_path.'views/';
-
 					// fetch the content
 					if ($method == 'publish_tabs')
 					{
@@ -770,15 +773,11 @@ class Api_channel_fields extends Api {
 					{
 						$set[$name][$method] = $OBJ->$method($params[$method]);
 					}
-					
-					// restore our package and view paths
-					$this->EE->load->_ci_view_path = $orig_view_path;
-
 				}
 			}
 		
-		// restore our package and view paths
-		$this->EE->load->remove_package_path($mod_base_path);
+			// restore our package and view paths
+			$this->EE->load->remove_package_path($mod_base_path);
 		
 		}
 
@@ -807,7 +806,7 @@ class Api_channel_fields extends Api {
 			// First or third party?
 			foreach(array(APPPATH.'modules/', PATH_THIRD) as $tmp_path)
 			{
-				if (file_exists($tmp_path.$name.'/tab.'.$name.EXT))
+				if (file_exists($tmp_path.$name.'/tab.'.$name.'.php'))
 				{
 					$paths[$name] = $tmp_path.$name.'/';
 					break;
@@ -819,10 +818,10 @@ class Api_channel_fields extends Api {
 			{
 				if ( ! isset($paths[$name]))
 				{
-					show_error(sprintf($this->EE->lang->line('unable_to_load_tab'), 'tab.'.$name.EXT));
+					show_error(sprintf($this->EE->lang->line('unable_to_load_tab'), 'tab.'.$name.'.php'));
 				}
 				
-				include_once($paths[$name].'tab.'.$name.EXT);
+				include_once($paths[$name].'tab.'.$name.'.php');
 			}
 		}
 		
@@ -892,6 +891,181 @@ class Api_channel_fields extends Api {
 		}
 		
 		return $custom_field_modules;
+	}
+	
+	// --------------------------------------------------------------------
+
+	function setup_entry_settings($channel_id, $entry_data, $bookmarklet = FALSE)
+	{
+		// Let's grab our channel data- note should be cached if already called via api
+		$this->EE->api->instantiate('channel_structure');
+
+		$channel_query = $this->EE->api_channel_structure->get_channel_info($channel_id);
+		
+		if ($channel_query->num_rows() == 0)
+		{
+			// bad return false?
+		}
+		
+		$channel_data = $channel_query->row_array();
+		
+		$dst_enabled = ($this->EE->session->userdata('daylight_savings') == 'y' ? TRUE : FALSE);		
+		
+		// We start by setting our default fields
+		
+		$title = (isset($entry_data['title'])) ? $entry_data['title'] : '';
+		
+		if ($channel_data['default_entry_title'] != '' && $title == '')
+		{
+			$title = $channel_data['default_entry_title'];
+		}
+		
+		
+		$url_title = (isset($entry_data['url_title'])) ? $entry_data['url_title'] : '';
+		
+
+		$deft_fields = array(
+			'title' 		=> array(
+				'field_id'				=> 'title',
+				'field_label'			=> lang('title'),
+				'field_required'		=> 'y',
+				'field_data'			=> $title,
+				'field_show_fmt'		=> 'n',
+				'field_instructions'	=> '',
+				'field_text_direction'	=> 'ltr',
+				'field_type'			=> 'text',
+				'field_maxl'			=> 100
+			),
+			'url_title'		=> array(
+				'field_id'				=> 'url_title',
+				'field_label'			=> lang('url_title'),
+				'field_required'		=> 'n',
+				'field_data'			=> $url_title,
+				'field_fmt'				=> 'xhtml',
+				'field_instructions'	=> '',
+				'field_show_fmt'		=> 'n',
+				'field_text_direction'	=> 'ltr',
+				'field_type'			=> 'text',
+				'field_maxl'			=> 75
+			),
+			'entry_date'	=> array(
+				'field_id'				=> 'entry_date',
+				'field_label'			=> lang('entry_date'),
+				'field_required'		=> 'y',
+				'field_type'			=> 'date',
+				'field_text_direction'	=> 'ltr',
+				'field_data'			=> (isset($entry_data['entry_date'])) ? $entry_data['entry_date'] : '',
+				'field_fmt'				=> 'text',
+				'field_instructions'	=> '',
+				'field_show_fmt'		=> 'n',
+				'always_show_date'		=> 'y',
+				'default_offset'		=> 0,
+				'selected'				=> 'y',
+				'dst_enabled'			=> $dst_enabled				
+			),
+			'expiration_date' => array(
+				'field_id'				=> 'expiration_date',
+				'field_label'			=> lang('expiration_date'),
+				'field_required'		=> 'n',
+				'field_type'			=> 'date',
+				'field_text_direction'	=> 'ltr',
+				'field_data'			=> (isset($entry_data['expiration_date'])) ? $entry_data['expiration_date'] : '',
+				'field_fmt'				=> 'text',
+				'field_instructions'	=> '',
+				'field_show_fmt'		=> 'n',
+				'default_offset'		=> 0,
+				'selected'				=> 'y',
+				'dst_enabled'			=> $dst_enabled				
+			)	
+		);
+
+//wtf dst_enabled?		
+		
+		
+		// comment expiry here.
+		if (isset($this->EE->cp->installed_modules['comment']))
+		{
+			$deft_fields['comment_expiration_date'] = array(
+				'field_id'				=> 'comment_expiration_date',
+				'field_label'			=> lang('comment_expiration_date'),
+				'field_required'		=> 'n',
+				'field_type'			=> 'date',
+				'field_text_direction'	=> 'ltr',
+				'field_data'			=> (isset($entry_data['comment_expiration_date'])) ? $entry_data['comment_expiration_date'] : '',
+				'field_fmt'				=> 'text',
+				'field_instructions'	=> '',
+				'field_show_fmt'		=> 'n',
+				'default_offset'		=> $channel_data['comment_expiration'] * 86400,
+				'selected'				=> 'y',
+				'dst_enabled'			=> $dst_enabled
+			);
+		}
+		
+		foreach ($deft_fields as $field_name => $f_data)
+		{
+			$this->set_settings($field_name, $f_data);
+		}
+		
+
+		// Now we set our custom fields
+		
+		// Get Channel fields in the field group
+		$channel_fields = $this->EE->channel_model->get_channel_fields($channel_data['field_group']);
+
+		
+
+		$field_settings = array();
+
+		foreach ($channel_fields->result_array() as $row)
+		{
+			$field_fmt 		= $row['field_fmt'];
+			$field_dt 		= '';
+			$field_data		= '';
+			$dst_enabled	= '';
+						
+			if ($bookmarklet)
+			{
+				// Bookmarklet data perhaps?
+				if (($field_data = $this->EE->input->get('field_id_'.$row['field_id'])) !== FALSE)
+				{
+					$field_data = $this->EE->functions->bm_qstr_decode($this->EE->input->get('tb_url')."\n\n".$field_data );
+				}
+			}
+			else
+			{
+				$field_data = (isset($entry_data['field_id_'.$row['field_id']])) ? $entry_data['field_id_'.$row['field_id']] : $field_data;				
+				$field_dt	= (isset($entry_data['field_dt_'.$row['field_id']])) ? $entry_data['field_dt_'.$row['field_id']] : 'y';
+				$field_fmt	= (isset($entry_data['field_ft_'.$row['field_id']])) ? $entry_data['field_ft_'.$row['field_id']] : $field_fmt;				
+			}			
+
+			$settings = array(
+				'field_instructions'	=> trim($row['field_instructions']),
+				'field_text_direction'	=> ($row['field_text_direction'] == 'rtl') ? 'rtl' : 'ltr',
+				'field_fmt'				=> $field_fmt,
+				'field_dt'				=> $field_dt,
+				'field_data'			=> $field_data,
+				'field_name'			=> 'field_id_'.$row['field_id'],
+				'dst_enabled'			=> $dst_enabled
+			);
+			
+			$ft_settings = array();
+
+			if (isset($row['field_settings']) && strlen($row['field_settings']))
+			{
+				$ft_settings = unserialize(base64_decode($row['field_settings']));
+			}
+			
+			$settings = array_merge($row, $settings, $ft_settings);
+			$this->EE->api_channel_fields->set_settings($row['field_id'], $settings);
+			
+			$field_settings[$settings['field_name']] = $settings;
+		}
+		
+		// Merge the default and custom fields
+		
+		return array_merge($deft_fields, $field_settings);
+
+
 	}
 }
 

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -67,6 +67,7 @@ class EE_Actions {
 		// rather than doing a lookup in the actions table.
 		$specials = array(
 							'jquery'			=> array('Jquery', 'output_javascript'),
+							'comment_editor'	=> array('Comment', 'comment_editor'),
 							'saef'				=> array('Channel', 'saef_filebrowser')
 						 );
 		
@@ -149,19 +150,17 @@ class EE_Actions {
 		}
 		
 		// Assign the path
-		$orig_view_path	= $EE->load->_ci_view_path;
-		$package_path	= PATH_MOD.$base_class.'/';
+		$package_path = PATH_MOD.$base_class.'/';
 		
 		// Third parties have a different package and view path
 		if ( ! in_array($base_class, $EE->core->native_modules))
 		{
 			$package_path = PATH_THIRD.$base_class.'/';
-			$EE->load->_ci_view_path = $package_path.'views/';
 		}
 				
-		$EE->load->add_package_path($package_path);
+		$EE->load->add_package_path($package_path, FALSE);
 		
-		$path = $package_path.$type.'.'.$base_class.EXT;
+		$path = $package_path.$type.'.'.$base_class.'.php';
 
 		// Does the path exist?		
 		if ( ! file_exists($path))
@@ -203,8 +202,7 @@ class EE_Actions {
 		}
 		
 		// remove the temporarily added path for local libraries, models, etc.
-		$EE->load->_ci_view_path = $orig_view_path;
-		$EE->load->remove_package_path();
+		$EE->load->remove_package_path($package_path);
 	}
 
 }

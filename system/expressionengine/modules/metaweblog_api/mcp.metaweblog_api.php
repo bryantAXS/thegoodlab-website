@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -519,27 +519,21 @@ class Metaweblog_api_mcp {
 
 		foreach ($this->group_array as $key => $val)
 		{
-			$statuses = array();
-
-			$statuses[] = array('null', $this->EE->lang->line('do_not_set_status'));
+			$statuses = array(
+				array('null', $this->EE->lang->line('do_not_set_status')),
+				array('open', $this->EE->lang->line('open')),
+				array('closed', $this->EE->lang->line('closed'))
+			);
 
 			if (count($this->status_array) > 0)
 			{
 				foreach ($this->status_array as $k => $v)
 				{
-					$statuses[] = array('open', $this->EE->lang->line('open'));
-					$statuses[] = array('closed', $this->EE->lang->line('closed'));
-					
 					if ($v['0'] == $key)
 					{
 						$statuses[] = array($v['1'], $v['1']);
 					}
 				}
-			}
-			else
-			{
-				$statuses[] = array($v['1'], $this->EE->lang->line('open'));
-				$statuses[] = array($v['1'], $this->EE->lang->line('closed'));
 			}
 
 			$channel_info[$key]['statuses'] = $statuses;
@@ -580,15 +574,15 @@ var empty_select = new Option("{$none_text}", 'none');
 		
 		// Go through each of the individual settings and build a proper dom element
 		jQuery.each(details, function(group, values) {
-			var newval = new Array();
+			var html = new String();
 			
 			// Add the new option fields
 			jQuery.each(values, function(a, b) {
-				newval.push(new Option(b[1], b[0]));
+				html += '<option value="' + b[0] + '">' + b[1] + "</option>";
 			});
 
 			// Set the new values
-			channel_map[key][group] = $(newval);
+			channel_map[key][group] = html;
 		});
 	});
 	
@@ -606,14 +600,12 @@ function changemenu(index)
 	}
 	else {
 		jQuery.each(channel_map[index], function(key, val) {
-			switch(key) {
-				case 'fields': 		$('select[name=excerpt_field_id]').empty().append(val);
-									$('select[name=content_field_id]').empty().append(val.clone());
-									$('select[name=more_field_id]').empty().append(val.clone());
-									$('select[name=keywords_field_id]').empty().append(val.clone());				
-					break;
-				case 'statuses':	$('select[name=entry_status]').empty().append(val);
-					break;
+			if (key == 'fields')
+			{
+				$('select[name=excerpt_field_id]').empty().append(val);
+				$('select[name=content_field_id]').empty().append(val);
+				$('select[name=more_field_id]').empty().append(val);
+				$('select[name=keywords_field_id]').empty().append(val);				
 			}
 		});
 	}

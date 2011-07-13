@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -23,23 +23,31 @@
  * @link		http://expressionengine.com
  */
 
-class View  {
+class View {
 
-	protected $_theme		= 'default';
+	protected $_theme = 'default';
 	
-	protected $_view_path 	= NULL;
-	
-	protected $_theme_url	= NULL;
-
-	protected $_head_link	= NULL;
-	
-	public function __construct($conf)
+	public function __construct()
 	{
 		$this->EE =& get_instance();
+	}
+	
+	// --------------------------------------------------------------------------
+	
+	/**
+	 * Set Theme
+	 */
+	public function set_cp_theme($cp_theme)
+	{
+		if ($cp_theme == 'default')
+		{
+			return;
+		}
 		
-		$this->_theme = $conf[0];
-		$this->_view_path = $conf[1];
-		$this->_theme_url = $conf[2];
+		$this->_theme = $cp_theme;
+		
+		$this->EE->session->userdata['cp_theme'] = $cp_theme;
+		$this->EE->load->add_theme_cascade(PATH_CP_THEME.$cp_theme.'/');
 	}
 	
 	// --------------------------------------------------------------------------
@@ -70,7 +78,7 @@ class View  {
 	{
 		$src_dir = ($this->EE->config->item('use_compressed_js') == 'n') ? 'src/' : 'compressed/';
 		
-		$path = PATH_THEMES . 'javascript/' . $src_dir . $file;
+		$path = PATH_THEMES.'javascript/'.$src_dir.$file;
 		
 		if ( ! file_exists($path))
 		{
@@ -101,25 +109,23 @@ class View  {
 		$filemtime = NULL;
 		$file_url  = NULL;
 		
-		if (is_array($this->_view_path))
+		$css_paths = array(
+			PATH_CP_THEME.$this->_theme.'/',
+			PATH_CP_THEME.'default/'
+		);
+		
+		if ($this->_theme == 'default')
 		{
-			foreach($this->_view_path as $path)
-			{
-				if (file_exists($path.$file))
-				{
-					$filemtime = filemtime($path.$file);
-					$file_url = $this->_get_theme_from_path($path) . $file;
-					
-					break 1;
-				}
-			}
+			array_shift($css_paths);
 		}
-		else
+				
+		foreach($css_paths as $path)
 		{
-			if (file_exists($this->_view_path.$file))
+			if (file_exists($path.$file))
 			{
-				$filemtime = filemtime($this->_view_path.$file);
-				$file_url = $this->_get_theme_from_path($this->_view_path) . $file;
+				$filemtime = filemtime($path.$file);
+				$file_url = $this->_get_theme_from_path($path) . $file;
+				break;
 			}
 		}
 
@@ -143,9 +149,9 @@ class View  {
 	 */
 	protected function _get_theme_from_path($path)
 	{
-		$path = rtrim($path, '/');
+		$path = '/'.trim($path, '/');
 		
-		$theme_name = ltrim(substr($path, strrpos($path, '/')), '/');
+		$theme_name = ltrim(strrchr($path, '/'), '/');
 
 		return $this->EE->config->item('theme_folder_url') . 'cp_themes/' . $theme_name . '/';		
 	}

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -102,10 +102,9 @@ class EE_Template {
 	/**
 	 * Constructor
 	 *
-	 * @access	public
 	 * @return	void
 	 */	
-	function __construct()
+	public function __construct()
 	{
 		// Make a local reference to the ExpressionEngine super object
 		$this->EE =& get_instance();
@@ -119,33 +118,23 @@ class EE_Template {
 		{
 			$this->debugging = TRUE;
 			
-			if (phpversion() < 5)
-			{
-				list($usec, $sec) = explode(" ", microtime());
-				$this->start_microtime = ((float)$usec + (float)$sec);
-			}
-			else
-			{
-				$this->start_microtime = microtime(TRUE);
-			}
+			$this->start_microtime = microtime(TRUE);
 		}
 	}
-	
 	
 	// --------------------------------------------------------------------
 	
 	/**
 	 * Run Template Engine
 	 *
-	 * Upon a Page or a Preview, it Runs the Processing of a Template baed on URI request or method arguments
+	 * Upon a Page or a Preview, it Runs the Processing of a Template 
+	 * based on URI request or method arguments
 	 *
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @return	void
 	 */	
-	 
-	function run_template_engine($template_group = '', $template = '')
+	public function run_template_engine($template_group = '', $template = '')
 	{
 		$this->log_item(" - Begin Template Processing - ");
 				
@@ -162,11 +151,9 @@ class EE_Template {
 			$this->p_cache_path .= md5($this->EE->config->item('site_url').'index'.$this->EE->uri->query_string).'/';
 		}
 		
-		
 		// We limit the total number of cache files in order to
 		// keep some sanity with large sites or ones that get
 		// hit by over-ambitious crawlers.
-		
 		if ($this->disable_caching == FALSE)
 		{		
 			if ($dh = @opendir(APPPATH.'cache/page_cache'))
@@ -209,8 +196,6 @@ class EE_Template {
 		$this->EE->output->set_output($this->final_template); 
 	}
 	
-	
-	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -218,22 +203,18 @@ class EE_Template {
 	 * 
 	 * Determines what template to process, fetches the template and its preferences, and then processes all of it
 	 * 
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @param	bool
 	 * @param	int
 	 * @return	void
 	 */
-	function fetch_and_parse($template_group = '', $template = '', $sub = FALSE, $site_id = '')
+	public function fetch_and_parse($template_group = '', $template = '', $sub = FALSE, $site_id = '')
 	{
 		// add this template to our subtemplate tracker
 		$this->templates_sofar = $this->templates_sofar.'|'.$site_id.':'.$template_group.'/'.$template.'|';
 		
-		/** -------------------------------------
-		/**  Fetch the requested template
-		/** -------------------------------------*/
-		
+		// Fetch the requested template		
 		// The template can either come from the DB or a cache file
 		// Do not use a reference!
 		
@@ -253,22 +234,18 @@ class EE_Template {
 	/**
 	 * Parse a string as a template
 	 *
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @return	void
 	 */	
-	function parse(&$str, $sub = FALSE, $site_id = '')
+	public function parse(&$str, $sub = FALSE, $site_id = '')
 	{
 		if ($str != '')
 		{
 			$this->template =& $str;
 		}
 
-		/** -------------------------------------
-		/**  Static Content, No Parsing
-		/** -------------------------------------*/
-				
+		// Static Content, No Parsing				
 		if ($this->template_type == 'static' OR $this->embed_type == 'static')
 		{
 			if ($sub == FALSE)
@@ -301,9 +278,7 @@ class EE_Template {
 			return;
 		}
 		
-		/** --------------------------------------------------
-		/**  Parse 'Site' variables
-		/** --------------------------------------------------*/
+		// Parse 'Site' variables
 		$this->log_item("Parsing Site Variables");
 		
 		// load site variables into the global_vars array
@@ -316,10 +291,7 @@ class EE_Template {
 		$seg_array = $this->EE->uri->segment_array();
 		$this->EE->config->_global_vars['last_segment'] = end($seg_array);
 
-		/** -------------------------------------
-		/**  Parse manual variables and Snippets
-		/** -------------------------------------*/
-		
+		// Parse manual variables and Snippets		
 		// These are variables that can be set in the path.php file
 		
 		if (count($this->EE->config->_global_vars) > 0)
@@ -336,10 +308,7 @@ class EE_Template {
 			$this->template = $this->remove_ee_comments($this->template);
 		}
 			
-		/** -------------------------------------
-		/**  Parse URI segments
-		/** -------------------------------------*/
-		
+		// Parse URI segments		
 		// This code lets admins fetch URI segments which become
 		// available as:  {segment_1} {segment_2}		
 				
@@ -349,10 +318,7 @@ class EE_Template {
 			$this->segment_vars['segment_'.$i] = $this->EE->uri->segment($i);
 		}
 		
-		/** -------------------------------------
-		/**  Parse {embed} tag variables
-		/** -------------------------------------*/
-		
+		// Parse {embed} tag variables		
 		if ($sub === TRUE && count($this->embed_vars) > 0)
 		{
 			$this->log_item("Embed Variables (Keys): ".implode('|', array_keys($this->embed_vars)));
@@ -374,13 +340,10 @@ class EE_Template {
 			$this->template = preg_replace('/'.LD.'embed:(.+?)'.RD.'/', '', $this->template);
 		}		
 	
-		/** -------------------------------------
-		/**  Parse date format string "constants"
-		/** -------------------------------------*/
-		
+		// Parse date format string "constants"		
 		$date_constants	= array('DATE_ATOM'		=>	'%Y-%m-%dT%H:%i:%s%Q',
 								'DATE_COOKIE'	=>	'%l, %d-%M-%y %H:%i:%s UTC',
-								'DATE_ISO8601'	=>	'%Y-%m-%dT%H:%i:%s%O',
+								'DATE_ISO8601'	=>	'%Y-%m-%dT%H:%i:%s%Q',
 								'DATE_RFC822'	=>	'%D, %d %M %y %H:%i:%s %O',
 								'DATE_RFC850'	=>	'%l, %d-%M-%y %H:%m:%i UTC',
 								'DATE_RFC1036'	=>	'%D, %d %M %y %H:%i:%s %O',
@@ -396,9 +359,7 @@ class EE_Template {
 		
 		$this->log_item("Parse Date Format String Constants");
 		
-		/** --------------------------------------------------
-		/**  Template's Last Edit time {template_edit_date format="%Y %m %d %H:%i:%s"}
-		/** --------------------------------------------------*/
+		// Template's Last Edit time {template_edit_date format="%Y %m %d %H:%i:%s"}
 		if (strpos($this->template, LD.'template_edit_date') !== FALSE && preg_match_all("/".LD."template_edit_date\s+format=([\"\'])([^\\1]*?)\\1".RD."/", $this->template, $matches))
 		{	
 			for ($j = 0; $j < count($matches[0]); $j++)
@@ -407,9 +368,7 @@ class EE_Template {
 			}
 		}  
 
-		/** --------------------------------------------------
-		/**  Current time {current_time format="%Y %m %d %H:%i:%s"}
-		/** --------------------------------------------------*/
+		// Current time {current_time format="%Y %m %d %H:%i:%s"}
 		if (strpos($this->template, LD.'current_time') !== FALSE && preg_match_all("/".LD."current_time\s+format=([\"\'])([^\\1]*?)\\1".RD."/", $this->template, $matches))
 		{				
 			for ($j = 0; $j < count($matches[0]); $j++)
@@ -422,9 +381,7 @@ class EE_Template {
 		
 		$this->log_item("Parse Current Time Variables");
 		
-		/** -------------------------------------
-		/**  Is the main template cached?
-		/** -------------------------------------*/
+		// Is the main template cached?
 		// If a cache file exists for the primary template
 		// there is no reason to go further.
 		// However we do need to fetch any subtemplates
@@ -435,10 +392,7 @@ class EE_Template {
 		
 			$this->template = $this->parse_nocache($this->template);
 			
-			/** -------------------------------------
-			/**  Smite Our Enemies:  Advanced Conditionals
-			/** -------------------------------------*/
-			
+			// Smite Our Enemies:  Advanced Conditionals			
 			if (stristr($this->template, LD.'if'))
 			{
 				$this->template = $this->advanced_conditionals($this->template);
@@ -455,30 +409,21 @@ class EE_Template {
 		// This helps prevent errors, particularly if PHP is used in a template
 		$this->template = preg_replace("/".LD."\s*(\S+)\s*".RD."/U", LD."\\1".RD, $this->template);
 		
-		/** -------------------------------------
-		/**  Parse Input Stage PHP
-		/** -------------------------------------*/
-		
-		if ($this->parse_php == TRUE AND $this->php_parse_location == 'input' AND $this->cache_status != 'CURRENT')
+		// Parse Input Stage PHP		
+		if ($this->parse_php == TRUE && $this->php_parse_location == 'input' && $this->cache_status != 'CURRENT')
 		{
 			$this->log_item("Parsing PHP on Input");
 			$this->template = $this->parse_template_php($this->template);	
 		}
 		
-		/** -------------------------------------
-		/**  Smite Our Enemies:  Conditionals
-		/** -------------------------------------*/
-		
+		// Smite Our Enemies:  Conditionals		
 		$this->log_item("Parsing Segment, Embed, and Global Vars Conditionals");
 		
 		$this->template = $this->parse_simple_segment_conditionals($this->template);
 		$this->template = $this->simple_conditionals($this->template, $this->embed_vars);
 		$this->template = $this->simple_conditionals($this->template, $this->EE->config->_global_vars);
 
-		/** -------------------------------------
-		/**  Assign Variables
-		/** -------------------------------------*/
-
+		// Assign Variables
 		if (strpos($this->template, 'preload_replace') !== FALSE)
 		{	
 			if (preg_match_all("/".LD."preload_replace:(.+?)=([\"\'])([^\\2]*?)\\2".RD."/i", $this->template, $matches))
@@ -493,11 +438,7 @@ class EE_Template {
 			}
 		}
 		
-		
-		/** -------------------------------------
-		/**  Parse Plugin and Module Tags
-		/** -------------------------------------*/
-
+		// Parse Plugin and Module Tags
 		$this->tags();
 		
 		if ($this->cease_processing === TRUE)
@@ -505,45 +446,31 @@ class EE_Template {
 			return;
 		}
 		
-		/** -------------------------------------
-		/**  Parse Output Stage PHP
-		/** -------------------------------------*/
-		
+		// Parse Output Stage PHP		
 		if ($this->parse_php == TRUE AND $this->php_parse_location == 'output' AND $this->cache_status != 'CURRENT')
 		{
 			$this->log_item("Parsing PHP on Output");
 			$this->template = $this->parse_template_php($this->template);	
 		}
 					
-		/** -------------------------------------
-		/**  Write the cache file if needed
-		/** -------------------------------------*/
-				
+		// Write the cache file if needed				
 		if ($this->cache_status == 'EXPIRED')
 		{ 
 			$this->template = $this->EE->functions->insert_action_ids($this->template);
 			$this->write_cache_file($this->cache_hash, $this->template, 'template');
 		}
 		
-		/** -------------------------------------
-		/**  Parse Our Uncacheable Forms
-		/** -------------------------------------*/
-		
+		// Parse Our Uncacheable Forms		
 		$this->template = $this->parse_nocache($this->template);
 		
-		/** -------------------------------------
-		/**  Smite Our Enemies:  Advanced Conditionals
-		/** -------------------------------------*/
-		
+		// Smite Our Enemies:  Advanced Conditionals		
 		if (strpos($this->template, LD.'if') !== FALSE)
 		{
 			$this->log_item("Processing Advanced Conditionals");
 			$this->template = $this->advanced_conditionals($this->template);
 		}
 		
-		/** -------------------------------------
-		/**  Build finalized template
-		/** -------------------------------------*/
+		// Build finalized template
 		
 		// We only do this on the first pass.
 		// The sub-template routine will insert embedded
@@ -563,17 +490,12 @@ class EE_Template {
 	 *
 	 * If any {embed=} tags are found, it processes those templates and does a replacement.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	void
 	 */	
-	 
-	function process_sub_templates($template)
+	public function process_sub_templates($template)
 	{
-		/** -------------------------------------
-		/**  Match all {embed=bla/bla} tags
-		/** -------------------------------------*/
-		
+		// Match all {embed=bla/bla} tags		
 		$matches = array();
 	
 		if ( ! preg_match_all("/(".LD."embed\s*=)(.*?)".RD."/s", $template, $matches))
@@ -581,9 +503,7 @@ class EE_Template {
 			return;
 		}
 		
-		/** -------------------------------------
-		/**  Loop until we have parsed all sub-templates
-		/** -------------------------------------*/
+		// Loop until we have parsed all sub-templates
 		
 		// For each embedded tag we encounter we'll run the template parsing
 		// function - AND - through the beauty of recursive functions we
@@ -640,10 +560,7 @@ class EE_Template {
 				continue;
 			}
 			
-			/** ----------------------------------
-			/**  Determine Site
-			/** ----------------------------------*/
-			
+			// Determine Site			
 			$site_id = $this->EE->config->item('site_id');
 			
 			if (stristr($ex[0], ':'))
@@ -675,10 +592,7 @@ class EE_Template {
 				$ex[0] = str_replace($name.':', '', $ex[0]);
 			}
 			
-			
-			/** ----------------------------------
-			/**  Loop Prevention
-			/** ----------------------------------*/
+			// Loop Prevention
 
 			/* -------------------------------------------
 			/*	Hidden Configuration Variable
@@ -692,10 +606,7 @@ class EE_Template {
 				return;				
 			}
 				
-			/** ----------------------------------
-			/**  Process Subtemplate
-			/** ----------------------------------*/
-			
+			// Process Subtemplate			
 			$this->log_item("Processing Sub Template: ".$ex[0]."/".$ex[1]);
 				
 			$this->fetch_and_parse($ex[0], $ex[1], TRUE, $site_id);
@@ -719,7 +630,6 @@ class EE_Template {
 		}
 	}
 
-
 	// --------------------------------------------------------------------
 	
 	/**
@@ -727,11 +637,9 @@ class EE_Template {
 	 *
 	 * Goes Through the Template, Finds the Beginning and End of Tags, and Stores Tag Data in a Class Array
 	 *
-	 * @access	public
 	 * @return	void
 	 */	
-	 
-	function parse_tags()
+	public function parse_tags()
 	{
 		while (TRUE)  
 		{
@@ -753,10 +661,7 @@ class EE_Template {
 			}
 			else
 			{
-				/** ------------------------------------------
-				/**  Process the tag data
-				/** ------------------------------------------*/
-				
+				// Process the tag data				
 				// These REGEXs parse out the various components contained in any given tag.
 				
 				// Grab the opening portion of the tag: {exp:some:tag param="value" param="value"}
@@ -807,10 +712,10 @@ class EE_Template {
 				// These two segments represent either a "class:constructor"
 				// or a "class:method".  We need to determine which one it is.
 				
-				if (count($class) == 1)
-				{
-					$class[1] = $class[0];
-				}
+				// if (count($class) == 1)
+				// {
+				// 	$class[1] = $class[0];
+				// }
 				
 				foreach($class as $key => $value)
 				{
@@ -911,7 +816,7 @@ class EE_Template {
 
 				$this->tag_data[$this->loop_count]['tag']				= $raw_tag;
 				$this->tag_data[$this->loop_count]['class']				= $class[0];
-				$this->tag_data[$this->loop_count]['method']			= $class[1];
+				$this->tag_data[$this->loop_count]['method']			= (isset($class[1])) ? $class[1] : FALSE;
 				$this->tag_data[$this->loop_count]['tagparts']			= $class;
 				$this->tag_data[$this->loop_count]['params']			= $args;
 				$this->tag_data[$this->loop_count]['chunk']				= $chunk; // Matched data block - including opening/closing tags		  
@@ -930,7 +835,6 @@ class EE_Template {
 		} // END WHILE
 	}
 	
-	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -938,11 +842,9 @@ class EE_Template {
 	 *
 	 * Goes Through the Template, Finds the Beginning and End of Tags, and Stores Tag Data in a Class Array
 	 *
-	 * @access	public
 	 * @return	void
-	 */	
-
-	function tags()
+	 */
+	public function tags()
 	{
 		// Fetch installed modules and plugins if needed
 		if (count($this->modules) == 0)
@@ -982,7 +884,6 @@ class EE_Template {
 		$this->log_item(" - End Tag Processing - ");
 	}
 
-
 	// --------------------------------------------------------------------
 	
 	/**
@@ -991,11 +892,9 @@ class EE_Template {
 	 * Takes the Class Array Full of Tag Data and Processes the Tags One by One.  Class class, feeds
 	 * data to class, takes results, and puts it back into the Template.
 	 *
-	 * @access	public
 	 * @return	void
 	 */	
-	 
-	function process_tags()
+	public function process_tags()
 	{
 		$plugins = array();
 		$modules = array();
@@ -1080,11 +979,11 @@ class EE_Template {
 			{
 				if (in_array($plugin ,$this->EE->core->native_plugins))
 				{
-					require_once PATH_PI."pi.{$plugin}".EXT;
+					require_once PATH_PI."pi.{$plugin}.php";
 				}
 				else
 				{
-					require_once PATH_THIRD."{$plugin}/pi.{$plugin}".EXT;
+					require_once PATH_THIRD."{$plugin}/pi.{$plugin}.php";
 				}
 			}
 		}
@@ -1096,21 +995,18 @@ class EE_Template {
 			{
 				if (in_array($module, $this->EE->core->native_modules))
 				{
-					require_once PATH_MOD."{$module}/mod.{$module}".EXT;
+					require_once PATH_MOD."{$module}/mod.{$module}.php";
 				}
 				else
 				{
-					require_once PATH_THIRD."{$module}/mod.{$module}".EXT;
+					require_once PATH_THIRD."{$module}/mod.{$module}.php";
 				}
 			}			
 		}
 		
 		$this->log_item("Files for Plugins and Modules All Included");
 		
-		/** -----------------------------------
-		/**  Only Retrieve Data if Not Done Before and Modules Being Called
-		/** -----------------------------------*/
-		
+		// Only Retrieve Data if Not Done Before and Modules Being Called		
 		if (count($this->module_data) == 0 && count(array_intersect($this->modules, $modules)) > 0)
 		{
 			$this->EE->db->select('module_version, module_name');
@@ -1188,10 +1084,7 @@ class EE_Template {
 					}
 				}
 			
-				/** ---------------------------------
-				/**  Nested Plugins...
-				/** ---------------------------------*/
-				
+				// Nested Plugins...				
 				if (in_array($this->tag_data[$i]['class'] , $this->plugins) && strpos($this->tag_data[$i]['block'], LD.'exp:') !== FALSE)
 				{
 					if ( ! isset($this->tag_data[$i]['params']['parse']) OR $this->tag_data[$i]['params']['parse'] != 'inward')
@@ -1199,7 +1092,7 @@ class EE_Template {
 						$this->log_item("Nested Plugins in Tag, Parsing Outward First");
 						
 						$TMPL2 = clone $this;
-
+						
 						while (is_int(strpos($TMPL2->tag_data[$i]['block'], LD.'exp:')))
 						{
 							unset($this->EE->TMPL);
@@ -1242,20 +1135,13 @@ class EE_Template {
 				$this->no_results		= $this->tag_data[$i]['no_results'];
 				$this->search_fields	= $this->tag_data[$i]['search_fields'];
 
-				/** -------------------------------------
-				/**  Assign Sites for Tag
-				/** -------------------------------------*/
-				
+				// Assign Sites for Tag				
 				$this->_fetch_site_ids();
 				
-				/** -------------------------------------
-				/**  Fetch Form Class/Id Attributes
-				/** -------------------------------------*/
+				// Fetch Form Class/Id Attributes
 				$this->tag_data[$i] = $this->_assign_form_params($this->tag_data[$i]);
 
-				/** -------------------------------------
-				/**  Relationship Data Pulled Out
-				/** -------------------------------------*/
+				// Relationship Data Pulled Out
 				
 				// If the channel:entries tag or search:search_results is being called
 				// we need to extract any relationship data that might be present.
@@ -1297,10 +1183,8 @@ class EE_Template {
 				}
 				
 				// Assign the class name and method name
-			
 				$class_name = ucfirst($this->tag_data[$i]['class']);
-				$meth_name  = $this->tag_data[$i]['method'];
-				
+				$meth_name = $this->tag_data[$i]['method'];
 				
 				// If it's a third party class or a first party module,
 				// add the root folder to the loader paths so we can use
@@ -1313,12 +1197,11 @@ class EE_Template {
 					$package_path = in_array($this->tag_data[$i]['class'], $this->EE->core->native_modules) ? PATH_MOD : PATH_THIRD;
 					$package_path .= strtolower($this->tag_data[$i]['class'].'/');
 					
-					$this->EE->load->add_package_path($package_path);
+					$this->EE->load->add_package_path($package_path, FALSE);
 				}
 				
 				// Dynamically instantiate the class.
 				// If module, only if it is installed...
-				
 				if (in_array($this->tag_data[$i]['class'], $this->modules) && ! isset($this->module_data[$class_name]))
 				{
 					$this->log_item("Problem Processing Module: Module Not Installed");
@@ -1330,18 +1213,33 @@ class EE_Template {
 					$EE = new $class_name();
 				}
 				
-				/** ----------------------------------
-				/**  Does method exist?  Is This A Module and Is It Installed?
-				/** ----------------------------------*/
-		
-				if ((in_array($this->tag_data[$i]['class'], $this->modules) && ! isset($this->module_data[$class_name])) OR ! method_exists($EE, $meth_name))
+				// This gives proper PHP5 __construct() support in 
+				// plugins and modules with only a single __construct()
+				// and allows them to be named __construct() instead of a 
+				// PHP4-style contructor.  
+				if ($meth_name === FALSE && isset($EE))
+				{
+					if (method_exists($EE, $class_name))
+					{
+						$meth_name = $class_name;
+					} 
+					elseif (method_exists($EE, '__construct'))
+					{
+						$meth_name = '__construct';
+					}
+				}
+				
+				// Does method exist?  Is This A Module and Is It Installed?
+				if ((in_array($this->tag_data[$i]['class'], $this->modules) && 
+							  ! isset($this->module_data[$class_name])) OR 
+							  ! method_exists($EE, $meth_name))
 				{
 					
 					$this->log_item("Tag Not Processed: Method Inexistent or Module Not Installed");
 
 					if ($this->EE->config->item('debug') >= 1)
 					{						
-						if ($this->tag_data[$i]['tagparts'][0] == $this->tag_data[$i]['tagparts'][1] &&
+						if (isset($this->tag_data[$i]['tagparts'][1]) && $this->tag_data[$i]['tagparts'][0] == $this->tag_data[$i]['tagparts'][1] &&
 							! isset($this->tag_data[$i]['tagparts'][2]))
 						{
 							unset($this->tag_data[$i]['tagparts'][1]);
@@ -1362,7 +1260,7 @@ class EE_Template {
 						return;						
 					}
 				}	
-				
+			
 				/*
 				
 				OK, lets grab the data returned from the class.
@@ -1379,7 +1277,7 @@ class EE_Template {
 				
 				$this->log_item(" -> Method Called: ".$meth_name);
 				
-				if (strtolower($class_name) == $meth_name)
+				if ((strtolower($class_name) == strtolower($meth_name)) OR ($meth_name == '__construct'))
 				{
 					$return_data = (isset($EE->return_data)) ? $EE->return_data : '';
 				}
@@ -1394,13 +1292,10 @@ class EE_Template {
 				
 				if ($package_path)
 				{
-					$this->EE->load->remove_package_path();
+					$this->EE->load->remove_package_path($package_path);
 				}
 
-				/** ----------------------------------
-				/**  404 Page Triggered, Cease All Processing of Tags From Now On
-				/** ----------------------------------*/
-				
+				// 404 Page Triggered, Cease All Processing of Tags From Now On				
 				if ($this->cease_processing === TRUE)
 				{
 					return;
@@ -1445,12 +1340,10 @@ class EE_Template {
 	 * $this->EE->TMPL->related_data array contains anything.  If so, we'll celebrate
 	 * wildly.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */	
-
-	function assign_relationship_data($chunk)
+	public function assign_relationship_data($chunk)
 	{
 		$this->related_markers = array();
 		
@@ -1545,13 +1438,11 @@ class EE_Template {
 	 * Further, if one assigns the second argument, it will be returned as the value if a
 	 * parameter of the $which name does not exist for this tag.  Handy for default values!
 	 *
-	 * @access	public
 	 * @access	string
 	 * @access	bool
 	 * @return	string
 	 */
-		
-	function fetch_param($which, $default = FALSE)
+	public function fetch_param($which, $default = FALSE)
 	{
 		if ( ! isset($this->tagparams[$which]))
 		{
@@ -1584,18 +1475,16 @@ class EE_Template {
 	 *
 	 * LEGACY!!!
 	 *
-	 * @access	public
+	 * @deprecated
 	 * @param	string
 	 * @param	string
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function swap_var_single($search, $replace, $source)
+	public function swap_var_single($search, $replace, $source)
 	{
 		return str_replace(LD.$search.RD, $replace, $source);  
 	}
-
 
 	// --------------------------------------------------------------------
 	
@@ -1604,18 +1493,16 @@ class EE_Template {
 	 *
 	 * LEGACY!!!
 	 *
-	 * @access	public
+	 * @deprecated
 	 * @param	string
 	 * @param	string
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function swap_var_pairs($open, $close, $source)
+	public function swap_var_pairs($open, $close, $source)
 	{
 		return preg_replace("/".LD.preg_quote($open).RD."(.*?)".LD.'\/'.$close.RD."/s", "\\1", $source); 
 	}
-
 
 	// --------------------------------------------------------------------
 	
@@ -1624,14 +1511,13 @@ class EE_Template {
 	 *
 	 * LEGACY!!!
 	 *
-	 * @access	public
+	 * @deprecated
 	 * @param	string
 	 * @param	string
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function delete_var_pairs($open, $close, $source)
+	public function delete_var_pairs($open, $close, $source)
 	{
 		return preg_replace("/".LD.preg_quote($open).RD."(.*?)".LD.'\/'.$close.RD."/s", "", $source); 
 	}
@@ -1643,13 +1529,12 @@ class EE_Template {
 	 *
 	 * LEGACY!!!
 	 *
-	 * @access	public
+	 * @deprecated
 	 * @param	string
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function fetch_data_between_var_pairs($str, $variable)
+	public function fetch_data_between_var_pairs($str, $variable)
 	{
 		if ($str == '' OR $variable == '')
 			return;
@@ -1660,19 +1545,16 @@ class EE_Template {
 		return $match[1];		
 	}
 
-
 	// --------------------------------------------------------------------
 	
 	/**
 	 * Returns String with PHP Processed
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	 function parse_template_php($str)
-	 {
+	public function parse_template_php($str)
+	{
 		ob_start();
 
 		echo $this->EE->functions->evaluate($str);
@@ -1684,20 +1566,19 @@ class EE_Template {
 		$this->parse_php = FALSE;
 		
 		return $str;
-	 }
+	}
 
 	// --------------------------------------------------------------------
 	
 	/**
 	 * Get Cache File Data
 	 *
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @param	mixed
 	 * @return	string
 	 */
-	function fetch_cache_file($cfile, $cache_type = 'tag', $args = array())
+	public function fetch_cache_file($cfile, $cache_type = 'tag', $args = array())
 	{
 		// Which cache are we working on?
 		$status = ($cache_type == 'tag') ? 'tag_cache_status' : 'cache_status';
@@ -1756,13 +1637,12 @@ class EE_Template {
 	 *
 	 * Stores the Tag and Page Cache Data
 	 *
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @param	string
 	 * @return	string
 	 */
-	function write_cache_file($cfile, $data, $cache_type = 'tag')
+	public function write_cache_file($cfile, $data, $cache_type = 'tag')
 	{
 		if ($this->disable_caching == TRUE)
 		{
@@ -1837,10 +1717,9 @@ class EE_Template {
 	 * If invalid Template, shows Template Group's index page
 	 * If invalid Template Group, depending on sendings may show 404 or default Template Group
 	 *
-	 * @access	public
 	 * @return	string
 	 */
-    function parse_template_uri()
+    public function parse_template_uri()
     {
         $this->log_item("Parsing Template URI");
         
@@ -1850,7 +1729,8 @@ class EE_Template {
 			return $this->fetch_template('', 'index', TRUE);
         }
         // Is only the pagination showing in the URI?
-        elseif(count($this->EE->uri->segments) == 1 && preg_match("#^(P\d+)$#", $this->EE->uri->segment(1), $match))
+        elseif(count($this->EE->uri->segments) == 1 && 
+        		preg_match("#^(P\d+)$#", $this->EE->uri->segment(1), $match))
         {
         	$this->EE->uri->query_string = $match['1'];
         	return $this->fetch_template('', 'index', TRUE);
@@ -2042,7 +1922,6 @@ class EE_Template {
 		// Fetch the template!
        return $this->fetch_template($template_group, $template, FALSE);
     }
-   // END
    
 	// --------------------------------------------------------------------
 	
@@ -2051,17 +1930,15 @@ class EE_Template {
 	 *
 	 * If users do not have a 404 template specified this is what gets shown
 	 *
-	 * @access	private
 	 * @return	string
 	 */
-	function _404()
+	protected function _404()
 	{
 		$this->log_item("404 Page Returned");
 		$this->EE->output->set_status_header(404);
 		echo '<html><head><title>404 Page Not Found</title></head><body><h1>Status: 404 Page Not Found</h1></body></html>';
 		exit;	
 	}
-	// END
 
 	// --------------------------------------------------------------------
 	
@@ -2071,15 +1948,13 @@ class EE_Template {
 	 * Takes a Template Group, Template, and Site ID and will retrieve the Template and its metadata
 	 * from the database (or file)
 	 *
-	 * @access	public
 	 * @param	string
 	 * @param	string
 	 * @param	bool
 	 * @param	int
 	 * @return	string
 	 */
-	 
-	function fetch_template($template_group, $template, $show_default = TRUE, $site_id = '')
+	public function fetch_template($template_group, $template, $show_default = TRUE, $site_id = '')
 	{
 		if ($site_id == '' OR ! is_numeric($site_id))
 		{
@@ -2222,19 +2097,16 @@ class EE_Template {
 		
 		$this->log_item("Template Found");
 		
-		/** ----------------------------------------------------
-		/**  HTTP Authentication
-		/** ----------------------------------------------------*/
-		
+		// HTTP Authentication
 		if ($query->row('enable_http_auth') == 'y')
 		{
 			$this->log_item("HTTP Authentication in Progress");
-		
+
 			$this->EE->db->select('member_group');
 			$this->EE->db->where('template_id', $query->row('template_id'));
 			$results = $this->EE->db->get('template_no_access');
 		
-			$not_allowed_groups = array('2', '3', '4');
+			$not_allowed_groups = array();
 			
 			if ($results->num_rows() > 0)
 			{
@@ -2243,18 +2115,13 @@ class EE_Template {
 					$not_allowed_groups[] = $row['member_group'];
 				}
 			}		  
-		
-			if ($this->template_authentication_check_basic($not_allowed_groups) !== TRUE)
-			{
-				$this->template_authentication_basic();
-			}
+
+			$this->EE->load->library('auth');
+			$this->EE->auth->authenticate_http_basic($not_allowed_groups,
+													 $this->realm);
 		}
 
-
-		/** ----------------------------------------------------
-		/**  Is the current user allowed to view this template?
-		/** ----------------------------------------------------*/
-		
+		// Is the current user allowed to view this template?		
 		if ($query->row('enable_http_auth') != 'y' && $query->row('no_auth_bounce')  != '')
 		{
 			$this->log_item("Determining Template Access Privileges");
@@ -2287,22 +2154,17 @@ class EE_Template {
 		
 		$row = $query->row_array();
 		
-		/** -----------------------------------------
-		/**  Is PHP allowed in this template?
-		/** -----------------------------------------*/
-		
-		if ($row['allow_php'] == 'y' AND $this->EE->config->item('demo_date') == FALSE)
+		// Is PHP allowed in this template?		
+		if ($row['allow_php'] == 'y')
 		{
 			$this->parse_php = TRUE;
 			
 			$this->php_parse_location = ($row['php_parse_location'] == 'i') ? 'input' : 'output';
 		}
 		
-		/** -----------------------------------------
-		/**  Increment hit counter
-		/** -----------------------------------------*/
-		
-		if (($this->hit_lock == FALSE OR $this->hit_lock_override == TRUE) AND $this->EE->config->item('enable_hit_tracking') != 'n')
+		// Increment hit counter		
+		if (($this->hit_lock == FALSE OR $this->hit_lock_override == TRUE) && 
+			$this->EE->config->item('enable_hit_tracking') != 'n')
 		{
 			$this->template_hits = $row['hits'] + 1;
 			$this->hit_lock = TRUE;
@@ -2311,24 +2173,16 @@ class EE_Template {
 											   array('template_id'	=> $row['template_id']));
 		}
 		
-        /** -----------------------------------------
-        /**  Set template edit date
-        /** -----------------------------------------*/
-
+		// Set template edit date
 		$this->template_edit_date = $row['edit_date'];
 		
-		/** -----------------------------------------
-		/**  Set template type for our page headers
-		/** -----------------------------------------*/
+		// Set template type for our page headers
 		if ($this->template_type == '')
 		{ 
 			$this->template_type = $row['template_type'];
 			$this->EE->functions->template_type = $row['template_type'];
 			
-			/** -----------------------------------------
-			/**  If JS or CSS request, reset Tracker Cookie
-			/** -----------------------------------------*/
-			
+			// If JS or CSS request, reset Tracker Cookie			
 			if ($this->template_type == 'js' OR $this->template_type == 'css')
 			{
 				if (count($this->EE->session->tracker) <= 1)
@@ -2349,9 +2203,7 @@ class EE_Template {
 			$this->embed_type = $row['template_type'];
 		}
 		
-		/** -----------------------------------------
-		/**  Cache Override
-		/** -----------------------------------------*/
+		// Cache Override
 		
 		// We can manually set certain things not to be cached, like the
 		// search template and the member directory after it's updated
@@ -2369,10 +2221,7 @@ class EE_Template {
 			}
 		}
 		
-		/** -----------------------------------------
-		/**  Retreive cache
-		/** -----------------------------------------*/
-					  
+		// Retreive cache					  
 		$this->cache_hash = md5($site_id.'-'.$template_group.'-'.$template);
 
 		if ($row['cache'] == 'y')
@@ -2385,10 +2234,7 @@ class EE_Template {
 			}
 		}
 		
-		/** -----------------------------------------
-        /**  Retrieve template file if necessary
-        /** -----------------------------------------*/
-        
+		// Retrieve template file if necessary        
         if ($row['save_template_file'] == 'y')
         {
         	$site_switch = FALSE;
@@ -2443,7 +2289,6 @@ class EE_Template {
 	 *
 	 * Attempts to create a template group / template from a file
 	 *
-	 * @access	public
 	 * @param	string		template group name
 	 * @param	string		template name
 	 * @return	bool
@@ -2489,7 +2334,7 @@ class EE_Template {
 
 		foreach ($this->EE->api_template_structure->file_extensions as $type => $temp_ext)
 		{
-			if (file_exists($basepath.'/'.$template.$temp_ext))
+			if (file_exists($basepath.'/'.$template.$temp_ext) &&is_really_writable($basepath.'/'.$template.$temp_ext))
 			{
 				// found it with an extension
 				$filename = $template.$temp_ext;
@@ -2572,11 +2417,9 @@ class EE_Template {
 	 * If a tag/class has no results to show, it can call this method.  Any no_results variable in
 	 * the tag will be followed.  May be 404 page, content, or even a redirect.
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	
-	function no_results()
+	public function no_results()
 	{
 		if ( ! preg_match("/".LD."redirect\s*=\s*(\042|\047)([^\\1]*?)\\1".RD."/si", $this->no_results, $match))
 		{
@@ -2612,7 +2455,6 @@ class EE_Template {
 		}
 	}
 
-
 	// --------------------------------------------------------------------
 	
 	/**
@@ -2621,14 +2463,12 @@ class EE_Template {
 	 * Takes any XML declaration in the string  and makes sure it is not interpreted as PHP during
 	 * the processing of the template.
 	 *
-	 * @access	public
+	 * This fixes a parsing error when PHP is used in RSS templates
+	 *
 	 * @param	string
 	 * @return	string
 	 */
-	
-	// This fixes a parsing error when PHP is used in RSS templates
-
-	function convert_xml_declaration($str)
+	public function convert_xml_declaration($str)
 	{
 		if (strpos($str, '<?xml') === FALSE) return $str;
 		
@@ -2640,12 +2480,10 @@ class EE_Template {
 	/**
 	 * Restore XML Declaration
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	
-	function restore_xml_declaration($str)
+	public function restore_xml_declaration($str)
 	{		
 		if (strpos($str, '<XXML') === FALSE) return $str;
 		
@@ -2660,18 +2498,15 @@ class EE_Template {
 	 * EE Templates have a special EE Code Comments for site designer notes and are removed prior
 	 * to Template processing.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function remove_ee_comments($str)
+	public function remove_ee_comments($str)
 	{	
 		if (strpos($str, '{!--') === FALSE) return $str;
 		
 		return preg_replace("/\{!--.*?--\}/s", '', $str);
 	}
-	
 
 	// --------------------------------------------------------------------
 	
@@ -2680,14 +2515,13 @@ class EE_Template {
 	 *
 	 * Gathers available modules and plugins
 	 *
-	 * @access	public
 	 * @return	void
 	 */
-	function fetch_addons()
+	public function fetch_addons()
 	{
 		$this->EE->load->helper('file');
 		$this->EE->load->helper('directory');
-		$ext_len = strlen(EXT);
+		$ext_len = strlen('.php');
 		$pattern = 'bas'.'e'.'6'.'4_d'.'ecode';
 		
 		// first get first party modules
@@ -2712,8 +2546,10 @@ class EE_Template {
 		{
 			foreach ($map as $file)
 			{
-				if (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == EXT && strlen($file) > strlen('pi.'.EXT)
-					&& in_array(substr($file, 3, -$ext_len), $this->EE->core->native_plugins))
+				if (strncasecmp($file, 'pi.', 3) == 0 && 
+					substr($file, -$ext_len) == '.php' && 
+					strlen($file) > strlen('pi..php') && 
+					in_array(substr($file, 3, -$ext_len), $this->EE->core->native_plugins))
 				{							
 					$this->plugins[] = substr($file, 3, -$ext_len);
 				}				
@@ -2741,7 +2577,9 @@ class EE_Template {
 					}
 					
 					// we gots a module?
-					if (strncasecmp($file, 'mod.', 4) == 0 && substr($file, -$ext_len) == EXT && strlen($file) > strlen('mod.'.EXT))
+					if (strncasecmp($file, 'mod.', 4) == 0 && 
+						substr($file, -$ext_len) == '.php' && 
+						strlen($file) > strlen('mod..php'))
 					{
 						$file = substr($file, 4, -$ext_len);
 
@@ -2751,7 +2589,9 @@ class EE_Template {
 						}
 					}
 					// how abouts a plugin?
-					elseif (strncasecmp($file, 'pi.', 3) == 0 && substr($file, -$ext_len) == EXT && strlen($file) > strlen('pi.'.EXT))
+					elseif (strncasecmp($file, 'pi.', 3) == 0 && 
+							substr($file, -$ext_len) == '.php' && 
+							strlen($file) > strlen('pi..php'))
 					{							
 						$file = substr($file, 3, -$ext_len);
 
@@ -2776,21 +2616,22 @@ class EE_Template {
 	 * paths, action IDs, CAPTCHAs.  Typically stuff that should only be done after caching to prevent
 	 * any manner of changes in the system or who is viewing the page to affect the display.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	
-	function parse_globals($str)
+	public function parse_globals($str)
 	{
 		$charset 	= '';
 		$lang		= '';
-		$user_vars	= array('member_id', 'group_id', 'group_description', 'group_title', 'member_group', 'username', 'screen_name', 'email', 'ip_address', 'location', 'total_entries', 'total_comments', 'private_messages', 'total_forum_posts', 'total_forum_topics', 'total_forum_replies');			
+		$user_vars	= array(
+					'member_id', 'group_id', 'group_description', 
+					'group_title', 'member_group', 'username', 'screen_name', 
+					'email', 'ip_address', 'location', 'total_entries', 
+					'total_comments', 'private_messages', 'total_forum_posts', 
+					'total_forum_topics', 'total_forum_replies'
+				);
 
-        /** --------------------------------------------------
-        /**  Redirect - if we have one of these, no need to go further
-        /** --------------------------------------------------*/
-     	
+		// Redirect - if we have one of these, no need to go further     	
 		if (strpos($str, LD.'redirect') !== FALSE)
 		{
 			if (preg_match("/".LD."redirect\s*=\s*(\042|\047)([^\\1]*?)\\1".RD."/si", $str, $match))
@@ -2822,17 +2663,11 @@ class EE_Template {
 			}
 		}
 						
-		/** --------------------------------------------------
-		/**  Restore XML declaration if it was encoded
-		/** --------------------------------------------------*/
-		
+		// Restore XML declaration if it was encoded		
 		$str = $this->restore_xml_declaration($str);
 
-		/** --------------------------------------------------
-		/**  Parse User-defined Global Variables first so that
-		/**  they can use other standard globals
-		/** --------------------------------------------------*/
-	 	
+		//  Parse User-defined Global Variables first so that
+		//  they can use other standard globals
 		$this->EE->db->select('variable_name, variable_data');
 		$this->EE->db->where('site_id', $this->EE->config->item('site_id'));
 		$query = $this->EE->db->get('global_variables');
@@ -2845,15 +2680,10 @@ class EE_Template {
 			}
 		}
 		
-		/** --------------------------------------------------
-		/**  {hits}
-		/** --------------------------------------------------*/
+		// {hits}
 		$str = str_replace(LD.'hits'.RD, $this->template_hits, $str);  
 		
-		/** --------------------------------------------------
-		/**  {ip_address} and {ip_hostname}
-		/** --------------------------------------------------*/
-		
+		// {ip_address} and {ip_hostname}		
 		$str = str_replace(LD.'ip_address'.RD, $this->EE->input->ip_address(), $str); 
 		 
 		// Turns out gethostbyaddr() is WAY SLOW on many systems so I'm killing it.		 
@@ -2861,16 +2691,10 @@ class EE_Template {
 		
 		$str = str_replace(LD.'ip_hostname'.RD, $this->EE->input->ip_address(), $str); 
 								
-		/** --------------------------------------------------
-		/**  {homepage}
-		/** --------------------------------------------------*/
-		
+		// {homepage}		
 		$str = str_replace(LD.'homepage'.RD, $this->EE->functions->fetch_site_index(), $str); 
 
-		/** --------------------------------------------------
-		/**  {cp_url}
-		/** --------------------------------------------------*/
-	
+		//  {cp_url}	
 		if ($this->EE->session->access_cp === TRUE)
 		{
 			$str = str_replace(LD.'cp_url'.RD, $this->EE->config->item('cp_url'), $str);
@@ -2880,19 +2704,13 @@ class EE_Template {
 			$str = str_replace(LD.'cp_url'.RD, '', $str);
 		}
 
-		/** --------------------------------------------------
-		/**  {site_name} {site_url} {site_index}
-		/** --------------------------------------------------*/
-		
+		// {site_name} {site_url} {site_index} {webmaster_email}		
 		$str = str_replace(LD.'site_name'.RD, stripslashes($this->EE->config->item('site_name')), $str);
 		$str = str_replace(LD.'site_url'.RD, stripslashes($this->EE->config->item('site_url')), $str);
 		$str = str_replace(LD.'site_index'.RD, stripslashes($this->EE->config->item('site_index')), $str);
 		$str = str_replace(LD.'webmaster_email'.RD, stripslashes($this->EE->config->item('webmaster_email')), $str);
 
-		/** --------------------------------------------------
-		/**  Stylesheet variable: {stylesheet=group/template}
-		/** --------------------------------------------------*/
-		
+		// Stylesheet variable: {stylesheet=group/template}		
 		if (strpos($str, 'stylesheet=') !== FALSE && preg_match_all("/".LD."\s*stylesheet=[\042\047]?(.*?)[\042\047]?".RD."/", $str, $css_matches))
         {
         	$css_versions = array();
@@ -2936,19 +2754,23 @@ class EE_Template {
         		}
         	}
         	
-        	for($ci=0, $cs=count($css_matches[0]); $ci < $cs; ++$ci)
-        	{
-        		$str = str_replace($css_matches[0][$ci], $this->EE->functions->fetch_site_index().QUERY_MARKER.'css='.$css_matches[1][$ci].(isset($css_versions[$css_matches[1][$ci]]) ? '.v.'.$css_versions[$css_matches[1][$ci]] : ''), $str);
-        	}
+			$s_index = $this->EE->functions->fetch_site_index();
+			
+			if ( ! QUERY_MARKER && substr($s_index, -1) != '?')
+			{
+				$s_index .= '&';
+			}
+
+			for($ci=0, $cs=count($css_matches[0]); $ci < $cs; ++$ci)
+			{
+				$str = str_replace($css_matches[0][$ci], $s_index.QUERY_MARKER.'css='.$css_matches[1][$ci].(isset($css_versions[$css_matches[1][$ci]]) ? '.v.'.$css_versions[$css_matches[1][$ci]] : ''), $str);
+			}
         
         	unset($css_matches);
         	unset($css_versions);
         }
 		  
-		/** --------------------------------------------------
-		/**  Email encode: {encode="you@yoursite.com" title="click Me"}
-		/** --------------------------------------------------*/
-		
+		// Email encode: {encode="you@yoursite.com" title="click Me"}		
 		if (strpos($str, LD.'encode=') !== FALSE)
 		{
 			if ($this->encode_email == TRUE)
@@ -2975,56 +2797,32 @@ class EE_Template {
 			}
 		}
 		
-		/** --------------------------------------------------
-		/**  Path variable: {path=group/template}
-		/** --------------------------------------------------*/
-		
-		if (strpos($str, 'path=') !== FALSE)
-		{
-			$str = preg_replace_callback("/".LD."\s*path=(.*?)".RD."/", array(&$this->EE->functions, 'create_url'), $str);
-		}
-		
-		/** --------------------------------------------------
-		/**  Debug mode: {debug_mode}
-		/** --------------------------------------------------*/
-		
+		// Debug mode: {debug_mode}		
 		$str = str_replace(LD.'debug_mode'.RD, ($this->EE->config->item('debug') > 0) ? $this->EE->lang->line('on') : $this->EE->lang->line('off'), $str);
 				
-		/** --------------------------------------------------
-		/**  GZip mode: {gzip_mode}
-		/** --------------------------------------------------*/
+		// GZip mode: {gzip_mode}
 		$str = str_replace(LD.'gzip_mode'.RD, ($this->EE->config->item('gzip_output') == 'y') ? $this->EE->lang->line('enabled') : $this->EE->lang->line('disabled'), $str);
 				
-		/** --------------------------------------------------
-		/**  App version: {version}
-		/** --------------------------------------------------*/
-		
+		// App version: {version}		
 		$str = str_replace(LD.'app_version'.RD, APP_VER, $str); 
 		$str = str_replace(LD.'version'.RD, APP_VER, $str); 
 		 
-		/** --------------------------------------------------
-		/**  App version: {build}
-		/** --------------------------------------------------*/
-		
+		// App version: {build}		
 		$str = str_replace(LD.'app_build'.RD, APP_BUILD, $str); 
 		$str = str_replace(LD.'build'.RD, APP_BUILD, $str);
 
-		/** --------------------------------------------------
-		/**  {charset} and {lang}
-		/** --------------------------------------------------*/
-		
+		// {charset} and {lang}		
 		$str = str_replace(LD.'charset'.RD, $this->EE->config->item('output_charset'), $str); 
 		$str = str_replace(LD.'lang'.RD, $this->EE->config->item('xml_lang'), $str);
 
-		/** --------------------------------------------------
-		/**  {doc_url}
-		/** --------------------------------------------------*/
-
+		// {doc_url}
 		$str = str_replace(LD.'doc_url'.RD, $this->EE->config->item('doc_url'), $str);
+
+		// {theme_folder_url}		
+		$str = str_replace(LD.'theme_folder_url'.RD, 
+			$this->EE->config->item('theme_folder_url'), $str);
 		
-		/** --------------------------------------------------
-		/**  {member_profile_link}
-		/** --------------------------------------------------*/
+		// {member_profile_link}
 		if ($this->EE->session->userdata('member_id') != 0)
 		{
 			$name = ($this->EE->session->userdata['screen_name'] == '') ? $this->EE->session->userdata['username'] : $this->EE->session->userdata['screen_name'];
@@ -3038,35 +2836,20 @@ class EE_Template {
 			$str = str_replace(LD.'member_profile_link'.RD, '', $str);
 		}
 		
-		/** -----------------------------------
-		/**  Fetch CAPTCHA
-		/** -----------------------------------*/
-		
+		// Fetch CAPTCHA		
 		if (strpos($str, "{captcha}") !== FALSE)
 		{
 			$str = str_replace("{captcha}", $this->EE->functions->create_captcha(), $str);
 		}		
 					
-		/** -----------------------------------
-		/**  Add security hashes to forms
-		/** -----------------------------------*/
-		
+		// Add security hashes to forms		
 		// We do this here to keep the security hashes from being cached
 		
 		$str = $this->EE->functions->add_form_security_hash($str);
 		
-		/** -----------------------------------
-		/**  Add Action IDs form forms and links
-		/** -----------------------------------*/
-		
-		$str = $this->EE->functions->insert_action_ids($str);
-		
-		/** -----------------------------------
-		/**  Parse non-cachable variables
-		/** -----------------------------------*/
-		
+		// Parse non-cachable variables		
 		$this->EE->session->userdata['member_group'] = $this->EE->session->userdata['group_id'];
-	
+
 		foreach ($user_vars as $val)
 		{
 			if (isset($this->EE->session->userdata[$val]) AND ($val == 'group_description' OR strval($this->EE->session->userdata[$val]) != ''))
@@ -3078,10 +2861,18 @@ class EE_Template {
 			}
 		}
 		
+		// Path variable: {path=group/template}		
+		if (strpos($str, 'path=') !== FALSE)
+		{
+			$str = preg_replace_callback("/".LD."\s*path=(.*?)".RD."/", array(&$this->EE->functions, 'create_url'), $str);
+		}
+		
+		// Add Action IDs form forms and links
+		$str = $this->EE->functions->insert_action_ids($str);
+		
 		// and once again just in case global vars introduce EE comments
 		return $this->remove_ee_comments($str);
 	}
-	
 	
 	// --------------------------------------------------------------------
 	
@@ -3091,21 +2882,17 @@ class EE_Template {
 	 * Parses and Process forms that cannot be stored in a cache file.  Probably one of the most
 	 * tedious parts of EE's Template parser for a while there in 2004...
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	
-	function parse_nocache($str)
+	public function parse_nocache($str)
 	{
 		if (strpos($str, '{NOCACHE') === FALSE)
 		{
 			return $str;
 		}
 		
-		/** -----------------------------------
-		/**  Generate Comment Form if needed
-		/** -----------------------------------*/
+		// Generate Comment Form if needed
 		
 		// In order for the comment form not to cache the "save info"
 		// data we need to generate dynamically if necessary
@@ -3120,7 +2907,7 @@ class EE_Template {
 		
 				if ( ! class_exists($class))
 				{
-					require PATH_MOD.$class.'/mod.'.$class.EXT;
+					require PATH_MOD.$class.'/mod.'.$class.'.php';
 				}
 						
 				$this->tagdata = $match[3][$i];
@@ -3151,16 +2938,14 @@ class EE_Template {
 			}
 		}
 		
-		/** -----------------------------------
-		/**  Generate Stand-alone Publish form
-		/** -----------------------------------*/
+		// Generate Stand-alone Publish form
 		if (preg_match_all("#{{NOCACHE_CHANNEL_FORM(.*?)}}(.+?){{/NOCACHE_FORM}}#s", $str, $match))
 		{
 			for($i=0, $s=count($match[0]); $i < $s; $i++)
 			{
 				if ( ! class_exists('Channel'))
 				{
-					require PATH_MOD.'channel/mod.channel'.EXT;
+					require PATH_MOD.'channel/mod.channel.php';
 				}
 				
 				$this->tagdata = $match[2][$i];
@@ -3187,9 +2972,7 @@ class EE_Template {
 		}
 
 		return $str;
-	
 	}
-
 
 	// --------------------------------------------------------------------
 	
@@ -3202,12 +2985,10 @@ class EE_Template {
 	 * variables and preps the conditionals with them.  Then, it converts the conditionals to PHP so that
 	 * PHP can do all of the really heavy lifting for us.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function advanced_conditionals($str)
+	public function advanced_conditionals($str)
 	{
 		if (stristr($str, LD.'if') === FALSE)
 		{
@@ -3246,10 +3027,7 @@ class EE_Template {
 		// current time
 		$data['current_time'] = $this->EE->localize->now;
 		
-		/** ------------------------------------
-		/**  Member Group in_group('1') function, Super Secret!  Shhhhh!
-		/** ------------------------------------*/
-		
+		// Member Group in_group('1') function, Super Secret!  Shhhhh!		
 		if (preg_match_all("/in_group\(([^\)]+)\)/", $str, $matches))
 		{
 			$groups = (is_array($this->EE->session->userdata['group_id'])) ? $this->EE->session->userdata['group_id'] : array($this->EE->session->userdata['group_id']);
@@ -3261,30 +3039,24 @@ class EE_Template {
 				$str = str_replace($matches[0][$i], (count(array_intersect($check, $groups)) > 0) ? 'TRUE' : 'FALSE', $str);
 			}
 		}
-		
-		/** ------------------------------------
-		/**  Final Prep, Safety On
-		/** ------------------------------------*/
+
+		// Final Prep, Safety On		
 		$str = $this->EE->functions->prep_conditionals($str, array_merge($this->segment_vars, $this->embed_vars, $this->EE->config->_global_vars, $data), 'y');
 				
-		/** ------------------------------------
-		/**  Protect Already Existing Unparsed PHP
-		/** ------------------------------------*/
+		// Protect Already Existing Unparsed PHP		
+		$this->EE->load->helper('string');
 		
-		$opener = '90Parse89Me34Not18Open';
-		$closer = '90Parse89Me34Not18Close';
-		
+		$opener = unique_marker('tmpl_php_open');
+		$closer = unique_marker('tmpl_php_close');
+				
 		$str = str_replace(array('<?', '?'.'>'), 
 							array($opener.'?', '?'.$closer), 
 							$str);
 		
-		/** ------------------------------------
-		/**  Protect <script> tags
-		/** ------------------------------------*/
-
+		// Protect <script> tags
 		$protected = array();
-		$front_protect = '89Protect17';
-		$back_protect  = '21Me01Please47';
+		$front_protect = unique_marker('tmpl_script_open');
+		$back_protect  = unique_marker('tmpl_script_close');
 		
 		if ($this->protect_javascript !== FALSE && 
 			stristr($str, '<script') && 
@@ -3298,10 +3070,7 @@ class EE_Template {
 			$str = str_replace(array_values($protected), array_keys($protected), $str);
 		}
 
-		/** ------------------------------------
-		/**  Convert EE Conditionals to PHP 
-		/** ------------------------------------*/
-		
+		// Convert EE Conditionals to PHP 		
 		$str = str_replace(array(LD.'/if'.RD, LD.'if:else'.RD), array('<?php endif; ?'.'>','<?php else : ?'.'>'), $str);
 		
 		if (strpos($str, LD.'if') !== FALSE)
@@ -3311,26 +3080,19 @@ class EE_Template {
 
 		$str = $this->parse_template_php($str);
 		
-		/** ------------------------------------
-		/**  Unprotect <script> tags
-		/** ------------------------------------*/
-		
+		// Unprotect <script> tags		
 		if (count($protected) > 0)
 		{
 			$str = str_replace(array_keys($protected), array_values($protected), $str);
 		}
 		
-		/** ------------------------------------
-		/**  Unprotect Already Existing Unparsed PHP
-		/** ------------------------------------*/
-		
+		// Unprotect Already Existing Unparsed PHP		
 		$str = str_replace(array($opener.'?', '?'.$closer), 
 							array('<'.'?', '?'.'>'), 
 							$str);
 		
 		return $str;
 	}
-	
 	
 	// --------------------------------------------------------------------
 	
@@ -3343,12 +3105,10 @@ class EE_Template {
 	 * than that usage was required, we kept some separate processing in existence for the processing
 	 * of "simple" segment conditionals.  Only one variable, no elseif or else.
 	 *
-	 * @access	public
 	 * @param	string
 	 * @return	string
 	 */
-	 
-	function parse_simple_segment_conditionals($str)
+	public function parse_simple_segment_conditionals($str)
 	{
 		if ( ! preg_match("/".LD."if\s+segment_.+".RD."/", $str))
 		{
@@ -3425,7 +3185,6 @@ class EE_Template {
 		return $str;
 	}
 	
-	
 	// --------------------------------------------------------------------
 	
 	/**
@@ -3440,8 +3199,7 @@ class EE_Template {
 	 * @param	array
 	 * @return	string
 	 */
-
-	function simple_conditionals($str, $vars = array())
+	public function simple_conditionals($str, $vars = array())
 	{
 		if (count($vars) == 0 OR ! stristr($str, LD.'if'))
 		{
@@ -3520,9 +3278,7 @@ class EE_Template {
 		}		
 		
 		return $str;
-		
 	}
-	
 	
 	// --------------------------------------------------------------------
 	
@@ -3546,29 +3302,28 @@ class EE_Template {
 			$str = str_repeat('&nbsp;', $this->depth * 5).$str;
 		}
 		
-		if (phpversion() < 5)
+		$time = microtime(TRUE)-$this->start_microtime;
+
+		$memory_usage = '';
+
+		if (function_exists('memory_get_usage'))
 		{
-			list($usec, $sec) = explode(" ", microtime());
-			$time = ((float)$usec + (float)$sec) - $this->start_microtime;
-		}
-		else
-		{
-			$time = microtime(TRUE)-$this->start_microtime;
+			$memory_usage = ' / '.number_format(round(memory_get_usage()/1024/1024, 2),2).'MB';
 		}
 		
-		$this->log[] = '('.number_format($time, 6).') '.$str;
+		$this->log[] = '('.number_format($time, 6). $memory_usage . ') '.$str;
 	}
-	
 	
 	// --------------------------------------------------------------------
 	
 	/**
 	 * Basic HTTP Authentication for Templates
 	 *
+	 * @deprecated in 2.2 -- Moved to the Auth Library
+	 *
 	 * @access	public
 	 * @return	header
 	 */
-	
 	function template_authentication_basic()
 	{
 		@header('WWW-Authenticate: Basic realm="'.$this->realm.'"');
@@ -3585,153 +3340,16 @@ class EE_Template {
 	 * Takes the username/password from the HTTP Authentication and validates it against the
 	 * member database and see if this member's member group has access to the template.
 	 *
+	 * @deprecated -- Moved to the Auth Library in 2.2.
 	 * @access	public
 	 * @param	array
 	 * @return	header
 	 */
-	
 	function template_authentication_check_basic($not_allowed_groups = array())
 	{
-		if ( ! in_array('2', $not_allowed_groups))
-		{
-			$not_allowed_groups[] = 2;
-			$not_allowed_groups[] = 3;
-			$not_allowed_groups[] = 4;
-		}
-		
-		/** ----------------------------------
-		/**  Find Username, Please
-		/** ----------------------------------*/
-		if ( ! empty($_SERVER) && isset($_SERVER['PHP_AUTH_USER']))
-		{
-			$user = $_SERVER['PHP_AUTH_USER'];
-		}
-		elseif ( ! empty($_ENV) && isset($_ENV['REMOTE_USER']))
-		{
-			$user = $_ENV['REMOTE_USER'];
-		}
-		elseif ( @getenv('REMOTE_USER'))
-		{
-			$user = getenv('REMOTE_USER');
-		}
-		elseif ( ! empty($_ENV) && isset($_ENV['AUTH_USER']))
-		{
-			$user = $_ENV['AUTH_USER'];
-		}
-		elseif ( @getenv('AUTH_USER'))
-		{
-			$user = getenv('AUTH_USER');
-		}
-		
-		/** ----------------------------------
-		/**  Find Password, Please
-		/** ----------------------------------*/
-		
-		if ( ! empty($_SERVER) && isset($_SERVER['PHP_AUTH_PW']))
-		{
-			$pass = $_SERVER['PHP_AUTH_PW'];
-		}
-		elseif ( ! empty($_ENV) && isset($_ENV['REMOTE_PASSWORD']))
-		{
-			$pass = $_ENV['REMOTE_PASSWORD'];
-		}
-		elseif ( @getenv('REMOTE_PASSWORD'))
-		{
-			$pass = getenv('REMOTE_PASSWORD');
-		}
-		elseif ( ! empty($_ENV) && isset($_ENV['AUTH_PASSWORD']))
-		{
-			$pass = $_ENV['AUTH_PASSWORD'];
-		}
-		elseif ( @getenv('AUTH_PASSWORD'))
-		{
-			$pass = getenv('AUTH_PASSWORD');
-		}
-		
-		/** ----------------------------------
-		/**  Authentication for IIS
-		/** ----------------------------------*/
-		
-		if ( ! isset ($user) OR ! isset($pass) OR (empty($user) && empty($pass)))
-		{
-			if ( isset($_SERVER['HTTP_AUTHORIZATION']) && substr($_SERVER['HTTP_AUTHORIZATION'], 0, 6) == 'Basic ')
-			{
-				list($user, $pass) = explode(':', base64_decode(substr($HTTP_AUTHORIZATION, 6)));
-			}
-			elseif ( ! empty($_ENV) && isset($_ENV['HTTP_AUTHORIZATION']) && substr($_ENV['HTTP_AUTHORIZATION'], 0, 6) == 'Basic ')
-			{
-				list($user, $pass) = explode(':', base64_decode(substr($_ENV['HTTP_AUTHORIZATION'], 6)));
-			}
-			elseif (@getenv('HTTP_AUTHORIZATION') && substr(getenv('HTTP_AUTHORIZATION'), 0, 6) == 'Basic ')
-			{
-				list($user, $pass) = explode(':', base64_decode(substr(getenv('HTTP_AUTHORIZATION'), 6)));
-			}
-		}
-		
-		/** ----------------------------------
-		/**  Authentication for FastCGI
-		/** ----------------------------------*/
-		
-		if ( ! isset ($user) OR ! isset($pass) OR (empty($user) && empty($pass)))
-		{	
-			if ( ! empty($_ENV) && isset($_ENV['Authorization']) && substr($_ENV['Authorization'], 0, 6) == 'Basic ')
-			{
-				list($user, $pass) = explode(':', base64_decode(substr($_ENV['Authorization'], 6)));
-			}
-			elseif (@getenv('Authorization') && substr(getenv('Authorization'), 0, 6) == 'Basic ')
-			{
-				list($user, $pass) = explode(':', base64_decode(substr(getenv('Authorization'), 6)));
-			}
-		}
-		
-		if ( ! isset ($user) OR ! isset($pass) OR (empty($user) && empty($pass)))
-		{
-			return FALSE;
-		}
-		
-		/** ----------------------------------------
-		/**  Check password lockout status
-		/** ----------------------------------------*/
-		
-		if ($this->EE->session->check_password_lockout($user) === TRUE)
-		{
-			return FALSE;	
-		}
-		
-		/** ----------------------------------
-		/**  Validate Username and Password
-		/** ----------------------------------*/
-		
-		$query = $this->EE->db->query("SELECT password, group_id FROM exp_members WHERE username = '".$this->EE->db->escape_str($user)."'");
-		
-		if ($query->num_rows() == 0)
-		{
-			$this->EE->session->save_password_lockout($user);
-			return FALSE;
-		}
-		
-		if (in_array($query->row('group_id') , $not_allowed_groups))
-		{
-			return FALSE;
-		}
-		
-		$this->EE->load->helper('security');
-		if ($query->row('password')  == do_hash($pass))
-		{
-			return TRUE;
-		}
-		
-		// just in case it's still in the db as MD5 from an old pMachine or EE 1.x install
-		if ($query->row('password')  == do_hash($pass, 'md5'))
-		{
-			return TRUE;
-		}
-		else
-		{
-			$this->EE->session->save_password_lockout($user);
-			
-			return FALSE;
-		}
+		$this->EE->load->library('auth');
+		return $this->EE->auth->authenticate_http_basic($not_allowed_groups,
+														$this->realm);
 	}
 
 	// --------------------------------------------------------------------
@@ -3780,14 +3398,14 @@ class EE_Template {
 	 *
 	 * @access	private
 	 */
-	
 	function _fetch_site_ids()
 	{
 		$this->site_ids = array();
 		
 		if (isset($this->tagparams['site']))
 		{
-			if (count($this->sites) == 0 && $this->EE->config->item('multiple_sites_enabled') == 'y' && ! IS_FREELANCER)
+			if (count($this->sites) == 0 && 
+				$this->EE->config->item('multiple_sites_enabled') == 'y' && ! IS_FREELANCER)
 			{
 				$sites_query = $this->EE->db->query("SELECT site_id, site_name FROM exp_sites ORDER BY site_id");
 				
@@ -3827,13 +3445,12 @@ class EE_Template {
 	 * Simplifies variable parsing for plugin
 	 * and modules developers
 	 *
-	 * @access	public
 	 * @param	string	- the tagdata / text to be parsed
 	 * @param	array	- the rows of variables and their data
 	 * @return	string
 	 */
-	function parse_variables($tagdata, $variables)
-	{		
+	public function parse_variables($tagdata, $variables)
+	{	
 		if ($tagdata == '' OR ! is_array($variables) OR empty($variables) OR ! is_array($variables[0]))
 		{
 			return $tagdata;
@@ -3893,8 +3510,10 @@ class EE_Template {
 			
 			$str .= $this->parse_variables_row($tagdata, $row, FALSE);
 		}
-
-		if (($backspace = $this->fetch_param('backspace')) !== FALSE && is_numeric($backspace))
+		
+		$backspace = $this->fetch_param('backspace', FALSE);
+		
+		if (is_numeric($backspace))
 		{
 			$str = substr($str, 0, -$backspace);
 		}
@@ -3910,14 +3529,13 @@ class EE_Template {
 	 * Handles a "row" of variable data from
 	 * the parse_variables() method
 	 *
-	 * @access	public
 	 * @param	string	- the tagdata / text to be parsed
 	 * @param	array	- the variables and their data
 	 * @param	bool	- coming from parse_variables() or part of set, forces some caching
 	 * 
 	 * @return	string
 	 */
-	function parse_variables_row($tagdata, $variables, $solo = TRUE)
+	public function parse_variables_row($tagdata, $variables, $solo = TRUE)
 	{
 		if ($tagdata == '' OR ! is_array($variables) OR empty($variables))
 		{
@@ -3946,16 +3564,25 @@ class EE_Template {
 				$this->unfound_vars[0][$name] = TRUE;
 				continue;
 			}
-		
+			
 			// Pair variables are an array of arrays
 			if (is_array($value))
 			{
-				$tagdata = $this->_parse_var_pair($name, $value, $tagdata, 1);
+				if (empty($value))
+				{
+					// Weirdness. The most likely cause is an empty tag pair, we won't
+					// require developers to take care of this. This hack will blank them out.
+					$value = array(array());
+				}
+				
+				if (isset($value[0]) && is_array($value[0]))
+				{
+					$tagdata = $this->_parse_var_pair($name, $value, $tagdata, 1);
+					continue;
+				}
 			}
-			else
-			{
-				$tagdata = $this->_parse_var_single($name, $value, $tagdata);
-			}
+			
+			$tagdata = $this->_parse_var_single($name, $value, $tagdata);
 		}
 		
 		// Prep conditionals
@@ -3963,6 +3590,14 @@ class EE_Template {
 			
 		return $tagdata;
 	}
+
+	function create_url_check($matches)
+	{
+		
+		print_r($matches);
+
+	}
+
 
 	// --------------------------------------------------------------------
 	
@@ -4009,20 +3644,56 @@ class EE_Template {
 		// Complex Paths and Typography Variables
 		//
 		
-		// If the variable's $value is an array where $value[0] is 'path' and $value[1] has either
-		// the key 'suffix' or 'url' set, then it is a path
-		if (is_array($value) && $value[0] == 'path' && isset($value[1]) && (isset($value[1]['suffix']) OR isset($value[1]['url'])))
-		{
-			// Um...not sure what to do here, quite yet.
-			return $string;
-		}
 	
 		// If the single variable's value is an array, then
 		// $value[0] is the content and $value[1] is an array
-		// of parameters for the Typography class
-		elseif (is_array($value) && count($value) == 2 && is_array($value[1]))
+		// of parameters for the Typography class OR an indicator of a path variable
+		if (is_array($value) && count($value) == 2 && is_array($value[1]))
 		{			
 			$raw_content = $value[0];
+
+			// Make our path switches
+			if (isset($value[1]['path_variable']) && $value[1]['path_variable'] === TRUE)
+			{
+				if (preg_match_all("#".LD."\s*".$name."=(.*?)".RD."#", $string, $matches))
+				{
+					$done = array();
+					
+					foreach ($matches[0] as $full)
+					{
+						if (in_array($full, $done))
+						{
+							continue;
+						}
+						
+						$link = $this->EE->functions->create_url($this->EE->functions->extract_path($full).'/'.$value[0]);
+					
+					//$single_quote = str_replace("'", '"', $matches['0']);
+					//$double_quote = str_replace("'", '"', $matches['0']);
+					
+	//[0] => {id_path="about/test"}
+    //[1] => "about/test"
+					
+					// Switch to double quotes
+					
+						$single = str_replace(array('"', "'"), "'", $full);
+						$double = str_replace(array('"', "'"), '"', $full);
+					
+					//echo $single.' - '.$double.'<br>';
+						$string = str_replace($single, $double, $string);
+					//echo $string;
+					//echo '<br>-----------------------<br>';
+					
+						$string = str_replace($double, $link, $string);
+					
+						$done[] = $full;
+					
+					}
+				}
+				
+				return $string;
+			}
+
 			
 			$prefs = array();
 			
@@ -4036,11 +3707,13 @@ class EE_Template {
 			
 			// Instantiate Typography only if necessary
 			$this->EE->load->library('typography');
-			$this->EE->typography->initialize();
-			
-			$this->EE->typography->convert_curly = (isset($prefs['convert_curly']) && $prefs['convert_curly'] == 'n') ? FALSE : TRUE;
+			$this->EE->typography->initialize(array(
+				'convert_curly'	=> (isset($prefs['convert_curly']) && $prefs['convert_curly'] == 'n') ? FALSE : TRUE)
+				);
 			
 			$value = $this->EE->typography->parse_type($raw_content, $prefs);
+
+
 		}
 		
 		if (isset($raw_content))
@@ -4067,55 +3740,72 @@ class EE_Template {
 	 */
 	function _parse_var_pair($name, $variables, $string, $depth = 0)
 	{		
-		if ( ! preg_match("|".LD.$name.'.*?'.RD.'(.*?)'.LD.'/'.$name.RD."|s", $string, $match))
+		if ( ! $match_count = preg_match_all("|".LD.$name.'.*?'.RD.'(.*?)'.LD.'/'.$name.RD."|s", $string, $matches))
 		{
 			return $string;
 		}
-
+		
 		if (empty($variables[0]))
 		{
-			return str_replace($match[0], '', $string);
+			return str_replace($matches[0], '', $string);
 		}
-		
+						
 		if ( ! isset($this->unfound_vars[$depth]))
 		{
+			// created a separate unfound vars for each matched pair (kind of a crazy array, need to investigate if it's hindering performance at this point)
 			$this->unfound_vars[$depth] = array();
 		}
 		
-		$str = '';
-
-		foreach ($variables as $set)
+		foreach ($matches[1] as $k => $match)
 		{
-			$temp = $match[1];
-
-			foreach ($set as $name => $value)
+			$str = '';
+			
+			foreach ($variables as $set)
 			{
-				if (isset($this->unfound_vars[$depth][$name])) continue;
-			
-				if (strpos($string, LD.$name) === FALSE)
+				$temp = $match;
+
+				foreach ($set as $name => $value)
 				{
-					$this->unfound_vars[$depth][$name] = TRUE;
-					continue;
-				}
-			
-				// Pair variables are an array of arrays.
-				if (is_array($value) && is_array($value[0]))
-				{
-					$temp = $this->_parse_var_pair($name, $value, $temp, $depth + 1);
-				}
-				else
-				{
+					if (isset($this->unfound_vars[$depth][$name]))
+					{
+						continue;
+					}
+
+					if (strpos($string, LD.$name) === FALSE)
+					{
+						$this->unfound_vars[$depth][$name] = TRUE;
+						continue;
+					}
+					
+					// Pair variables are an array of arrays.
+					if (is_array($value))
+					{
+						if (empty($value))
+						{
+							// Weirdness. The most likely cause is an empty tag pair, we won't
+							// require developers to take care of this. This hack will blank them out.
+							$value = array(array());
+						}
+
+						if (isset($value[0]) && is_array($value[0]))
+						{
+							$temp = $this->_parse_var_pair($name, $value, $temp, $depth + 1);
+							continue;
+						}
+					}
+
 					$temp = $this->_parse_var_single($name, $value, $temp);
 				}
-			}
 
-			// Prep conditionals
-			$temp = $this->EE->functions->prep_conditionals($temp, $set);
+				// Prep conditionals
+				$temp = $this->EE->functions->prep_conditionals($temp, $set);
+				$str .= $temp;
+			}
 			
-			$str .= $temp;
+			$string = str_replace($matches[0][$k], $str, $string);
 		}
-		
-		return str_replace($match[0], $str, $string);
+				
+		return $string;
 	}
 
 	// --------------------------------------------------------------------
@@ -4139,7 +3829,6 @@ class EE_Template {
 	 * @param	string
 	 * @return	void
 	 */
-	 
 	function _match_date_vars($str)
 	{
 		if (strpos($str, 'format=') === FALSE) return;

@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -34,7 +34,7 @@ class Addons extends CI_Controller {
 		// Can't access addons? Can't see this page!
 		if ( ! $this->cp->allowed_group('can_access_addons'))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 
 		$this->lang->loadfile('addons');
@@ -51,12 +51,7 @@ class Addons extends CI_Controller {
 	 */	
 	function index()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
-		$this->cp->set_variable('cp_page_title', $this->lang->line('addons'));
+		$this->cp->set_variable('cp_page_title', lang('addons'));
 
 		$this->load->vars(array('controller' => 'addons'));
 
@@ -76,11 +71,6 @@ class Addons extends CI_Controller {
 	 */	
 	function package_settings()
 	{
-		if ( ! $this->cp->allowed_group('can_access_addons'))
-		{
-			show_error($this->lang->line('unauthorized_access'));
-		}
-
 		$this->load->library('addons');
 		$this->load->library('table');
 		$this->load->helper('form');
@@ -90,13 +80,14 @@ class Addons extends CI_Controller {
 		
 		$return = $this->input->get_post('return');
 		$package = $this->input->get_post('package');
+		$required = array();
 		
 		if ( ! $package OR ! $this->addons->is_package($package))
 		{
-			show_error($this->lang->line('unauthorized_access'));
+			show_error(lang('unauthorized_access'));
 		}
 		
-		$this->cp->set_variable('cp_page_title', $this->lang->line('package_settings'));
+		$this->cp->set_variable('cp_page_title', lang('package_settings'));
 		
 		$components = $this->addons->_packages[$package];
 		
@@ -139,17 +130,32 @@ class Addons extends CI_Controller {
 			$this->functions->redirect(BASE.AMP.'C='.$_GET['return']);
 		}
 
+
 		$vars = array();
 		
 		foreach($components as $type => $info)
 		{
 			$inst_func = $type.'_installed';
 			$components[$type]['installed'] = $this->addons_model->$inst_func($package);
+
+			if ($type == 'extension')
+			{
+				include_once($info['path'].$info['file']);
+				$class = $info['class'];
+				
+				$out = new $class;
+				
+				if (isset($out->required_by) && is_array($out->required_by))
+				{			
+					$required[$type] = $out->required_by;
+				}
+			}
 		}
 		
 		$vars['form_action'] = 'C=addons'.AMP.'M=package_settings'.AMP.'package='.$package.AMP.'return='.$return;
 		$vars['package'] = ucfirst(str_replace('_', ' ', $package));
 		$vars['components'] = $components;
+		$vars['required'] = $required;
 		
 		$this->javascript->compile();
 		

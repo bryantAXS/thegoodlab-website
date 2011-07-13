@@ -6,7 +6,7 @@
  *
  * @package		CodeIgniter
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -504,12 +504,7 @@ class XML_RPC_Response
 	function decode($array=FALSE)
 	{
 		$CI =& get_instance();
-
-		if ($this->xss_clean && ! isset($CI->security))
-		{
-			$CI->load->library('security');
-		}
-
+		
 		if ($array !== FALSE && is_array($array))
 		{
 			while (list($key) = each($array))
@@ -1123,12 +1118,7 @@ class XML_RPC_Message extends CI_Xmlrpc
 	function output_parameters($array=FALSE)
 	{
 		$CI =& get_instance();
-
-		if ($this->xss_clean && ! isset($CI->security))
-		{
-			$CI->load->library('security');
-		}
-
+		
 		if ($array !== FALSE && is_array($array))
 		{
 			while (list($key) = each($array))

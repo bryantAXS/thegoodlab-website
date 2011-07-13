@@ -134,7 +134,7 @@ MatrixConf = function(namespace, celltypes, colInfo, colSettings){
 
 		// label preview
 		$('<th class="matrix matrix-last" scope="col">'
-		+   '<input type="hidden" name="'+obj.namespace+'[col_order][]" value="'+colId+'"'
+		+   '<input type="hidden" name="'+obj.namespace+'[col_order][]" value="'+colId+'" />'
 		+   '<span>&nbsp;</span>'
 		+ '</th>').appendTo(obj.dom.$trs[0]);
 
@@ -176,7 +176,7 @@ MatrixConf = function(namespace, celltypes, colInfo, colSettings){
 		}
 
 		// remove btn
-		$('<td class="matrix-breakdown"><a class="matrix-btn" title="Remove column" /></td>').appendTo(obj.dom.$trs[obj.colSettings.length+2]);
+		$('<td class="matrix-breakdown"><a class="matrix-btn" title="'+MatrixConf.lang.delete_col+'" /></td>').appendTo(obj.dom.$trs[obj.colSettings.length+2]);
 
 		// fake a window resize so that any text
 		// cells can update their heights
@@ -281,7 +281,58 @@ MatrixConf.Col = function(field, index, id, type){
 		// is this the new last?
 		if (obj.index == obj.field.totalCols-1) obj.dom.$tds.addClass('matrix-last');
 		else obj.dom.$tds.removeClass('matrix-last');
+
+		obj.overrideTabOrder();
 	};
+
+	/**
+	 * Override Tab Order
+	 */
+	obj.overrideTabOrder = function(){
+		if (typeof obj.dom.$inputs != 'undefined') {
+			// unbind previous tab handling
+			obj.dom.$inputs.unbind('keydown.matrix-tabcontrol');
+		}
+
+		obj.dom.$inputs = $('*[name][type!=hidden]', obj.dom.$tds);
+
+		obj.dom.$inputs.bind('keydown.matrix-tabcontrol', function(event) {
+			// was this a tab?
+			if (! event.metaKey && event.keyCode == 9) {
+				// get the index of this input
+				var inputIndex = $.inArray(this, obj.dom.$inputs);
+
+				if (! event.shiftKey) {
+					// is there another input in this column?
+					if (inputIndex < obj.dom.$inputs.length-1) {
+						event.preventDefault();
+						$(obj.dom.$inputs[inputIndex+1]).focus();
+					} else {
+						// is there a next column?
+						if (obj.index < obj.field.totalCols-1) {
+							event.preventDefault();
+							$(obj.field.cols[obj.index+1].dom.$inputs[0]).focus();
+						}
+					}
+				} else {
+					// is there a previous input in this column?
+					if (inputIndex > 0) {
+						event.preventDefault();
+						$(obj.dom.$inputs[inputIndex-1]).focus();
+					} else {
+						// is there a previous column?
+						if (obj.index > 0) {
+							event.preventDefault();
+							var $prevColInputs = obj.field.cols[obj.index-1].dom.$inputs;
+							$($prevColInputs[$prevColInputs.length-1]).focus();
+						}
+					}
+				}
+			}
+		});
+	};
+
+	obj.overrideTabOrder();
 
 	/**
 	 * Remove
@@ -309,6 +360,7 @@ MatrixConf.Col = function(field, index, id, type){
 		}
 
 		obj.dom.$settings.html(html);
+		obj.overrideTabOrder();
 	});
 
 	// -------------------------------------------
@@ -544,16 +596,16 @@ MatrixConf.Col = function(field, index, id, type){
 
 			switch (setting) {
 				case 'label':
-					var cell = new Matrix.Cell(obj.field, 'text', { multiline: 'n' }, td);
+					var cell = new Matrix.Cell(obj.field, 'text', {}, td);
 					break;
 
 				case 'instructions':
-					var cell = new Matrix.Cell(obj.field, 'text', {}, td);
+					var cell = new Matrix.Cell(obj.field, 'text', { multiline: 'y'}, td);
 					break;
 
 				case 'name':
 				case 'width':
-					var cell = new Matrix.Cell(obj.field, 'text', { multiline: 'n', spaces: 'n' }, td);
+					var cell = new Matrix.Cell(obj.field, 'text', { spaces: 'n' }, td);
 					break;
 
 				case 'required':

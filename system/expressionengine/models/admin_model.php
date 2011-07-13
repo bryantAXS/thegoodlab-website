@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -42,18 +42,16 @@ class Admin_model extends CI_Model {
 											'is_system_on'				=> array('r', array('y' => 'yes', 'n' => 'no')),
 											'is_site_on'				=> array('r', array('y' => 'yes', 'n' => 'no')),											
 											'license_number'			=> array('i', ''),
-											'site_name'					=> array('i', ''),
+											'site_name'					=> array('i', '', 'required'),
 											'site_index'				=> array('i', ''),
-											'site_url'					=> array('i', ''),
-											'cp_url'					=> array('i', ''),
-											'theme_folder_url'			=> array('i', ''),
-											'theme_folder_path'			=> array('i', ''),
+											'site_url'					=> array('i', '', 'required|prep_url'),
+											'cp_url'					=> array('i', '', 'required|prep_url'),
+											'theme_folder_url'			=> array('i', '', 'required|prep_url'),
+											'theme_folder_path'			=> array('i', '', 'required'),
 											'cp_theme'					=> array('f', 'theme_menu'),
 											'deft_lang'					=> array('f', 'language_menu'),											
 											'xml_lang'					=> array('f', 'fetch_encoding'),
 											'max_caches'				=> array('i', ''),
-					// deprecated			'remap_pm_urls'				=> array('r', array('y' => 'yes', 'n' => 'no')),
-					// deprecated			'remap_pm_dest'				=> array('i', ''),
 											'new_version_check'			=> array('r', array('y' => 'yes', 'n' => 'no')),
 					// deprecated			'channel_nomenclature'		=> array('i', ''),
 											'doc_url'					=> array('i', ''),
@@ -71,7 +69,7 @@ class Admin_model extends CI_Model {
 											'gzip_output'				=> array('r', array('y' => 'yes', 'n' => 'no')),
 											'force_query_string'		=> array('r', array('y' => 'yes', 'n' => 'no')),
 											'redirect_method'			=> array('s', array('redirect' => 'location_method', 'refresh' => 'refresh_method')),
-											'debug'						=> array('s', array('0' => 'debug_zero', '1' => 'debug_one', '2' => 'debug_two')),
+											'debug'						=> array('s', array('debug_one', '2' => 'debug_two')),
 											'show_profiler'				=> array('r', array('y' => 'yes', 'n' => 'no')),
 											'template_debugging'		=> array('r', array('y' => 'yes', 'n' => 'no'))
 											),
@@ -129,7 +127,7 @@ class Admin_model extends CI_Model {
 										  ),
 
 			'email_cfg'			=>	array(
-											'webmaster_email'			=> array('i', ''),
+											'webmaster_email'			=> array('i', '', 'required|valid_email'),
 											'webmaster_name'			=> array('i', ''),
 											'email_charset'				=> array('i', ''),
 											'email_debug'				=> array('r', array('y' => 'yes', 'n' => 'no')),
@@ -221,7 +219,7 @@ class Admin_model extends CI_Model {
 		{
 			unset($f_data['general_cfg']['is_site_on']);
 		}
-		
+
 		return $f_data[$type];
 	}
 
@@ -292,8 +290,6 @@ class Admin_model extends CI_Model {
 						'auto_assign_cat_parents'	=> array('auto_assign_cat_parents_exp'),
 						'save_tmpl_revisions'		=> array('template_rev_msg'),
 						'max_tmpl_revisions'		=> array('max_revisions_exp'),
-// deprecated			'remap_pm_urls'				=> array('remap_pm_urls_desc'),
-// deprecated			'remap_pm_dest'				=> array('remap_pm_dest_exp'),
 						'max_page_loads'			=> array('max_page_loads_exp'),
 						'time_interval'				=> array('time_interval_exp'),
 						'lockout_time'				=> array('lockout_time_exp'),
@@ -322,7 +318,7 @@ class Admin_model extends CI_Model {
 
 		if ( ! isset($encodings))
 		{
-			$file = APPPATH.'config/languages'.EXT; 
+			$file = APPPATH.'config/languages.php'; 
 
 			if ( ! file_exists($file)) 
 			{
@@ -616,3 +612,5 @@ class Admin_model extends CI_Model {
 
 /* End of file admin_model.php */
 /* Location: ./system/expressionengine/models/admin_model.php */
+
+

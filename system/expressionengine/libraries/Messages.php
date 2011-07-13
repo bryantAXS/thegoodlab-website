@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -2485,7 +2485,7 @@ DOH;
 		
 		if ( ! class_exists('Html_buttons'))
 		{
-			if (include_once(APPPATH.'libraries/Html_buttons'.EXT))
+			if (include_once(APPPATH.'libraries/Html_buttons.php'))
 			{
 				$BUTT = new EE_Html_buttons();
 				$button_include = $BUTT->create_buttons();
@@ -2743,8 +2743,9 @@ DOH;
  		/** ---------------------------------*/
  		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->highlight_code = TRUE;
+		$this->EE->typography->initialize(array(
+				'highlight_code'	=> TRUE)
+				);
 
 		$this->single_parts['include']['parsed_message'] = $this->EE->typography->parse_type(stripslashes($data['body']), 
 									 		 								  array(
@@ -2853,7 +2854,7 @@ DOH;
 	{
 		if ( ! class_exists('EE_Messages_send'))
 		{
-			require APPPATH.'libraries/Messages_send'.EXT;
+			require APPPATH.'libraries/Messages_send.php';
 		}
 		
 		$MS = new EE_Messages_send();
@@ -4559,13 +4560,13 @@ EOT;
 	{
 		$r = '';
 		
-		if ( ! is_file(PATH_MOD.'emoticon/emoticons'.EXT))
+		if ( ! is_file(PATH_MOD.'emoticon/emoticons.php'))
 		{
 			return $r;		
 		}
 		else
 		{
-			require PATH_MOD.'emoticon/emoticons'.EXT;
+			require PATH_MOD.'emoticon/emoticons.php';
 		}
 		
 		if ( ! is_array($smileys))
@@ -4627,7 +4628,7 @@ EOT;
 	{
 		if ( ! class_exists('EE_Spellcheck'))
 		{
-			require APPPATH.'libraries/Spellcheck'.EXT; 
+			require APPPATH.'libraries/Spellcheck.php'; 
 		}
 		
 		return EE_Spellcheck::iframe();
@@ -4642,7 +4643,7 @@ EOT;
 	{
 		if ( ! class_exists('EE_Spellcheck'))
 		{
-			require APPPATH.'libraries/Spellcheck'.EXT; 
+			require APPPATH.'libraries/Spellcheck.php'; 
 		}
 		
 		return EE_Spellcheck::check();
@@ -4657,7 +4658,7 @@ EOT;
 	{
 		if ( ! class_exists('EE_Spellcheck'))
 		{
-			require APPPATH.'libraries/Spellcheck'.EXT;
+			require APPPATH.'libraries/Spellcheck.php';
 		}
 		
 		$SPELL = new EE_Spellcheck();

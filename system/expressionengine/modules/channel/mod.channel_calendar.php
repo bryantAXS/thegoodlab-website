@@ -5,7 +5,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -427,8 +427,9 @@ class Channel_calendar extends Channel {
 				// We'll need this later
 
 				$this->EE->load->library('typography');
-				$this->EE->typography->initialize();
-			 	$this->EE->typography->convert_curly = FALSE;
+			 	$this->EE->typography->initialize(array(
+			 				 	'convert_curly'	=> FALSE)
+			 				 	);
 
 				/** ----------------------------------------
 				/**  Fetch query results and build data array

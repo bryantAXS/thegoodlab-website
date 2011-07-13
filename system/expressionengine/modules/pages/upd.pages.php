@@ -5,7 +5,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -79,7 +79,7 @@ class Pages_upd {
 				`site_id` INT( 8 ) UNSIGNED NOT NULL DEFAULT '1',
 				`configuration_name` VARCHAR( 60 ) NOT NULL ,
 				`configuration_value` VARCHAR( 100 ) NOT NULL
-				)";
+				) DEFAULT CHARACTER SET utf8 COLLATE utf8_general_ci";
 
 		foreach ($sql as $query)
 		{

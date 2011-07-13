@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -24,19 +24,16 @@
 
 class Stats {
 
-	var $return_data 	= '';
+	public $return_data = '';
 
 	/**
 	 *  Constructor
 	 */
-	function Stats()
+	public function Stats()
 	{
 		$this->EE =& get_instance();
-		
-		if ( ! isset($this->EE->stats->statdata) OR empty($this->EE->stats->statdata))
-		{
-			$this->EE->stats->load_stats();
-		}
+
+		$this->EE->stats->load_stats();
 
 		// Limit stats by channel
 		// You can limit the stats by any combination of channels
@@ -124,7 +121,7 @@ class Stats {
 		//  Parse dates
 		$dates = array('last_entry_date', 'last_forum_post_date', 
 						'last_comment_date', 'last_visitor_date', 'most_visitor_date');
-
+		
 		foreach ($this->EE->TMPL->var_single as $key => $val)
 		{	
 			foreach ($dates as $date)
@@ -147,7 +144,7 @@ class Stats {
 
 		$names = '';
 
-		if (count($this->EE->stats->statdata('current_names')) > 0)
+		if ($this->EE->stats->statdata('current_names'))
 		{
 			$chunk = $this->EE->TMPL->fetch_data_between_var_pairs($this->EE->TMPL->tagdata, 
 																	'member_names');	  

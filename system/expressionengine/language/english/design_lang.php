@@ -457,9 +457,6 @@ $lang = array(
 'is_site_default' =>
 'Make the index template in this group your site\'s home page?',
 
-'consult_manual' =>
-'Please consult manual',
-
 'preferences_updated' =>
 'Preferences Updated',
 
@@ -897,7 +894,7 @@ username and password to view the template.',
 'Private Message - Member Search Result Rows',
 
 'message_submission_error' =>
-'Private Message - Submisssion Error',
+'Private Message - Submission Error',
 
 'message_attachment_link' =>
 'Private Message - Attachment Link',

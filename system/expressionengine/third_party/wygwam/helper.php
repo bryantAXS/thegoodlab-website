@@ -12,6 +12,16 @@ class Wygwam_Helper {
 	function Wygwam_Helper()
 	{
 		$this->EE =& get_instance();
+
+		// -------------------------------------------
+		//  Prepare Cache
+		// -------------------------------------------
+
+		if (! isset($this->EE->session->cache['wygwam']))
+		{
+			$this->EE->session->cache['wygwam'] = array();
+		}
+		$this->cache =& $this->EE->session->cache['wygwam'];
 	}
 
 	// --------------------------------------------------------------------
@@ -37,7 +47,7 @@ class Wygwam_Helper {
 			array('Outdent', 'Indent', 'Blockquote', 'CreateDiv'),
 			array('JustifyLeft', 'JustifyCenter', 'JustifyRight', 'JustifyBlock'),
 			array('Link', 'Unlink', 'Anchor'),
-			array('Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak'),
+			array('Image', 'Flash', 'Table', 'HorizontalRule', 'Smiley', 'SpecialChar', 'PageBreak', 'ReadMore', 'EmbedMedia'),
 			array('Styles'),
 			array('Format'),
 			array('Font'),
@@ -107,7 +117,9 @@ class Wygwam_Helper {
 			'TextColor'      => 'Text Color',
 			'BGColor'        => 'Background Color',
 			'ShowBlocks'     => 'Show Blocks',
-			'About'          => 'About CKEditor'
+			'About'          => 'About CKEditor',
+			'EmbedMedia'     => 'Embed Media',
+			'ReadMore'       => 'Read More'
 		);
 	}
 
@@ -169,7 +181,7 @@ class Wygwam_Helper {
 
 		return array(
 			'toolbar' => $toolbars['Basic'],
-			'height' => 200,
+			'height' => '200',
 			'resize_enabled' => 'y',
 			'contentsCss' => array(),
 			'upload_dir' => ''
@@ -184,7 +196,7 @@ class Wygwam_Helper {
 		return array(
 			'Basic' => array('Bold','Italic','Underline','Strike','NumberedList','BulletedList','Link','Unlink','Anchor','About'),
 			'Full'  => array('Source','Save','NewPage','Preview','Templates','Cut','Copy','Paste','PasteText','PasteFromWord','Print','SpellChecker','Scayt','Undo','Redo','Find','Replace','SelectAll','RemoveFormat','Form','Checkbox','Radio','TextField','Textarea','Select','Button','ImageButton','HiddenField','/',
-			                 'Bold','Italic','Underline','Strike','Subscript','Superscript','NumberedList','BulletedList','Outdent','Indent','Blockquote','CreateDiv','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','Link','Unlink','Anchor','Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','/',
+			                 'Bold','Italic','Underline','Strike','Subscript','Superscript','NumberedList','BulletedList','Outdent','Indent','Blockquote','CreateDiv','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','Link','Unlink','Anchor','Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','ReadMore','EmbedMedia','/',
 			                 'Styles','Format','Font','FontSize','TextColor','BGColor','Maximize','ShowBlocks','About')
 		);
 	}
@@ -214,9 +226,9 @@ class Wygwam_Helper {
 		return array_merge(array(
 			'skin'               => 'wygwam2',
 			'toolbarCanCollapse' => 'n',
-			'dialog_backgroundCoverColor' => '#262626',
-			'dialog_backgroundCoverOpacity' => 0.85,
-			'entities_processNumerical' => 'y'
+			'dialog_backgroundCoverOpacity' => 0,
+			'entities_processNumerical' => 'y',
+			'forcePasteAsPlainText' => 'y'
 		), $this->default_config_settings());
 	}
 
@@ -284,6 +296,7 @@ class Wygwam_Helper {
 	function config_booleans()
 	{
 		return array(
+			'autoParagraph',
 			'colorButton_enableMore',
 			'disableNativeSpellChecker',
 			'disableObjectResizing',
@@ -304,11 +317,13 @@ class Wygwam_Helper {
 			'pasteFromWordPromptCleanup',
 			'pasteFromWordRemoveFontStyles',
 			'pasteFromWordRemoveStyles',
+			'readOnly',
 			'resize_enabled',
 			'startupFocus',
 			'startupOutlineBlocks',
 			'templates_replaceContent',
 			'toolbarCanCollapse',
+			'toolbarGroupCycling',
 			'toolbarStartupExpanded'
 		);
 	}
@@ -330,7 +345,13 @@ class Wygwam_Helper {
 	function config_literals()
 	{
 		return array(
-			'enterMode'
+			'enterMode',
+			'stylesheetParser_skipSelectors',
+			'stylesheetParser_validSelectors',
+			'filebrowserBrowseFunc',
+			'filebrowserLinkBrowseFunc',
+			'filebrowserImageBrowseFunc',
+			'filebrowserFlashBrowseFunc',
 		);
 	}
 
@@ -375,4 +396,137 @@ class Wygwam_Helper {
 		$this->EE->cp->add_to_foot('<script type="text/javascript">'.$js.'</script>');
 	}
 
+	// --------------------------------------------------------------------
+
+	/**
+	 * Is Pages Installed?
+	 */
+	private function _is_pages_mod_installed()
+	{
+		if (! isset($this->cache['pages_module_installed']))
+		{
+			$query = $this->EE->db->get_where('modules', 'module_name = "Pages"');
+			$this->cache['pages_module_installed'] = $query->num_rows() ? TRUE : FALSE;
+		}
+
+		return $this->cache['pages_module_installed'];
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get Site Pages
+	 */
+	private function _get_site_pages()
+	{
+		$site_id = $this->EE->config->item('site_id');
+
+		if (! isset($this->cache['site_pages'][$site_id]))
+		{
+			$pages = $this->EE->config->item('site_pages');
+
+			if (! isset($pages[$site_id]['uris']) || ! $pages[$site_id]['uris']) return NULL;
+
+			// grab a copy of this site's pages
+			$site_pages = array_merge($pages[$site_id]);
+
+			// sort by uris
+			natcasesort($site_pages['uris']);
+
+			$this->cache['site_pages'][$site_id] = $site_pages;
+		}
+
+		return $this->cache['site_pages'][$site_id];
+	}
+
+	/**
+	 * Get Pages Data
+	 */
+	private function _get_pages_mod_data()
+	{
+		$page_data = array();
+
+		if ($pages = $this->_get_site_pages())
+		{
+			$query = $this->EE->db->query('SELECT entry_id, channel_id, title, url_title, status
+										   FROM exp_channel_titles
+										   WHERE entry_id IN ('.implode(',', array_keys($pages['uris'])).')
+										   ORDER BY entry_id DESC');
+
+			// index entries by entry_id
+			$entry_data = array();
+			foreach ($query->result_array() as $entry)
+			{
+				$entry_data[$entry['entry_id']] = $entry;
+			}
+
+			foreach ($pages['uris'] as $entry_id => $uri)
+			{
+				if (! isset($entry_data[$entry_id])) continue;
+				$entry = $entry_data[$entry_id];
+
+				$page_data[] = array(
+					$entry_id,
+					$entry['channel_id'],
+					$entry['title'],
+					'0',
+					$this->EE->functions->create_page_url($pages['url'], $uri)
+				);
+			}
+		}
+
+		// sort by entry title
+		if(count($page_data) > 0)
+		{
+			$page_data = $this->_subval_sort($page_data, 2);
+		}
+
+		return $page_data;
+	}
+
+	/**
+	 * Sorts a multidimensional array on an internal array's key.
+	 */
+	private function _subval_sort($initial_array, $sub_key)
+	{
+		$sorted_array = array();
+
+		foreach ($initial_array as $key => $value)
+		{
+			$temp_array[$key] = strtolower($value[$sub_key]);
+		}
+
+		asort($temp_array);
+
+		foreach ($temp_array as $key => $value)
+		{
+			$sorted_array[] = $initial_array[$key];
+		}
+
+		return $sorted_array;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Gets all site page data from the pages module
+	 */
+	function get_all_page_data($install_check = TRUE)
+	{
+		$page_data = array();
+
+		if ($install_check)
+		{
+			if ($this->_is_pages_mod_installed())
+			{
+				$page_data = $this->_get_pages_mod_data();
+			}
+		}
+		else
+		{
+			$page_data = $this->_get_pages_mod_data();
+		}
+
+		return $page_data;
+	}
 }

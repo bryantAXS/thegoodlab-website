@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -127,7 +127,7 @@ class EE_Stylesheet {
 	function _ee_saef_css()
 	{
 		// $files[] = PATH_THEMES.'jquery_ui/default/min_filebrowser.css';
-        $files[] = PATH_THEMES.'cp_themes/default/css/file_browser.css';
+        // $files[] = PATH_THEMES.'cp_themes/default/css/file_browser.css';
 		$files[] = PATH_THEMES.'cp_themes/default/css/jquery-ui-1.7.2.custom.css';
 		$files[] = PATH_THEMES.'cp_themes/default/css/saef.css';
 		
@@ -145,18 +145,17 @@ class EE_Stylesheet {
 					
 					$out = str_replace('url(images/', 'url('.$theme_url.'/images/', $out);
 				}
-		
-				if ($file == PATH_THEMES.'cp_themes/default/css/file_browser.css')
-				{
-					
-				}
 			}
 		}
 
 		$cp_theme  = $this->EE->config->item('cp_theme'); 
 		$cp_theme_url = $this->EE->config->slash_item('theme_folder_url').'cp_themes/'.$cp_theme.'/';
 
-		$this->_send_css(str_replace('<?=$cp_theme_url?>', $cp_theme_url, $out), time());
+		$out = str_replace('../images', $cp_theme_url.'images', $out);
+		$out = str_replace('<?=$cp_theme_url?>', $cp_theme_url, $out);
+
+
+		$this->_send_css($out, time());
 	}
 
 	// --------------------------------------------------------------------
@@ -175,7 +174,7 @@ class EE_Stylesheet {
 	{
 		if ($this->EE->config->item('send_headers') == 'y')
 		{
-			$max_age		= 172800;
+			$max_age		= 604800;
 			$modified_since	= $this->EE->input->server('HTTP_IF_MODIFIED_SINCE');
 
 			// Remove anything after the semicolon

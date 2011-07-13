@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -106,22 +106,6 @@ class EE_Output extends CI_Output {
 			case 'feed':	$this->_send_feed($output);
 				break;
 		}
-
-
-		// Parse elapsed time and query count
-			
-		if (REQ != 'CP')
-		{
-			$output = str_replace(LD.'total_queries'.RD, $EE->db->query_count, $output);		
-
-
-			// If 'debug' is turned off, we will remove any variables that didn't get parsed due to syntax errors.
-	
-			if ($EE->config->item('debug') == 0 AND $this->remove_unparsed_variables == TRUE)
-			{
-				$output = preg_replace("/".LD."[^;\n]+?".RD."/", '', $output);
-			}
-		}
 		
 		// Compress the output
 		// We simply set the ci config value to true
@@ -131,6 +115,12 @@ class EE_Output extends CI_Output {
 			$EE->config->set_item('compress_output', TRUE);
 		}
 
+
+		// Parse query count
+		if (REQ != 'CP')
+		{
+			$output = str_replace(LD.'total_queries'.RD, $EE->db->query_count, $output);
+		}
 
 		// Send it to the CI method for final processing
 		parent::_display($output);
@@ -327,6 +317,8 @@ class EE_Output extends CI_Output {
 	{
 		$EE =& get_instance();
 		
+		$this->set_header("Content-Type: text/html; charset=".$EE->config->item('charset'));
+		
 		if ($type != 'off')
 		{	  
 			switch($type)
@@ -404,6 +396,64 @@ class EE_Output extends CI_Output {
 		
 		$EE->load->library('javascript');
 		exit($EE->javascript->generate_json($msg, TRUE));
+	}
+
+	// --------------------------------------------------------------------
+	
+	/**
+	 * Send Cache Headers
+	 *
+	 * Used to control client caching for JS, CSS
+	 *
+	 * @access	public
+	 * @param	int		Unix Timestamp, date of "file" modification
+	 * @param	int		max-age value
+	 * @param	string	path identifier for ETag, helpful in load balanced environs
+ 	 * @return	void
+	 */
+	function send_cache_headers($modified, $max_age = 172800, $etag_path = NULL)
+	{
+		$EE =& get_instance();
+		
+		if ($EE->config->item('send_headers') == 'y')
+		{
+			$max_age		= (int) $max_age;
+			$modified		= (int) $modified;
+			$modified_since	= $EE->input->server('HTTP_IF_MODIFIED_SINCE');
+
+			// Remove anything after the semicolon
+
+			if ($pos = strrpos($modified_since, ';') !== FALSE)
+			{
+				$modified_since = substr($modified_since, 0, $pos);
+			}
+
+			// If the file is in the client cache, we'll
+			// send a 304 and be done with it.
+
+			if ($modified_since && (strtotime($modified_since) == $modified))
+			{
+				$this->set_status_header(304);
+				exit;
+			}
+
+			// All times GMT
+			$modified = gmdate('D, d M Y H:i:s', $modified).' GMT';
+			$expires = gmdate('D, d M Y H:i:s', time() + $max_age).' GMT';
+
+			$this->set_status_header(200);
+			$this->set_header("Cache-Control: max-age={$max_age}, must-revalidate");
+			$this->set_header('Vary: Accept-Encoding');
+			$this->set_header('Last-Modified: '.$modified);
+			$this->set_header('Expires: '.$expires);
+
+			// Send a custom ETag to maintain a useful cache in
+			// load-balanced environments
+			if ( ! is_null($etag_path))
+			{
+				$this->set_header("ETag: ".md5($modified.$etag_path));				
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------

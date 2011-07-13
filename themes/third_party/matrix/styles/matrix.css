@@ -7,6 +7,8 @@ table.matrix { position: relative; width: 100%; border: 1px solid #b6c0c2;
 table.matrix th.matrix,
 table.matrix td.matrix { vertical-align: top; text-align: left; }
 
+table.matrix .matrix-tr-header { padding: 7px !important; width: 0.01% !important; }
+
 /* buttons */
 a.matrix-btn { display: block; margin: 3px 0 0 2px; width: 20px; height: 20px; background: no-repeat 0 -20px; cursor: pointer; }
 a.matrix-btn:active { background-position: 0 -40px; }
@@ -28,17 +30,22 @@ table.matrix thead.matrix td.matrix { font-size: 0.9em; background: #e5e5e5; bac
 table.matrix thead.matrix tr.matrix-first th.matrix { border-top: 1px solid #fff !important; padding-top: 5px; }
 table.matrix thead.matrix tr.matrix-last .matrix { padding-bottom: 6px; border-bottom: 1px solid #bbb !important; }
 
+table.matrix-nodata thead.matrix tr.matrix-last .matrix { border-bottom: none !important; }
+
 
 /*-- table body --*/
 table.matrix tbody.matrix th.matrix,
 table.matrix tbody.matrix td.matrix { border: solid #e3e3e3; border-width: 1px 1px 0 0; }
 
-table.matrix tbody.matrix th.matrix { border-color: #c8cbce; padding: 7px; width: 0.01%; text-align: center; vertical-align: middle; text-shadow: 0 1px #fff; background: #e2e2e2; background: rgba(0,0,0,0.06);
+table.matrix tbody.matrix th.matrix { border-color: #c8cbce; text-align: center; vertical-align: middle; text-shadow: 0 1px #fff; background: #e2e2e2; background: rgba(0,0,0,0.06);
 	cursor: move; cursor: -webkit-grab; cursor: -moz-grab; }
 table.matrix tbody.matrix td.matrix { padding: 7px 10px; background: #fff; }
 table.matrix tbody.matrix td.matrix-disabled { background: #eee; -webkit-user-select: none; -moz-user-select: none; }
 
 table.matrix tbody.matrix td.matrix label { font-size: 1em; line-height: 160%; }
+
+/* validation errors */
+table.matrix tbody.matrix td.matrix-error { background: #fff4f2; }
 
 /* focussed borders */
 table.matrix tbody.matrix td.matrix-focussed { border-width: 2px 2px 1px 1px; padding: 6px 9px; }
@@ -127,10 +134,10 @@ td.matrix-text { position: relative; cursor: text; }
 td.matrix .matrix-textarea { border: none !important; margin: 0 !important; padding: 0 !important; width: 100%; min-width: 60px; font-family: 'Lucida Grande', sans-serif; font-size: 11px; background: none; resize: none; outline: none;
 	border-radius: 0; -webkit-border-radius: 0; -moz-border-radius: 0; }
 
-td.matrix-text div { position: relative; }
-td.matrix-text div div { display: none; position: absolute; z-index: 1; right: -10px; bottom: -7px; margin-top: -1em; padding: 1px 2px; font-size: 0.9em; line-height: 1em; color: #666; text-shadow: 0 1px #fff; background: #e3e3e3;
+td.matrix-text div.matrix-charsleft-container { position: relative; }
+td.matrix-text div.matrix-charsleft-container div.matrix-charsleft { display: none; position: absolute; z-index: 1; right: -10px; bottom: -7px; margin-top: -1em; padding: 1px 2px; font-size: 0.9em; line-height: 1em; color: #666; text-shadow: 0 1px #fff; background: #e3e3e3;
 	border-radius: 2px 0; -webkit-border-top-left-radius: 2px; -webkit-border-bottom-right-radius: 2px; -moz-border-radius-topleft: 3px; -moz-border-radius-bottomright: 3px; }
-td.matrix-text.matrix-focussed div div { display: block; }
+td.matrix-text.matrix-focussed div.matrix-charsleft-container div.matrix-charsleft { display: block; }
 td.matrix-text div.negative { display: block; color: #a9432d; }
 
 /*-- date cell styles --*/

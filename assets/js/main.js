@@ -155,6 +155,7 @@ $(document).ready(function(){
     work_pagination.init();
   }
   
+  //toggles on about page
   $('#about-content-container-right a.services-title').bind('click',function(){
     $el = $(this);
     $h3 = $el.find('h3:eq(0)');
@@ -172,6 +173,9 @@ $(document).ready(function(){
       });
     }
   });
+  
+  //lists in article content
+  $('#article-content-container ol li, #article-content-container ul li').wrapInner('<span class="white"></span>');
   
 });
 

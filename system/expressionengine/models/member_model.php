@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -198,16 +198,8 @@ class Member_model extends CI_Model {
 
 		$members = $this->db->get();
 
-		if ($members->num_rows() == 0)
-		{
-			return FALSE;
-		}
-		else
-		{
-			return $members->row('count');
-		}
+		return ($members->num_rows() == 0) ? FALSE : $members->row('count');
 	}
-
 
 	// --------------------------------------------------------------------
 
@@ -284,7 +276,7 @@ class Member_model extends CI_Model {
 			$this->db->select($fields);
 		}
 
-		$this->db->where('member_id', (int)$member_id);
+		$this->db->where('member_id', (int) $member_id);
 		return $this->db->get('members');
 	}
 
@@ -1142,29 +1134,6 @@ class Member_model extends CI_Model {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Update Layouts
-	 *
-	 * Adds a new tab and all associated fields to all existing layouts
-	 * Deprecated and I can't spot it being called anywhere
-	 *
-	 * @access	public
-	 * @param	array	Altered tabs and/or fields
-	 * @param	string	Action to take
-	 * @param	int		The channel id
-	 * @return	bool
-	 */
-	function update_layouts($layout_info, $action, $channel_id = array())
-	{
-		$this->load->model('layout_model');
-		
-		$response = $this->layout_model->update_layouts($layout_info, $action, $channel_id);
-		return $response;
-	}
-
-
-	// --------------------------------------------------------------------
-
-	/**
 	 * Insert Group Layout
 	 *
 	 * Inserts layout information for member groups for the publish page, saved as
@@ -1250,24 +1219,13 @@ class Member_model extends CI_Model {
 	 */
 	function get_group_layout($member_group = '', $channel_id = '')
 	{
-		$this->db->select('field_layout');
-		$this->db->where("site_id", $this->config->item('site_id'));
-		$this->db->where("channel_id", $channel_id);
-
-		$this->db->where("member_group", $member_group);
-
-		$layout_data = $this->db->get('layout_publish');
-
-		if ($layout_data->num_rows() > 0)
-		{
-			$returned_data = unserialize($layout_data->row('field_layout'));
-		}
-		else
-		{
-			$returned_data = array();
-		}
-
-		return $returned_data;
+		$this->load->model('layout_model');
+		
+		return $this->layout_model->get_layout_settings(array(
+			'site_id' => $this->config->item('site_id'),
+			'channel_id' => $channel_id,
+			'member_group' => $member_group
+		));
 	}
 
 	// --------------------------------------------------------------------
@@ -1368,7 +1326,7 @@ class Member_model extends CI_Model {
 		
 		$this->db->select('notepad');
 		$this->db->from('members');
-		$this->db->where('member_id', $id);
+		$this->db->where('member_id', (int) $id);
 		$notepad_query = $this->db->get();
 
 		if ($notepad_query->num_rows() > 0)
@@ -1376,10 +1334,8 @@ class Member_model extends CI_Model {
 			$notepad_result = $notepad_query->row();
 			return $notepad_result->notepad;
 		}
-		else
-		{
-			return '';
-		}
+
+		return '';
 	}
 
 	// --------------------------------------------------------------------
@@ -1393,14 +1349,14 @@ class Member_model extends CI_Model {
 	function can_access_module($module, $group_id = '')
 	{	
 		// Superadmin sees all		
-		if ($this->session->userdata['group_id'] == 1)
+		if ($this->session->userdata('group_id') === 1)
 		{
 			return TRUE;
 		}
 		
 		if ( ! $group_id)
 		{
-			$group_id = $this->session->userdata['group_id'];
+			$group_id = $this->session->userdata('group_id');
 		}
 
 		$this->db->select('modules.module_id, module_member_groups.group_id');
@@ -1410,15 +1366,7 @@ class Member_model extends CI_Model {
 		
 		$query = $this->db->get('modules');
 
-		if ($query->num_rows() == 0)
-		{
-			return FALSE;
-		}
-		else
-		{
-			return TRUE;
-		}
-
+		return ($query->num_rows() === 0) ? FALSE : TRUE;
 	}
 	
 }

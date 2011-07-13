@@ -5,7 +5,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -258,7 +258,7 @@ class Channel_standalone extends Channel {
 
 		$this->EE->functions->clear_caching('all', $_POST['PRV']);
 
-		require APPPATH.'libraries/Template'.EXT;
+		require APPPATH.'libraries/Template.php';
 
 		$this->EE->TMPL = new EE_Template();
 
@@ -1417,9 +1417,10 @@ class Channel_standalone extends Channel {
 		/** ----------------------------------------*/
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE)
+				);
 
-		$this->EE->typography->convert_curly = FALSE;
 		$file_dirs = $this->EE->functions->fetch_file_paths();
 
 		$match['1'] = str_replace(LD.'title'.RD, stripslashes($this->EE->input->post('title')), $match['1']);
@@ -2362,19 +2363,9 @@ class Channel_standalone extends Channel {
 			$this->EE->table->clear(); // clear out tables for the next smiley
 		}
 		
-		if (isset($row['field_show_fmt']) && $row['field_show_fmt'] == 'y')
-		{
-			
-		}
-		
 		if (isset($settings['field_show_glossary']))
 		{
-			$tmp = $this->EE->load->_ci_view_path;
-			$this->EE->load->_ci_view_path = PATH_THEMES.'cp_themes/default/';
-
-			$output .= $this->EE->load->view('content/_assets/glossary_items', '', TRUE);
-			
-			$this->EE->load->_ci_view_path = $tmp;
+			$output .= $this->EE->load->ee_view('content/_assets/glossary_items', '', TRUE);
 		}
 		
 		$output .= '</div>';

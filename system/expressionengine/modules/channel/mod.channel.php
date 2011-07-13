@@ -5,7 +5,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -322,8 +322,9 @@ class Channel {
 		$this->track_views();
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->convert_curly = FALSE;
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE)
+				);
 
 		if ($this->enable['categories'] == TRUE)
 		{
@@ -443,11 +444,15 @@ class Channel {
 						}
 
 						$this->query = $reldata['query'];
-						$this->categories = array($this->query->row('entry_id')  => $reldata['categories']);
-
-						if (isset($reldata['category_fields']))
+						
+						if ($this->query->num_rows != 0)
 						{
-							$this->catfields = array($this->query->row('entry_id') => $reldata['category_fields']);
+							$this->categories = array($this->query->row('entry_id')  => $reldata['categories']);
+
+							if (isset($reldata['category_fields']))
+							{
+								$this->catfields = array($this->query->row('entry_id') => $reldata['category_fields']);
+							}							
 						}
 
 						$this->parse_channel_entries();
@@ -469,13 +474,11 @@ class Channel {
 	  */
 	function parse_reverse_related_entries()
 	{
-		$sql = "SELECT rel_id, rel_parent_id, rel_child_id, rel_type, reverse_rel_data
-				FROM exp_relationships
-				WHERE rel_child_id IN ('".implode("','", array_keys($this->reverse_related_entries))."')
-				AND rel_type = 'channel'";
-
-		$query = $this->EE->db->query($sql);
-
+		$this->EE->db->select('rel_id, rel_parent_id, rel_child_id, rel_type, reverse_rel_data');
+		$this->EE->db->where_in('rel_child_id', array_keys($this->reverse_related_entries));
+		$this->EE->db->where('rel_type', 'channel');
+		$query = $this->EE->db->get('relationships');
+		
 		if ($query->num_rows() == 0)
 		{
 			// remove Reverse Related tags for these entries
@@ -512,8 +515,10 @@ class Channel {
 
 				$this->EE->functions->compile_relationship($rewrite, FALSE, TRUE);
 
-				$results = $this->EE->db->query("SELECT reverse_rel_data FROM exp_relationships WHERE rel_parent_id = '".$row['rel_parent_id']."'");
-				$row['reverse_rel_data'] = $results->row('reverse_rel_data') ;
+				$this->EE->db->select('reverse_rel_data');
+				$this->EE->db->where('rel_parent_id', $row['rel_parent_id']);
+				$results = $this->EE->db->get('relationships');
+				$row['reverse_rel_data'] = $results->row('reverse_rel_data');
 			}
 
 			//  Unserialize the entries data, please
@@ -523,7 +528,7 @@ class Channel {
 				$entry_data[$row['rel_child_id']][$row['rel_parent_id']] = $revreldata;
 			}
 		}
-
+		
 		//  Without this the Reverse Related Entries were inheriting the parameters of
 		//  the enclosing Channel Entries tag, which is not appropriate.
 
@@ -608,7 +613,9 @@ class Channel {
 				{
 					if (count($this->channels_array) == 0)
 					{
-						$results = $this->EE->db->query("SELECT channel_id, channel_name FROM exp_channels WHERE site_id IN ('".implode("','", $this->EE->TMPL->site_ids)."')");
+						$this->EE->db->select('channel_id, channel_name');
+						$this->EE->db->where_in('site_id', $this->EE->TMPL->site_ids);
+						$results = $this->EE->db->get('channels');
 
 						foreach($results->result_array() as $row)
 						{
@@ -669,7 +676,7 @@ class Channel {
 				foreach($entry_data[$entry_id] as $relating_data)
 				{
 					$post_fix = ' '.$r;
-					$order_set = FALSE;					
+					$order_set = FALSE;
 					
 					if ( ! isset($params['channel']) OR ($relating_data['query']->row('channel_id') &&  array_key_exists($relating_data['query']->row('channel_id'), $allowed))) 
 					{
@@ -715,7 +722,21 @@ class Channel {
 						++$r;
 					}
 				}
-
+				
+				$sort_flags = SORT_REGULAR;
+				
+				// Check if the custom field to sort on is numeric, sort numericaly if it is
+				if (strncmp($order, 'field_id_', 9) === 0)
+				{
+					$this->EE->load->library('api');
+					$this->EE->api->instantiate('channel_fields');
+					$field_settings = $this->EE->api_channel_fields->get_settings(substr($order, 9));
+					if (isset($field_settings['field_content_type']) && in_array($field_settings['field_content_type'], array('numeric', 'integer', 'decimal')))
+					{
+						$sort_flags = SORT_NUMERIC;
+					}
+				}
+				
 				if ($random === TRUE)
 				{
 					shuffle($new);
@@ -724,7 +745,7 @@ class Channel {
 				{
 					if (in_array($order, $str_sort))
 					{
-						ksort($new);
+						ksort($new, $sort_flags);
 					}
 					else
 					{
@@ -735,7 +756,7 @@ class Channel {
 				{
 					if (in_array($order, $str_sort))
 					{
-						ksort($new);
+						ksort($new, $sort_flags);
 					}
 					else
 					{
@@ -744,7 +765,7 @@ class Channel {
 					
 					$new = array_reverse($new, TRUE);
 				}
-
+				
 				$output_data[$entry_id] = array_slice($new, $offset, $limit);
 
 				if (count($output_data[$entry_id]) == 0)
@@ -888,7 +909,7 @@ class Channel {
 			$this->paginate_data = str_replace(LD.'total_pages'.RD,			$this->total_pages,  		$this->paginate_data);
 			$this->paginate_data = str_replace(LD.'pagination_links'.RD,	$this->pagination_links,	$this->paginate_data);
 
-			if (preg_match("/".LD."if previous_page".RD."(.+?)".LD.'\/'."if".RD."/s", $this->paginate_data, $match))
+			if (preg_match_all("/".LD."if previous_page".RD."(.+?)".LD.'\/'."if".RD."/s", $this->paginate_data, $matches))
 			{
 				if ($this->page_previous == '')
 				{
@@ -896,15 +917,17 @@ class Channel {
 				}
 				else
 				{
-					$match[1] = preg_replace("/".LD.'path.*?'.RD."/", 	$this->page_previous, $match[1]);
-					$match[1] = preg_replace("/".LD.'auto_path'.RD."/",	$this->page_previous, $match[1]);
+					foreach($matches[1] as $count => $match)
+					{					
+						$match = preg_replace("/".LD.'path.*?'.RD."/", 	$this->page_previous, $match);
+						$match = preg_replace("/".LD.'auto_path'.RD."/", $this->page_previous, $match);
 
-					$this->paginate_data = str_replace($match[0],	$match[1], $this->paginate_data);
+						$this->paginate_data = str_replace($matches[0][$count], $match, $this->paginate_data);
+					}
 				}
 			}
 
-
-			if (preg_match("/".LD."if next_page".RD."(.+?)".LD.'\/'."if".RD."/s", $this->paginate_data, $match))
+			if (preg_match_all("/".LD."if next_page".RD."(.+?)".LD.'\/'."if".RD."/s", $this->paginate_data, $matches))
 			{
 				if ($this->page_next == '')
 				{
@@ -912,10 +935,13 @@ class Channel {
 				}
 				else
 				{
-					$match[1] = preg_replace("/".LD.'path.*?'.RD."/", 	$this->page_next, $match[1]);
-					$match[1] = preg_replace("/".LD.'auto_path'.RD."/",	$this->page_next, $match[1]);
+					foreach ($matches[1] as $count => $match)
+					{
+						$match = preg_replace("/".LD.'path.*?'.RD."/", 	$this->page_next, $match);
+						$match = preg_replace("/".LD.'auto_path'.RD."/", $this->page_next, $match);
 
-					$this->paginate_data = str_replace($match[0],	$match[1], $this->paginate_data);
+						$this->paginate_data = str_replace($matches[0][$count],	$match, $this->paginate_data);
+					}					
 				}
 			}
 			
@@ -1180,7 +1206,7 @@ class Channel {
 			/**  Do we have a pure ID number?
 			/** --------------------------------------*/
 
-			if (is_numeric($qstring) AND $dynamic)
+			if ($dynamic && is_numeric($qstring))
 			{
 				$entry_id = $qstring;
 			}
@@ -1193,7 +1219,7 @@ class Channel {
 				/**  Parse day
 				/** --------------------------------------*/
 
-				if (preg_match("#(^|\/)(\d{4}/\d{2}/\d{2})#", $qstring, $match) AND $dynamic)
+				if ($dynamic && preg_match("#(^|\/)(\d{4}/\d{2}/\d{2})#", $qstring, $match))
 				{
 					$ex = explode('/', $match[2]);
 
@@ -1209,7 +1235,7 @@ class Channel {
 				/** --------------------------------------*/
 
 				// added (^|\/) to make sure this doesn't trigger with url titles like big_party_2006
-				if (preg_match("#(^|\/)(\d{4}/\d{2})(\/|$)#", $qstring, $match) AND $dynamic)
+				if ($dynamic && preg_match("#(^|\/)(\d{4}/\d{2})(\/|$)#", $qstring, $match))
 				{
 					$ex = explode('/', $match[2]);
 
@@ -1225,7 +1251,7 @@ class Channel {
 				/** --------------------------------------
 				/**  Parse ID indicator
 				/** --------------------------------------*/
-				if (preg_match("#^(\d+)(.*)#", $qstring, $match) AND $dynamic)
+				if ($dynamic && preg_match("#^(\d+)(.*)#", $qstring, $match))
 				{
 					$seg = ( ! isset($match[2])) ? '' : $match[2];
 
@@ -1240,7 +1266,7 @@ class Channel {
 				/**  Parse page number
 				/** --------------------------------------*/
 
-				if (preg_match("#^P(\d+)|/P(\d+)#", $qstring, $match) AND ($dynamic OR $this->EE->TMPL->fetch_param('paginate'))) 
+				if (($dynamic OR $this->EE->TMPL->fetch_param('paginate')) && preg_match("#^P(\d+)|/P(\d+)#", $qstring, $match)) 
 				{
 					$this->p_page = (isset($match[2])) ? $match[2] : $match[1];
 
@@ -1343,7 +1369,7 @@ class Channel {
 
 				// Numeric version of the category
 
-				if (preg_match("#(^|\/)C(\d+)#", $qstring, $match) AND $dynamic)
+				if ($dynamic && preg_match("#(^|\/)C(\d+)#", $qstring, $match))
 				{
 					$this->cat_request = TRUE;
 
@@ -3835,7 +3861,7 @@ class Channel {
 				//( ! isset($row['m_field_id_'.$value[0]])) ? '' : $row['m_field_id_'.$value[0]];
 			}
 
-			$tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
+			//$tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
 
 
 			// Reset custom variable pair cache
@@ -4075,7 +4101,7 @@ class Channel {
 					//  Hourly header
 					if ($display == 'hourly')
 					{
-						$heading_date_hourly = date('YmdH', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date'])));
+						$heading_date_hourly = gmdate('YmdH', $this->EE->localize->set_localized_time($row['entry_date']));
 
 						if ($heading_date_hourly == $heading_flag_hourly)
 						{
@@ -4091,19 +4117,19 @@ class Channel {
 					//  Weekly header
 					elseif ($display == 'weekly')
 					{
-						$temp_date = $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']));
+						$temp_date = $this->EE->localize->set_localized_time($row['entry_date']);
 
 						// date()'s week variable 'W' starts weeks on Monday per ISO-8601.
 						// By default we start weeks on Sunday, so we need to do a little dance for
 						// entries made on Sundays to make sure they get placed in the right week heading
-						if (strtolower($this->EE->TMPL->fetch_param('start_day')) != 'monday' && date('w', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) == 0)
+						if (strtolower($this->EE->TMPL->fetch_param('start_day')) != 'monday' && gmdate('w', $this->EE->localize->set_localized_time($row['entry_date'])) == 0)
 						{
 							// add 7 days to toss us into the next ISO-8601 week
-							$heading_date_weekly = date('YW', $temp_date + 604800);
+							$heading_date_weekly = gmdate('YW', $temp_date + 604800);
 						}
 						else
 						{
-							$heading_date_weekly = date('YW', $temp_date);
+							$heading_date_weekly = gmdate('YW', $temp_date);
 						}
 
 						if ($heading_date_weekly == $heading_flag_weekly)
@@ -4120,7 +4146,7 @@ class Channel {
 					//  Monthly header
 					elseif ($display == 'monthly')
 					{
-						$heading_date_monthly = date('Ym', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date'])));
+						$heading_date_monthly = gmdate('Ym', $this->EE->localize->set_localized_time($row['entry_date']));
 
 						if ($heading_date_monthly == $heading_flag_monthly)
 						{
@@ -4136,7 +4162,7 @@ class Channel {
 					//  Yearly header
 					elseif ($display == 'yearly')
 					{
-						$heading_date_yearly = date('Y', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date'])));
+						$heading_date_yearly = gmdate('Y', $this->EE->localize->set_localized_time($row['entry_date']));
 
 						if ($heading_date_yearly == $heading_flag_yearly)
 						{
@@ -4152,7 +4178,7 @@ class Channel {
 					//  Default (daily) header
 					else
 					{
-			 			$heading_date_daily = date('Ymd', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date'], $row['dst_enabled'], FALSE)));
+			 			$heading_date_daily = gmdate('Ymd', $this->EE->localize->set_localized_time($row['entry_date']));
 			
 						if ($heading_date_daily == $heading_flag_daily)
 						{
@@ -4179,7 +4205,7 @@ class Channel {
 					if ($display == 'hourly')
 					{
 						if ( ! isset($query_result[$row['count']]) OR
-							date('YmdH', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) != date('YmdH', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($query_result[$row['count']]['entry_date']))))
+							gmdate('YmdH', $this->EE->localize->set_localized_time($row['entry_date'])) != gmdate('YmdH', $this->EE->localize->set_localized_time($query_result[$row['count']]['entry_date'])))
 						{
 							$tagdata = $this->EE->TMPL->swap_var_pairs($key, 'date_footer', $tagdata);
 						}
@@ -4192,7 +4218,7 @@ class Channel {
 					elseif ($display == 'weekly')
 					{
 						if ( ! isset($query_result[$row['count']]) OR
-							date('YW', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) != date('YW', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($query_result[$row['count']]['entry_date']))))
+							gmdate('YW', $this->EE->localize->set_localized_time($row['entry_date'])) != gmdate('YW', $this->EE->localize->set_localized_time($query_result[$row['count']]['entry_date'])))
 						{
 							$tagdata = $this->EE->TMPL->swap_var_pairs($key, 'date_footer', $tagdata);
 						}
@@ -4205,7 +4231,7 @@ class Channel {
 					elseif ($display == 'monthly')
 					{
 						if ( ! isset($query_result[$row['count']]) OR
-							date('Ym', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) != date('Ym', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($query_result[$row['count']]['entry_date']))))
+							gmdate('Ym', $this->EE->localize->set_localized_time($row['entry_date'])) != gmdate('Ym', $this->EE->localize->set_localized_time($query_result[$row['count']]['entry_date'])))
 						{
 							$tagdata = $this->EE->TMPL->swap_var_pairs($key, 'date_footer', $tagdata);
 						}
@@ -4218,7 +4244,7 @@ class Channel {
 					elseif ($display == 'yearly')
 					{
 						if ( ! isset($query_result[$row['count']]) OR
-							date('Y', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) != date('Y', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($query_result[$row['count']]['entry_date']))))
+							gmdate('Y', $this->EE->localize->set_localized_time($row['entry_date'])) != gmdate('Y', $this->EE->localize->set_localized_time($query_result[$row['count']]['entry_date'])))
 						{
 							$tagdata = $this->EE->TMPL->swap_var_pairs($key, 'date_footer', $tagdata);
 						}
@@ -4231,7 +4257,7 @@ class Channel {
 					else
 					{
 						if ( ! isset($query_result[$row['count']]) OR
-							date('Ymd', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($row['entry_date']))) != date('Ymd', $this->EE->localize->set_localized_time($this->EE->localize->offset_entry_dst($query_result[$row['count']]['entry_date']))))
+							gmdate('Ymd', $this->EE->localize->set_localized_time($row['entry_date'])) != gmdate('Ymd', $this->EE->localize->set_localized_time($query_result[$row['count']]['entry_date'])))
 						{
 							$tagdata = $this->EE->TMPL->swap_var_pairs($key, 'date_footer', $tagdata);
 						}
@@ -4245,6 +4271,10 @@ class Channel {
 
 			}
 			// END VARIABLE PAIRS
+
+			// We swap out the conditionals after pairs are parsed so they don't interfere
+			// with the string replace
+			$tagdata = $this->EE->functions->prep_conditionals($tagdata, $cond);
 
 			//  Parse "single" variables
 			foreach ($this->EE->TMPL->var_single as $key => $val)
@@ -4832,7 +4862,8 @@ class Channel {
 					// prevent accidental parsing of other channel variables in custom field data
 					if (strpos($entry, '{') !== FALSE)
 					{
-	                    $tagdata = $this->EE->TMPL->swap_var_single($replace, str_replace(array('{', '}'), array('60ba4b2daa4ed4', 'c2b7df6201fdd3'), $entry), $tagdata);
+						$this->EE->load->helper('string');
+	                    $tagdata = $this->EE->TMPL->swap_var_single($replace, str_replace(array('{', '}'), array(unique_marker('channel_bracket_open'), unique_marker('channel_bracket_close')), $entry), $tagdata);
 					}
 					else
 					{
@@ -4868,9 +4899,9 @@ class Channel {
 			// END SINGLE VARIABLES
 
 			// do we need to replace any curly braces that we protected in custom fields?
-			if (strpos($tagdata, '60ba4b2daa4ed4') !== FALSE)
+			if (strpos($tagdata, unique_marker('channel_bracket_open')) !== FALSE)
 			{
-				$tagdata = str_replace(array('60ba4b2daa4ed4', 'c2b7df6201fdd3'), array('{', '}'), $tagdata);
+				$tagdata = str_replace(array(unique_marker('channel_bracket_open'), unique_marker('channel_bracket_close')), array('{', '}'), $tagdata);
 			}
 
 			// -------------------------------------------
@@ -5407,9 +5438,9 @@ class Channel {
 			unset($this->temp_array);
 
 			$this->EE->load->library('typography');
-			$this->EE->typography->initialize();
-
-			$this->EE->typography->convert_curly = FALSE;
+			$this->EE->typography->initialize(array(
+						'convert_curly'	=> FALSE)
+						);
 
 			$this->category_count = 0;
 			$total_results = count($this->cat_array);
@@ -5834,9 +5865,9 @@ class Channel {
 			if ($query->num_rows() > 0)
 			{
 				$this->EE->load->library('typography');
-				$this->EE->typography->initialize();
-
-				$this->EE->typography->convert_curly = FALSE;
+				$this->EE->typography->initialize(array(
+								'convert_curly'	=> FALSE)
+								);
 
 				$used = array();
 
@@ -6219,8 +6250,9 @@ class Channel {
 		$open = 0;
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->convert_curly = FALSE;
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE)
+				);
 
 		$this->category_count = 0;
 		$total_results = count($this->cat_array);
@@ -6790,8 +6822,9 @@ class Channel {
 		// parse custom fields
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->convert_curly = FALSE;
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE)
+				);
 
 		// parse custom fields
 		foreach($this->catfields as $ccv)
@@ -7083,6 +7116,8 @@ class Channel {
 		/**  Replace variables
 		/** ---------------------------------------*/
 
+		$this->EE->load->library('typography');
+
 		if (strpos($this->EE->TMPL->tagdata, LD.'path=') !== FALSE)
 		{
 			$path  = (preg_match("#".LD."path=(.+?)".RD."#", $this->EE->TMPL->tagdata, $match)) ? $this->EE->functions->create_url($match[1]) : $this->EE->functions->create_url("SITE_INDEX");
@@ -7110,12 +7145,14 @@ class Channel {
 
 		if (strpos($this->EE->TMPL->tagdata, LD.'title') !== FALSE)
 		{
-			$this->EE->TMPL->tagdata = str_replace(LD.'title'.RD, $query->row('title'), $this->EE->TMPL->tagdata);
+			$this->EE->TMPL->tagdata = str_replace(LD.'title'.RD, $this->EE->typography->format_characters($query->row('title')), $this->EE->TMPL->tagdata);
 		}
 
 		if (strpos($this->EE->TMPL->tagdata, '_entry->title') !== FALSE)
 		{
-			$this->EE->TMPL->tagdata = preg_replace('/'.LD.'(?:next|prev)_entry->title'.RD.'/', $query->row('title'), $this->EE->TMPL->tagdata);
+			$this->EE->TMPL->tagdata = preg_replace('/'.LD.'(?:next|prev)_entry->title'.RD.'/', 
+													$this->EE->typography->format_characters($query->row('title')),
+													$this->EE->TMPL->tagdata);
 		}
 
 		return $this->EE->functions->remove_double_slashes(stripslashes($this->EE->TMPL->tagdata));
@@ -7536,9 +7573,9 @@ class Channel {
 		}
 
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-
-		$this->EE->typography->convert_curly = FALSE;
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE)
+				);
 
 		if ($this->EE->TMPL->fetch_param('member_data') !== FALSE && $this->EE->TMPL->fetch_param('member_data') == 'yes')
 		{
@@ -7673,7 +7710,7 @@ class Channel {
 			return $this->EE->output->fatal_error($this->EE->lang->line('must_be_logged_in'));
 		}
 		
-		$class_path = PATH_MOD.'emoticon/emoticons'.EXT;
+		$class_path = PATH_MOD.'emoticon/emoticons.php';
 		
 		if ( ! is_file($class_path) OR ! @include_once($class_path))
 		{

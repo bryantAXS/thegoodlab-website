@@ -327,7 +327,7 @@ $lang = array(
 'You have tried to access a channel that does not exist.',
 
 'no_entries_matching_that_criteria' => 
-'There are no entries matching the criteria you selected',
+'There are no entries matching the criteria you selected.',
 
 'no_entries_exist' => 
 'There are no entries in this channel',
@@ -374,7 +374,7 @@ $lang = array(
 'tab_name' 			=> 'Tab Name',
 'tab_name_required'	=> 'Please choose a name for your tab.',
 'duplicate_tab_name'	=> 'A tab with this name already exists.',
-'illegal_characters'	=> 'Tab names may only contain alpha-numeric characters, underscores, and dashes',
+'illegal_characters'	=> 'Tab names may only contain alpha-numeric characters, underscores, dashes, and spaces',
 
 'authors' 			=> 'Authors',
 
@@ -382,7 +382,7 @@ $lang = array(
 
 'publish_layout'	=> 'Publish Layout',
 'save_layout' 		=> 'Save Layout',
-'remove_layout' 	=> 'Remove Layout',
+'remove_layout' 	=> 'Reset Layout',
 'preview_layout' 	=> 'Preview Layout',
 'refresh_layout'	=> 'Refresh Layout',
 
@@ -539,6 +539,7 @@ $lang = array(
 'File Upload',
 
 'upload_dir_choose'		=> 'Choose an upload directory',
+'upload_to'				=> 'Upload to %s',
 
 'emoticons' =>
 'Smileys',
@@ -684,6 +685,15 @@ $lang = array(
 'file_exists' =>
 'A file already exists with this name',
 
+'file_exists_warning' =>
+'File Exists Warning',
+
+'actions' =>
+'Actions',
+
+'action_delete' =>
+'Delete',
+
 'overwrite_instructions' =>
 'You can either choose a new name and the file will be renamed, or you can submit this form with the same name and the file will be overwritten.',
 
@@ -695,6 +705,9 @@ $lang = array(
 
 'file_type' =>
 'File Type',
+
+'file_saved' =>
+'File Saved',
 
 'image' =>
 'Image',
@@ -911,6 +924,11 @@ $lang = array(
 'write_mode' => 'Write Mode',
 'show_tools' => 'Show Tools',
 
+// writemode
+'wm_discard_changes'	=> 'Discard Changes',
+'wm_publish_to_field'	=> 'Publish to Field',
+
+
 'edit_modes'			=> 'Edit Modes',
 'resize'				=> 'Resize',
 'crop'					=> 'Crop',
@@ -942,6 +960,9 @@ $lang = array(
 'layout_failure_invalid_name' => 
 'The following fields have invalid characters in the short names: ',
 
+'layout_preview' =>
+'You&rsquo;re previewing the Publish Layout for ',
+
 'no_entry_to_update' =>
 'You have tried to update an entry that does not exist.',
 
@@ -972,6 +993,8 @@ Confirm the fieldtype file is located in the expressionengine/third_party/ direc
 
 'add_file' => 'Add File',
 'remove_file' => 'Remove File',
+'directory_no_access' =>
+'You do not have access to the directory specified for this field',
 
 'invalid_selection' => 'Invalid Selection',
 

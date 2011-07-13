@@ -14,14 +14,20 @@ $lang = array(
 
 'wygwam_no_module' => 'You haven’t installed Wygwam’s module yet.',
 
-// Index
-'wygwam_editor_configs' => 'Editor Configurations',
+// Pages
+'wygwam_settings' => 'Settings',
+'wygwam_configs' => 'Editor Configurations',
+
+// Settings
+'wygwam_license_key' => 'License Key',
+'wygwam_file_browser' => 'File Browser',
+'wygwam_file_browser_desc' => 'Which file browser should be used when browsing for images and files from your Wygwam fields?',
+
+// Configs
 'wygwam_clone' => 'Clone',
 'wygwam_no_configs' => 'There are currently no configurations.',
-'wygwam_license_key' => 'License Key',
-'wygwam_license_key_saved' => 'Your license key saved successfully.',
 
-// Edit Configuration
+// Edit Config
 'wygwam_create_config' => 'Create a New Configuration',
 'wygwam_edit_config' => 'Edit Configuration',
 'wygwam_config_settings' => 'Configuration Settings',
@@ -37,7 +43,7 @@ $lang = array(
 'wygwam_advanced' => 'Advanced Settings',
 'wygwam_config_saved' => 'Your configuration saved successfully.',
 
-// Delete Configuration
+// Delete Config
 'wygwam_delete_config' => 'Delete Configuration',
 'wygwam_delete_config_confirm' => 'Are you sure you want to permanently delete this configuration?',
 'wygwam_config_deleted' => 'Your configuration was deleted successfully.',
@@ -49,8 +55,16 @@ $lang = array(
 'wygwam_convert' => 'Convert previous entries?',
 'wygwam_convert_desc' => 'Wygwam can convert your previous entries’ field data to HTML for you.',
 'wygwam_editor_config' => 'Editor Configuration',
+'wygwam_edit_configs' => 'Edit&nbsp;Configurations',
 'wygwam_defer' => 'Defer CKEditor initialization?',
 'wygwam_defer_desc' => 'If you select “Yes”, Wygwam won’t initialize CKEditor until the field is clicked on.',
+
+// -------------------------------------------
+//  Fields
+// -------------------------------------------
+
+'wygwam_site_page' => 'Site Page',
+'wygwam_site_template' => 'Site Template',
 
 ''=>''
 );

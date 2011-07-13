@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -133,14 +133,14 @@ $predefined_buttons = array(
 												),
 							'anchor'	=> array(
 												'tag_name'  => 'a',
-												'tag_open'  => '<a href=\"[![Link:!:http://]!]\"(!( title=\"[![Title]!]\")!)>',
+												'tag_open'  => '<a href="[![Link:!:http://]!]"(!( title="[![Title]!]")!)>',
 												'tag_close' => '</a>',
 												'accesskey' => 'a',
 												'classname'	 => 'btn_a'
 												),
 							'picture'	=> array(
 												'tag_name'  => 'img',
-												'tag_open'  => '<img src=\"[![Link:!:http://]!]\" alt=\"[![Alternative text]!]\"\ />',
+												'tag_open'  => '<img src="[![Link:!:http://]!]" alt="[![Alternative text]!]" />',
 												'tag_close' => '',
 												'accesskey' => '',
 												'classname'	 => 'btn_img'

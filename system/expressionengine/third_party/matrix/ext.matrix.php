@@ -1,12 +1,7 @@
-<?php if (! defined('APP_VER')) exit('No direct script access allowed');
+<?php if (! defined('BASEPATH')) exit('No direct script access allowed');
 
 
-if (! defined('MATRIX_VER'))
-{
-	// get the version from config.php
-	require PATH_THIRD.'matrix/config.php';
-	define('MATRIX_VER', $config['version']);
-}
+require_once PATH_THIRD.'matrix/config.php';
 
 
 /**
@@ -14,11 +9,11 @@ if (! defined('MATRIX_VER'))
  *
  * @package   Matrix
  * @author    Brandon Kelly <brandon@pixelandtonic.com>
- * @copyright Copyright (c) 2010 Pixel & Tonic, LLC
+ * @copyright Copyright (c) 2011 Pixel & Tonic, Inc
  */
 class Matrix_ext {
 
-	var $name = 'Matrix';
+	var $name = MATRIX_NAME;
 	var $version = MATRIX_VER;
 	var $settings_exist = 'n';
 	var $docs_url = 'http://pixelandtonic.com/matrix';
@@ -26,7 +21,7 @@ class Matrix_ext {
 	/**
 	 * Extension Constructor
 	 */
-	function Matrix_ext()
+	function __construct()
 	{
 		$this->EE =& get_instance();
 
@@ -50,8 +45,8 @@ class Matrix_ext {
 	{
 		$this->EE->db->insert('extensions', array(
 			'class'    => 'Matrix_ext',
-			'hook'     => 'channel_entries_tagdata',
 			'method'   => 'channel_entries_tagdata',
+			'hook'     => 'channel_entries_tagdata',
 			'settings' => '',
 			'priority' => 10,
 			'version'  => $this->version,
@@ -84,14 +79,20 @@ class Matrix_ext {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Get Fields
+	 * Get Site Fields
 	 */
-	private function _get_fields()
+	private function _get_site_fields($site_id)
 	{
-		if (! isset($this->cache['fields']))
+		if (! isset($this->cache['fields'][$site_id]))
 		{
-			$this->EE->db->select('field_id, field_name, field_settings');
-			$this->EE->db->where('field_type', 'matrix');
+			$this->EE->db->select('field_id, field_name, field_settings')
+			             ->where('field_type', 'matrix');
+
+			if ($site_id)
+			{
+				$this->EE->db->where('site_id', $site_id);
+			}
+
 			$query = $this->EE->db->get('channel_fields');
 
 			$fields = $query->result_array();
@@ -101,98 +102,85 @@ class Matrix_ext {
 				$field['field_settings'] = unserialize(base64_decode($field['field_settings']));
 			}
 
-			$this->cache['fields'] = $fields;
+			$this->cache['fields'][$site_id] = $fields;
 		}
 
-		return $this->cache['fields'];
+		return $this->cache['fields'][$site_id];
 	}
 
-	// --------------------------------------------------------------------
+	/**
+	 * Parse Tag Pair
+	 */
+	private function _parse_tag_pair($m)
+	{
+		// prevent {exp:channel:entries} from double-parsing this tag
+		unset($this->EE->TMPL->var_pair[$m[1]]);
+
+		//$params_str = isset($m[2]) ? $m[2] : '';
+		$tagdata = isset($m[3]) ? $m[3] : '';
+
+		// get the params
+		$params = array();
+		if (isset($m[2]) && $m[2] && preg_match_all('/\s+([\w-:]+)\s*=\s*([\'\"])([^\2]*)\2/sU', $m[2], $param_matches))
+		{
+			for ($i = 0; $i < count($param_matches[0]); $i++)
+			{
+				$params[$param_matches[1][$i]] = $param_matches[3][$i];
+			}
+		}
+
+		// get the tagdata
+		$tagdata = isset($m[3]) ? $m[3] : '';
+
+		// -------------------------------------------
+		//	Call the tag's method
+		// -------------------------------------------
+
+		if (! class_exists('Matrix_ft'))
+		{
+			require_once PATH_THIRD.'matrix/ft.matrix'.EXT;
+		}
+
+		$Matrix_ft = new Matrix_ft();
+		$Matrix_ft->row = $this->row;
+		$Matrix_ft->field_id = $this->field['field_id'];
+		$Matrix_ft->field_name = $this->field['field_name'];
+		$Matrix_ft->entry_id = $this->row['entry_id'];
+		$Matrix_ft->settings = array_merge($this->row, $this->field['field_settings']);
+
+		return (string) $Matrix_ft->replace_tag(NULL, $params, $tagdata);
+	}
 
 	/**
 	 * channel_entries_tagdata hook
 	 */
-	function channel_entries_tagdata($tagdata, $row, &$Channel)
+	function channel_entries_tagdata($tagdata, $row)
 	{
 		// has this hook already been called?
-		if ($this->EE->extensions->last_call)
+		if (isset($this->EE->extensions->last_call) && $this->EE->extensions->last_call)
 		{
 			$tagdata = $this->EE->extensions->last_call;
 		}
 
-		// save the Channel ref
-		$this->cache['Channel'] =& $Channel;
+		$this->row = $row;
 
-		// iterate through each field
-		foreach ($this->_get_fields() as $field)
+		// get the fields
+		$entry_site_id = isset($row['entry_site_id']) ? $row['entry_site_id'] : 0;
+		$fields = $this->_get_site_fields($entry_site_id);
+
+		// iterate through each Matrix field
+		foreach ($fields as $field)
 		{
-			// is the tag even being used here?
-			if (strpos($tagdata, LD.$field['field_name']) !== FALSE)
+			if (strpos($tagdata, '{'.$field['field_name']) !== FALSE)
 			{
-				$offset = 0;
-
-				while (preg_match('/'.LD.$field['field_name'].'(:(\w+))?(\s+.*)?'.RD.'/sU', $tagdata, $matches, PREG_OFFSET_CAPTURE, $offset))
-				{
-					$tag_pos = $matches[0][1];
-					$tag_len = strlen($matches[0][0]);
-					$tagdata_pos = $tag_pos + $tag_len;
-					$endtag = LD.'/'.$field['field_name'].(isset($matches[1][0]) ? $matches[1][0] : '').RD;
-					$endtag_len = strlen($endtag);
-					$endtag_pos = strpos($tagdata, $endtag, $tagdata_pos);
-					$tag_func = (isset($matches[2][0]) && $matches[2][0]) ? 'replace_'.$matches[2][0] : '';
-
-					// get the params
-					$params = array();
-					if (isset($matches[3][0]) && $matches[3][0] && preg_match_all('/\s+([\w-:]+)\s*=\s*([\'\"])([^\2]*)\2/sU', $matches[3][0], $param_matches))
-					{
-						for ($j = 0; $j < count($param_matches[0]); $j++)
-						{
-							$params[$param_matches[1][$j]] = $param_matches[3][$j];
-						}
-					}
-
-					// is this a tag pair?
-					$field_tagdata = ($endtag_pos !== FALSE)
-					  ?  substr($tagdata, $tagdata_pos, $endtag_pos - $tagdata_pos)
-					  :  '';
-
-					// -------------------------------------------
-					//  Call the tag's method
-					// -------------------------------------------
-
-					if (! class_exists('Matrix_ft'))
-					{
-						require_once PATH_THIRD.'matrix/ft.matrix'.EXT;
-					}
-
-					$Matrix_ft = new Matrix_ft();
-					$Matrix_ft->row = $row;
-					$Matrix_ft->field_id = $field['field_id'];
-					$Matrix_ft->field_name = $field['field_name'];
-					$Matrix_ft->entry_id = $row['entry_id'];
-					$Matrix_ft->settings = array_merge($row, $field['field_settings']);
-
-					if (! $tag_func || ! method_exists($Matrix_ft, $tag_func))
-					{
-						$tag_func = 'replace_tag';
-					}
-
-					$new_tagdata = $Matrix_ft->$tag_func(NULL, $params, $field_tagdata);
-
-					// update tagdata
-					$tagdata = substr($tagdata, 0, $tag_pos)
-					         . $new_tagdata
-					         . substr($tagdata, ($endtag_pos !== FALSE ? $endtag_pos+$endtag_len : $tagdata_pos));
-
-					// update offset
-					$offset = $tag_pos;
-				}
+				$this->field = $field;
+				$tagdata = preg_replace_callback("/\{({$field['field_name']}(\s+.*?)?)\}(.*?)\{\/{$field['field_name']}\}/s", array(&$this, '_parse_tag_pair'), $tagdata);
 			}
 		}
 
-		// unset Channel ref
-		unset($this->cache['Channel']);
+		unset($this->row, $this->field);
 
 		return $tagdata;
 	}
+
 }

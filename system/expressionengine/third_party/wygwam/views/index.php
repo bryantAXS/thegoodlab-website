@@ -1,38 +1,37 @@
 <?php
 
-$this->table->set_template($cp_table_template);
-$this->table->set_heading(array('colspan'=>3, 'data'=>lang('wygwam_editor_configs')));
+echo form_open($base.AMP.'method=save_settings');
 
-foreach ($configs as $config)
+$this->table->set_template($cp_table_template);
+$this->table->set_heading(array(array('style' => 'width: 50%', 'data' => lang('preference')), lang('setting')));
+
+
+$this->table->add_row(
+	lang('wygwam_license_key', 'license_key'),
+	form_input('license_key', $license_key, 'id="license_key" style="width: 98%"')
+);
+
+
+$file_browser_options = array(
+	'ee'       => 'EE File Manager',
+	'ckfinder' => 'CKFinder'
+);
+
+// is Assets installed?
+if (array_key_exists('assets', $this->addons->get_installed()))
 {
-	$this->table->add_row(
-		'<a href="'.BASE.AMP.$base.AMP.'method=config_edit'.AMP.'config_id='.$config['config_id'].'">'.$config['config_name'].'</a>',
-		array('width'=>'15%', 'data'=>'<a href="'.BASE.AMP.$base.AMP.'method=config_edit'.AMP.'config_id='.$config['config_id'].AMP.'clone=y">'.lang('wygwam_clone').'</a>'),
-		array('width'=>'15%', 'data'=>'<a href="'.BASE.AMP.$base.AMP.'method=config_delete_confirm'.AMP.'config_id='.$config['config_id'].'">'.lang('delete').'</a>')
-	);
+	$file_browser_options['assets'] = 'Assets';
 }
+
+$this->table->add_row(
+	lang('wygwam_file_browser', 'file_browser') . '<br />'.lang('wygwam_file_browser_desc'),
+	form_dropdown('file_browser', $file_browser_options, $file_browser, 'id="file_browser"')
+);
+
 
 echo $this->table->generate();
 
-if (! $configs)
-{
-	echo '<p>'.lang('wygwam_no_configs').'</p>';
-}
+echo form_submit(array('name' => 'submit', 'value' => lang('submit'), 'class' => 'submit'));
+echo form_close();
 
 ?>
-
-<p style="margin-bottom: 2em;">
-	<a class="submit" href="<?php echo BASE.AMP.$base.AMP ?>method=config_edit"><?php echo lang('wygwam_create_config') ?></a>
-</p>
-
-
-<?php echo form_open($base.AMP.'method=save_license_key') ?>
-
-<h3><?php echo lang('wygwam_license_key') ?></h3>
-
-<p>
-	<?php echo form_input('license_key', $license_key, 'style="width: 40em;"') ?>
-	<?php echo form_submit(array('name' => 'submit', 'value' => lang('submit'), 'class' => 'submit')) ?>
-</p>
-
-<?php echo form_close() ?>

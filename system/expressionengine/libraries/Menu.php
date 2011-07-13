@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -56,8 +56,15 @@ class EE_Menu {
 		$menu['content'] = array(
 			'publish'	=> BASE.AMP.'C=content_publish',
 			'edit'		=> BASE.AMP.'C=content_edit',
-			'files'		=> BASE.AMP.'C=content_files'
+			'files'		=> array(
+				'file_manager'					=> BASE.AMP.'C=content_files',
+				'----',
+				'file_upload_preferences'		=> BASE.AMP.'C=content_files'.AMP.'M=file_upload_preferences',
+				'file_watermark_preferences'	=> BASE.AMP.'C=content_files'.AMP.'M=watermark_preferences',
+			)
 		);
+		
+		// 
 		
 		$menu['design'] = array(
 			'templates'		=> array(
@@ -103,9 +110,9 @@ class EE_Menu {
 		$menu['admin'] = array(
 			'channel_management' => array(
 				'channels'						=> BASE.AMP.'C=admin_content'.AMP.'M=channel_management',
-				'category_management'			=> BASE.AMP.'C=admin_content'.AMP.'M=category_management',
 				'field_group_management'			=> BASE.AMP.'C=admin_content'.AMP.'M=field_group_management',
 				'status_group_management'		=> BASE.AMP.'C=admin_content'.AMP.'M=status_group_management',
+				'category_management'			=> BASE.AMP.'C=admin_content'.AMP.'M=category_management',
 				'----',
 				'global_channel_preferences'	=> BASE.AMP.'C=admin_content'.AMP.'M=global_channel_preferences'
 			),
@@ -115,7 +122,6 @@ class EE_Menu {
 			'email_configuration'			=> BASE.AMP.'C=admin_system'.AMP.'M=email_configuration',
 			'----',
 			'admin_content'	=> array(
-				'file_upload_preferences'		=> BASE.AMP.'C=admin_content'.AMP.'M=file_upload_preferences',
 				'default_ping_servers'			=> BASE.AMP.'C=admin_content'.AMP.'M=default_ping_servers',
 				'default_html_buttons'			=> BASE.AMP.'C=admin_content'.AMP.'M=default_html_buttons'
 			),
@@ -191,11 +197,14 @@ class EE_Menu {
 		// Grab all the groups a user is assigned to
 		$allowed_groups = $this->EE->session->userdata('assigned_template_groups');
 
-		// The person responsible for the mess below wants you
-		// to know that he feels the same way about it
+		// Grab all of the template groups in their desired order
+		$template_groups = $this->EE->template_model->get_template_groups();
+		$template_groups = $template_groups->result_array();
 		
+		// If there are allowed groups or the user is a Super Admin, go through with it
 		if (count($allowed_groups) OR $this->EE->session->userdata('group_id') == 1)
 		{
+			// In the event $allowed_groups has information in it, build a where clause for them
 			$additional_where = count($allowed_groups) ? array('template_groups.group_id' => array_keys($allowed_groups)) : array();
 			
 			$templates = $this->EE->template_model->get_templates(NULL, array('template_groups.group_id'), $additional_where);
@@ -210,16 +219,29 @@ class EE_Menu {
 					$by_group[$row->group_name][] = $row;
 				}
 				
-				foreach($by_group as $group_name => $templates)
+				// Using the template groups as a guide for ordering, build the list of templates
+				foreach($template_groups as $group)
 				{
+					$group_id   = $group['group_id'];
+					$group_name = $group['group_name'];
+					
+					if ( ! isset($by_group[$group_name]))
+					{
+						continue;
+					}
+					
+					$templates  = $by_group[$group_name];
+					
 					foreach($templates as $row)
 					{
 						$menu['design']['templates']['edit_templates'][$group_name][$row->template_name] = BASE.AMP.'C=design'.AMP.'M=edit_template'.AMP.'id='.$row->template_id;
 					}
 
 					// All groups have an index template, so row->group_id will always be set :)
+					$menu['design']['templates']['edit_templates'][$group_name][lang('nav_edit_template_group_more')] = BASE.AMP.'C=design'.AMP.'M=manager'.AMP.'tgpref='.$group_id;
 					$menu['design']['templates']['edit_templates'][$group_name][] = '----';
-					$menu['design']['templates']['edit_templates'][$group_name][lang('nav_create_template')] = BASE.AMP.'C=design'.AMP.'M=new_template'.AMP.'group_id='.$row->group_id;
+					$menu['design']['templates']['edit_templates'][$group_name][lang('nav_edit_template_group')] = BASE.AMP.'C=design'.AMP.'M=manager'.AMP.'tgpref='.$group_id;
+					$menu['design']['templates']['edit_templates'][$group_name][lang('nav_create_template')] = BASE.AMP.'C=design'.AMP.'M=new_template'.AMP.'group_id='.$group_id;
 				}
 				
 				unset($by_group);
@@ -250,6 +272,19 @@ class EE_Menu {
 
 		$menu = $this->_remove_blocked_menu_items($menu);
 		$menu = $this->_add_overviews($menu);
+	
+ 		/* -------------------------------------------
+		/* 'cp_menu_array' hook.
+		/*  - Modify menu array
+		/*  - Added: 2.1.5
+		*/
+			if ($this->EE->extensions->active_hook('cp_menu_array') === TRUE)
+			{
+				$menu = $this->EE->extensions->call('cp_menu_array', $menu);
+			}
+		/*
+		/* -------------------------------------------*/
+		
 
 		// Only get the views once
 		$this->menu_parent	= $this->EE->load->view('_shared/menu/item_parent', '', TRUE);
@@ -259,7 +294,7 @@ class EE_Menu {
 		// Main menu, custom tabs, help link - in that order
 		$menu_string  = $this->_process_menu($menu);
 		$menu_string .= $this->_process_menu($this->_fetch_quick_tabs(), 0, FALSE);
-		$menu_string .= $this->_process_menu(array('help' => $this->generate_help_link()));
+		$menu_string .= $this->_process_menu(array('help' => $this->generate_help_link()), 0, TRUE, '', 'external');
 		
 		// Visit Site / MSM Switcher gets an extra class
 		$menu_string .= $this->_process_menu($this->_fetch_site_list(), 0, FALSE, 'msm_sites');
@@ -267,7 +302,6 @@ class EE_Menu {
 		$this->EE->load->vars('menu_string', $menu_string);
 		
 		return $menu;
-		
 	}
 	
 	// --------------------------------------------------------------------
@@ -281,7 +315,7 @@ class EE_Menu {
 	 * @param	array	menu definition
 	 * @return	array
 	 */
-	function _process_menu($m, $depth = 0, $use_lang_keys = TRUE, $li_class = '')
+	function _process_menu($m, $depth = 0, $use_lang_keys = TRUE, $li_class = '', $rel = '')
 	{
 		$menu = '';
 
@@ -299,14 +333,16 @@ class EE_Menu {
 						'{link_class}',
 						'{li_class}',
 						'{subnav}',
-						'{ul_class}'
+						'{ul_class}',
+						'{rel}'
 					),
 					array(
 						$label,
 						$link_class,
 						$li_class,
-						$this->_process_menu($data, $depth + 1, $sub_use_lang),
-						''
+						$this->_process_menu($data, $depth + 1, $sub_use_lang, $li_class, $rel),
+						'',
+						($rel == '') ? '' : ' rel="'.$rel.'"',
 					),
 					$this->menu_parent
 				);
@@ -325,21 +361,23 @@ class EE_Menu {
 							'{link_class}',
 							'{li_class}',
 							'{url}',
-							'{ul_class}'
+							'{ul_class}',
+							'{rel}'
 						),
 						array(
 							$label,
 							$link_class,
 							$li_class,
 							$data,
-							''
+							'',
+							($rel == '') ? '' : ' rel="'.$rel.'"',
 						),
 						$this->menu_item
 					);
 				}
 			}
 		}
-		
+
 		return $menu;
 	}
 
@@ -410,7 +448,16 @@ class EE_Menu {
 			if ( ! $this->EE->cp->allowed_group('can_access_files'))
 			{
 				unset($menu['content']['files']);
-			}			
+			}
+			else
+			{
+				if ( ! $this->EE->cp->allowed_group('can_admin_upload_prefs'))
+				{
+					unset($menu['content']['files'][0]);
+					unset($menu['content']['files']['file_upload_preferences']);
+					unset($menu['content']['files']['file_watermark_preferences']);
+				}				
+			}
 		}
 
 		if ( ! $this->EE->cp->allowed_group('can_access_design'))
@@ -592,7 +639,7 @@ class EE_Menu {
 			{
 				if ( ! $this->EE->cp->allowed_group('can_admin_channels'))
 				{
-					unset($menu['admin']['channel_management']['global_channel_preferences']);
+					unset($menu['admin']['channel_management']);
 					unset($menu['admin']['admin_content']);
 					unset($menu['admin'][0]);	
 				}				
@@ -694,14 +741,15 @@ class EE_Menu {
 		// Add MSM Site Switcher
 		$this->EE->load->model('site_model');
 		
-		$site_list = $this->EE->site_model->get_site();
-		$site_list = ($this->EE->config->item('multiple_sites_enabled') === 'y' && ! IS_FREELANCER) ? $site_list->result() : FALSE;
+		$site_list = $this->EE->session->userdata('assigned_sites'); 
+		$site_list = ($this->EE->config->item('multiple_sites_enabled') === 'y' && ! IS_FREELANCER) ? $site_list : FALSE;
 
 		$menu = array();
 
 		if ($site_list)
 		{
 			$site_backlink = $this->EE->cp->get_safe_refresh();
+
 			if ($site_backlink)
 			{
 				$site_backlink = implode('|', explode(AMP, $site_backlink));
@@ -717,9 +765,9 @@ class EE_Menu {
 			
 			$menu[$this->EE->config->item('site_name')][] = '----';
 			
-			foreach($site_list as $row)
+			foreach($site_list as $site_id => $site_name)
 			{
-				$menu[$this->EE->config->item('site_name')][$row->site_label] = BASE.AMP.'C=sites'.AMP.'site_id='.$row->site_id.$site_backlink;
+				$menu[$this->EE->config->item('site_name')][$site_name] = BASE.AMP.'C=sites'.AMP.'site_id='.$site_id.$site_backlink;
 			}
 		}
 		else
@@ -753,153 +801,179 @@ class EE_Menu {
 		}
 
 		$help_map = array(
-							'addons_accessories'	=> 'cp/add-ons/accessory_manager.html',
-							'addons_extensions'		=> 'cp/add-ons/extension_manager.html',
-							'addons_modules'		=> 'cp/add-ons/module_manager.html',
-							'addons_plugins'		=> 'cp/add-ons/plugin_manager.html',
-							'addons'				=> 'cp/add-ons/index.html',
-							'admin_content'			=> array(
-								
-															'index'								=> 'cp/admin/content_admin/index.html',								
-															'category_edit'						=> 'cp/admin/content_admin/category_create.html',
-															'edit_category_group'				=> 'cp/admin/content_admin/category_create_group.html',
-															'category_editor'					=> 'cp/admin/content_admin/category_edit.html',
-															'category_custom_field_group_manager'	=> 'cp/admin/content_admin/category_field_management.html',
-															'category_management'				=>	'cp/admin/content_admin/category_management.html',
-															'channel_add'						=> 'cp/admin/content_admin/channel_create.html',
-															'channel_delete_confirm'			=> 'cp/admin/content_admin/channel_delete.html',
-															'channel_edit'						=> 'cp/admin/content_admin/channel_edit_preferences.html',
-															'channel_edit_group_assignments'	=> 'cp/admin/content_admin/channel_groups.html',
-															'channel_management'				=> 'cp/admin/content_admin/channel_management.html',
-															'edit_custom_category_field'		=> 'cp/admin/content_admin/category_field_edit.html',
-															'field_management'					=> 'cp/admin/content_admin/custom_channel_fields.html',
-															'field_group_management'			=> 'cp/admin/content_admin/custom_channel_fields.html',
-															'status_group_management'			=> 'cp/admin/content_admin/custom_entry_statuses.html',
-															'field_edit'						=> 'cp/admin/content_admin/custom_fields_edit.html',
-															'field_group_edit'					=> 'cp/admin/content_admin/custom_channel_fields.html',
-															'default_html_buttons'				=> 'cp/admin/content_admin/default_html_buttons.html',
-															'default_ping_servers'				=> 'cp/admin/content_admin/default_ping_servers.html',
-															'global_channel_preferences'		=> 'cp/admin/content_admin/global_channel_preferences.html',
-															'status_group_edit'					=> 'cp/admin/content_admin/statuses_edit.html',
-															'file_upload_preferences'			=> 'cp/admin/content_admin/file_upload_preferences.html',
-															'edit_upload_preferences'			=> 'cp/admin/content_admin/file_upload_preferences.html'
-															),
-							'admin_system'			=> array(
-															'index'							=> 'cp/admin/system_admin/index.html',								
-															'captcha_preferences'			=> 'cp/admin/system_admin/captcha_preferences.html',
-															'database_settings'				=> 'cp/admin/system_admin/database_settings.html',
-															'cookie_settings'				=> 'cp/admin/system_admin/cookie_settings.html',
-															'email_configuration'			=> 'cp/admin/system_admin/email_configuration.html',
-															'emoticon_preferences'			=> 'cp/admin/system_admin/emoticon_preferences.html',
-															'general_configuration'			=> 'cp/admin/system_admin/general_configuration.html',
-															'image_resizing_preferences'	=> 'cp/admin/system_admin/image_resizing_preferences.html',
-															'localization_settings'			=> 'cp/admin/system_admin/localization_settings.html',
-															'output_debugging_preferences'	=> 'cp/admin/system_admin/output_and_debugging_preferences.html',
-															'search_log_configuration'		=> 'cp/admin/system_admin/search_log_preferences.html',
-															'security_session_preferences'	=> 'cp/admin/system_admin/security_settings.html',
-															'throttling_configuration'		=> 'cp/admin/system_admin/throttling_settings.html',
-															'tracking_preferences'			=> 'cp/admin/system_admin/tracking_preferences.html',
-															'word_censoring'				=> 'cp/admin/system_admin/word_censoring.html'
-															),
-							'admin'					=> 'cp/admin/index.html',
-							'content_edit'			=> array(
-															'index'							=> 'cp/content/edit.html',
-															'content_edit'					=> 'cp/content/edit.html',
-															'view_comments'					=> 'cp/content/comments.html'
-															//'multi_edit_form'				=> '',
-															//'edit_comment_form'			=> '',
-														),
-							'content_publish'		=> 'cp/content/publish.html',
-							'content_files'			=> 'cp/content/publish.html',
-							'content'				=> '',
-							'css'					=> '',
-							'design'				=> array(
-															'index'							=> 'cp/design/templates/index.html',
-															'edit_template'					=> 'cp/design/templates/edit_template.html',
-															'global_template_preferences'	=> 'cp/design/templates/global_template_preferences.html',
-															'global_variables'				=> 'cp/design/templates/global_variables.html',
-															'manager'						=> 'cp/design/templates/index.html',
-															'new_template_group'			=> 'cp/design/templates/new_template_group.html',
-															'new_template'					=> 'cp/design/templates/new_template.html',
-															//''			=> 'cp/templates/template_access.html',
-															//''			=> 'cp/templates/template_preferences_manager.html',
-															//''			=> 'cp/templates/template_preferences.html',
-															'manager'						=> 'cp/design/templates/templates.html',
-															'snippets'				=> 'cp/design/templates/snippets.html',
-															
-															'email_notification'			=> 'cp/design/specialty_templates/index.html',
-															'edit_email_notification'		=> 'cp/design/specialty_templates/index.html',
-															'user_message'					=> 'cp/design/specialty_templates/index.html',
-															'system_offline'				=> 'cp/design/specialty_templates/index.html',
-															
-															'member_profile_templates'		=> 'cp/design/themes/member_profile_templates.html',
-															'list_profile_templates'		=> 'cp/design/themes/member_profile_templates.html',
-															'edit_profile_template'			=> 'cp/design/themes/member_profile_templates.html',
-														
-															),
-							'help'					=> '',
-							'homepage'				=> 'cp/index.html',
-							'javascript'			=> '',
-							'login'					=> 'cp/',
-							'members'				=> array(
-															'index'							=> 'cp/members/index.html',
-															'new_member_form'				=> 'cp/members/new_member_registraion.html',
-															'member_banning'				=> 'cp/members/user_banning.html',
-															'member_validation'				=> 'cp/members/activate_pending_members.html',
-															'member_group_manager'			=> 'cp/members/member_groups.html',
-															'edit_member_group'				=> 'cp/members/member_groups_edit.html',
-															'custom_profile_fields'			=> 'cp/members/custom_profile_fields.html',
-															'edit_profile_field'			=> 'cp/members/custom_profile_fields_edit.html',
-															'member_config'					=> 'cp/members/membership_preferences.html',
-															'view_all_members'				=> 'cp/members/view_members.html',
-															'ip_search'						=> 'cp/members/index.html'
-															),							
-							'myaccount'				=> 'cp/my_account/index.html',
-							'tools_communicate'		=> 'cp/tools/communicate.html',
-							'tools_data'			=> array(
-														'index'					=> 'cp/tools/index.html',								
-														'clear_caching'			=> 'cp/tools/data/clear_cached_data_files.html',								
-														'recount_stats'			=> 'cp/tools/data/recount_statistics.html',
-														'search_and_replace'	=> 'cp/tools/data/search_and_replace.html',	
-														'sql_view_database'		=> 'cp/tools/data/sql_manage_tables.html',	
-														'sql_run_query'			=> 'cp/tools/data/sql_manage_tables.html',						
-														'sql_manager'			=> 'cp/tools/data/sql_manager.html',								
-														'sql_processlist'		=> 'cp/tools/data/sql_process_list.html',
-														'sql_query_form'		=> 'cp/tools/data/sql_query_form.html',	
-														'sql_status'			=> 'cp/tools/data/sql_status_info.html',
-														'sql_system_vars'		=> 'cp/tools/data/sql_system_variables.html'
-														),																													
-							'cp/tools/data/',
-							'content_files'			=> 'cp/content/file_manager/index.html',
-							'tools_logs'			=> array(
-														'index'					=> 'cp/tools/index.html',
-														'view_cp_log'					=> 'cp/tools/logs/cp_log.html',
-														'view_email_log'					=> 'cp/tools/logs/email_console_logs.html',
-														'view_search_log'					=> 'cp/tools/logs/search_log.html',
-														'view_throttle_log'					=> 'cp/tools/logs/throttle_log.html',
+			'addons_accessories'	=> 'cp/add-ons/accessory_manager.html',
+			
+			'addons_extensions'		=> 'cp/add-ons/extension_manager.html',
+			
+			'addons_modules'		=> 'cp/add-ons/module_manager.html',
+			
+			'addons_plugins'		=> 'cp/add-ons/plugin_manager.html',
+			
+			'addons'				=> 'cp/add-ons/index.html',
+			
+			'admin_content'			=> array(
+				'index'								=> 'cp/admin/content_admin/index.html',
+				'category_edit'						=> 'cp/admin/content_admin/category_create.html',
+				'edit_category_group'				=> 'cp/admin/content_admin/category_create_group.html',
+				'category_editor'					=> 'cp/admin/content_admin/category_edit.html',
+				'category_custom_field_group_manager'	=> 'cp/admin/content_admin/category_field_management.html',
+				'category_management'				=>	'cp/admin/content_admin/category_management.html',
+				'channel_add'						=> 'cp/admin/content_admin/channel_create.html',
+				'channel_delete_confirm'			=> 'cp/admin/content_admin/channel_delete.html',
+				'channel_edit'						=> 'cp/admin/content_admin/channel_edit_preferences.html',
+				'channel_edit_group_assignments'	=> 'cp/admin/content_admin/channel_groups.html',
+				'channel_management'				=> 'cp/admin/content_admin/channel_management.html',
+				'edit_custom_category_field'		=> 'cp/admin/content_admin/category_field_edit.html',
+				'field_management'					=> 'cp/admin/content_admin/custom_channel_fields.html',
+				'field_group_management'			=> 'cp/admin/content_admin/custom_channel_fields.html',
+				'status_group_management'			=> 'cp/admin/content_admin/custom_entry_statuses.html',
+				'field_edit'						=> 'cp/admin/content_admin/custom_fields_edit.html',
+				'field_group_edit'					=> 'cp/admin/content_admin/custom_channel_fields.html',
+				'default_html_buttons'				=> 'cp/admin/content_admin/default_html_buttons.html',
+				'default_ping_servers'				=> 'cp/admin/content_admin/default_ping_servers.html',
+				'global_channel_preferences'		=> 'cp/admin/content_admin/global_channel_preferences.html',
+				'status_group_edit'					=> 'cp/admin/content_admin/statuses_edit.html',
+				'file_upload_preferences'			=> 'cp/admin/content_admin/file_upload_preferences.html',
+				'edit_upload_preferences'			=> 'cp/admin/content_admin/file_upload_preferences.html'
+			),
+			
+			'admin_system'			=> array(
+				'index'							=> 'cp/admin/system_admin/index.html',								
+				'captcha_preferences'			=> 'cp/admin/system_admin/captcha_preferences.html',
+				'database_settings'				=> 'cp/admin/system_admin/database_settings.html',
+				'cookie_settings'				=> 'cp/admin/system_admin/cookie_settings.html',
+				'email_configuration'			=> 'cp/admin/system_admin/email_configuration.html',
+				'emoticon_preferences'			=> 'cp/admin/system_admin/emoticon_preferences.html',
+				'general_configuration'			=> 'cp/admin/system_admin/general_configuration.html',
+				'image_resizing_preferences'	=> 'cp/admin/system_admin/image_resizing_preferences.html',
+				'localization_settings'			=> 'cp/admin/system_admin/localization_settings.html',
+				'output_debugging_preferences'	=> 'cp/admin/system_admin/output_and_debugging_preferences.html',
+				'search_log_configuration'		=> 'cp/admin/system_admin/search_log_preferences.html',
+				'security_session_preferences'	=> 'cp/admin/system_admin/security_settings.html',
+				'throttling_configuration'		=> 'cp/admin/system_admin/throttling_settings.html',
+				'tracking_preferences'			=> 'cp/admin/system_admin/tracking_preferences.html',
+				'word_censoring'				=> 'cp/admin/system_admin/word_censoring.html'
+			),
+			
+			'admin'					=> 'cp/admin/index.html',
+			
+			'content_edit'			=> array(
+				'index'					=> 'cp/content/edit.html',
+				'content_edit'			=> 'cp/content/edit.html',
+				'view_comments'			=> 'cp/content/comments.html'
+			),
+			
+			'content_publish'		=> 'cp/content/publish.html',
+			
+			'content_files'			=> 'cp/content/publish.html',
+			
+			'content'				=> array(
+				'index'							=> 'cp/content/publish.html', // This is for the different channels that don't have a defined index
+				'content'						=> 'cp/content/publish.html',
+				'edit'							=> 'cp/content/edit.html',
+				'file_manager'					=> 'cp/content/files/file_manager.html',
+				'file_upload_preferences'		=> 'cp/content/files/file_upload_preferences.html',
+				'file_watermark_preferences'	=> 'cp/content/files/watermark_preferences.html'
+				
+			),
+			
+			'css'					=> '',
+			
+			'design'				=> array(
+				'index'							=> 'cp/design/templates/index.html',
+				'edit_template'					=> 'cp/design/templates/edit_template.html',
+				'global_template_preferences'	=> 'cp/design/templates/global_template_preferences.html',
+				'global_variables'				=> 'cp/design/templates/global_variables.html',
+				'manager'						=> 'cp/design/templates/index.html',
+				'new_template_group'			=> 'cp/design/templates/new_template_group.html',
+				'new_template'					=> 'cp/design/templates/new_template.html',
+				'manager'						=> 'cp/design/templates/templates.html',
+				'snippets'						=> 'cp/design/templates/snippets.html',
+				
+				'email_notification'			=> 'cp/design/specialty_templates/index.html',
+				'edit_email_notification'		=> 'cp/design/specialty_templates/index.html',
+				'user_message'					=> 'cp/design/specialty_templates/index.html',
+				'system_offline'				=> 'cp/design/specialty_templates/index.html',
+				
+				'member_profile_templates'		=> 'cp/design/themes/member_profile_templates.html',
+				'list_profile_templates'		=> 'cp/design/themes/member_profile_templates.html',
+				'edit_profile_template'			=> 'cp/design/themes/member_profile_templates.html',
+			),
+			
+			'help'					=> '',
+			
+			'homepage'				=> 'cp/index.html',
+			
+			'javascript'			=> '',
+			
+			'login'					=> 'cp/',
+			
+			'members'				=> array(
+				'index'					=> 'cp/members/index.html',
+				'new_member_form'		=> 'cp/members/new_member_registration.html',
+				'member_banning'		=> 'cp/members/user_banning.html',
+				'member_validation'		=> 'cp/members/activate_pending_members.html',
+				'member_group_manager'	=> 'cp/members/member_groups.html',
+				'edit_member_group'		=> 'cp/members/member_groups_edit.html',
+				'custom_profile_fields'	=> 'cp/members/custom_member_fields.html',
+				'edit_profile_field'	=> 'cp/members/custom_profile_fields_edit.html',
+				'member_config'			=> 'cp/members/membership_preferences.html',
+				'view_all_members'		=> 'cp/members/view_members.html',
+				'ip_search'				=> 'cp/members/index.html'
+			),
+			
+			'myaccount'				=> 'cp/my_account/index.html',
+			
+			'tools_communicate'		=> 'cp/tools/communicate.html',
+			
+			'tools_data'			=> array(
+				'index'					=> 'cp/tools/index.html',
+				'clear_caching'			=> 'cp/tools/data/clear_cached_data_files.html',
+				'recount_stats'			=> 'cp/tools/data/recount_statistics.html',
+				'search_and_replace'	=> 'cp/tools/data/search_and_replace.html',
+				'sql_view_database'		=> 'cp/tools/data/sql_manage_tables.html',
+				'sql_run_query'			=> 'cp/tools/data/sql_manage_tables.html',
+				'sql_manager'			=> 'cp/tools/data/sql_manager.html',
+				'sql_processlist'		=> 'cp/tools/data/sql_process_list.html',
+				'sql_query_form'		=> 'cp/tools/data/sql_query_form.html',
+				'sql_status'			=> 'cp/tools/data/sql_status_info.html',
+				'sql_system_vars'		=> 'cp/tools/data/sql_system_variables.html'
+			),
+			
+			'cp/tools/data/',
+			
+			'content_files'			=> 'cp/content/file_manager/index.html',
+			
+			'tools_logs'			=> array(
+				'index'				=> 'cp/tools/index.html',
+				'view_cp_log'		=> 'cp/tools/logs/cp_log.html',
+				'view_email_log'	=> 'cp/tools/logs/email_console_logs.html',
+				'view_search_log'	=> 'cp/tools/logs/search_log.html',
+				'view_throttle_log'	=> 'cp/tools/logs/throttle_log.html',
+			),
+			
+			'tools_utilities'		=> array(
+				'index'						=> 'cp/tools/index.html',
+				'config_editor'				=> 'cp/tools/utilities/config_editor.html',
+				'import_utilities'			=> 'cp/tools/utilities/import_utilities.html',
+				'php_info'					=> 'cp/tools/utilities/php_info.html',
+				'translation_tool'			=> 'cp/tools/utilities/translation_utility.html',
+				'translate'					=> 'cp/tools/utilities/translation_utility.html',
+				'member_import'				=> 'cp/tools/utilities/member_import/index.html',
+				'pair_fields'				=> 'cp/tools/utilities/member_import/index.html',
+				'convert_from_delimited'	=> 'cp/tools/utilities/member_import/convert_to_xml.html',
+				'import_from_xml'			=> 'cp/tools/utilities/member_import/import_from_xml.html',
+				'confirm_xml_form'			=> 'cp/tools/utilities/member_import/import_from_xml.html'
+			),
+			
+			'tools'					=> 'cp/tools/index.html',
 
-														),
-							'tools_utilities'		=> array(
-														'index'					=> 'cp/tools/index.html',
-														'config_editor'			=> 'cp/tools/utilities/config_editor.html',
-														'import_utilities'		=> 'cp/tools/utilities/import_utilities.html',
-														'php_info'				=> 'cp/tools/utilities/php_info.html',															
-														'translation_tool'		=> 'cp/tools/utilities/translation_utility.html',
-														'translate'				=> 'cp/tools/utilities/translation_utility.html',
-														'member_import'			=> 'cp/tools/utilities/member_import/index.html',
-														'pair_fields'			=> 'cp/tools/utilities/member_import/index.html',
-														'convert_from_delimited'	=> 'cp/tools/utilities/member_import/convert_to_xml.html',
-														'import_from_xml'		=> 'cp/tools/utilities/member_import/import_from_xml.html',	
-														'confirm_xml_form'		=> 'cp/tools/utilities/member_import/import_from_xml.html'	
-														),		
-							'tools'					=> 'cp/tools/index.html',
-
-							// Consider new doc pages specifically for the cp links
-							'sites'					=> array(
-														'index'					=> 'cp/sites/index.html',
-														'add_edit_site'			=> 'cp/sites/createsite.html'
-														)
-							);
+			// Consider new doc pages specifically for the cp links
+			'sites'					=> array(
+				'index'					=> 'cp/sites/index.html',
+				'add_edit_site'			=> 'cp/sites/createsite.html'
+			)
+		);
 		
 		$page = $this->EE->config->item('doc_url');
 		
@@ -920,7 +994,6 @@ class EE_Menu {
 			$help_map['admin'] = array_merge($help_map['admin_content'], $help_map['admin_system']);
 		}
 
-
 		if ($class == 'addons_modules' && ($module !== FALSE OR ($module = $this->EE->input->get('module')) !== FALSE))
 		{
 			// check for native / third-party, build link accordingly
@@ -935,9 +1008,9 @@ class EE_Menu {
 				
 				$module = $this->EE->security->sanitize_filename($module);
 
-				if (file_exists(PATH_THIRD.$module.'/config/help_menu'.EXT))
+				if (file_exists(PATH_THIRD.$module.'/config/help_menu.php'))
 				{
-					require_once PATH_THIRD.$module.'/config/help_menu'.EXT;
+					require_once PATH_THIRD.$module.'/config/help_menu.php';
 					$method = ($this->EE->input->get('method') !== FALSE) ? $this->EE->input->get('method') : 'index';
 					$page = (isset($help_menu[$method])) ? $help_menu[$method] : $help_map['addons_modules'];
 				}

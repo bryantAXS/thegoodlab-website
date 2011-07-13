@@ -464,9 +464,6 @@ $lang = array(
 'email_changed' =>
 'Email was changed to:',
 
-'password_change_requires_login' =>
-'Note:  If you change your password you will have to log back in',
-
 'settings_updated' =>
 'Settings Have Been Updated',
 
@@ -524,9 +521,6 @@ $lang = array(
 'bookmarklet_info' =>
 'A bookmarklet allows you to add entries to your channel without logging into the full control panel.',
 
-'consult_manual' =>
-'Please consult the user guide for more info.',
-
 'bookmarklet_name' =>
 'Bookmarklet Name',
 
@@ -551,9 +545,6 @@ $lang = array(
 'no_fields_assigned_to_channel' =>
 'The channel you chose does not have a field group assigned to it',
 
-'safari_users' =>
-'Click if you use Safari as your browser',
-
 'bookmarklet_instructions' =>
 'Save this link to your favorites menu:',
 
@@ -568,9 +559,6 @@ $lang = array(
 
 'login_as_member' =>
 'Login as Member',
-
-'pmachine_news_feed' =>
-'EllisLab News Feed',
 
 'html_buttons_updated' =>
 'HTML Buttons Updated',

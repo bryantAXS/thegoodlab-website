@@ -4,7 +4,7 @@
  *
  * @package		ExpressionEngine
  * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2010, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -55,8 +55,16 @@ class Search {
 	{
 		$this->EE->lang->loadfile('search');
 
+		if ( ! $this->EE->security->secure_forms_check($this->EE->input->post('XID')))
+		{
+			return $this->EE->output->show_user_error('general', array(lang('invalid_action')));
+		}
+
 		// Get hidden meta vars 
-		$this->_get_meta_vars();
+		if (isset($_POST['meta']))
+		{
+			$this->_get_meta_vars();			
+		}
 		
 		/** ----------------------------------------
 		/**  Profile Exception
@@ -188,7 +196,7 @@ class Search {
 			/**  Remove "ignored" words
 			/** ----------------------------------------*/
 		
-			if (( ! isset($_POST['exact_keyword']) OR $_POST['exact_keyword'] != 'y') && @include_once(APPPATH.'config/stopwords'.EXT))
+			if (( ! isset($_POST['exact_keyword']) OR $_POST['exact_keyword'] != 'y') && @include_once(APPPATH.'config/stopwords.php'))
 			{
 				$parts = explode('"', $this->keywords);
 				
@@ -322,6 +330,7 @@ class Search {
 		$meta = array(
 			'status'				=> $this->EE->TMPL->fetch_param('status', ''),
 			'channel'				=> $this->EE->TMPL->fetch_param('channel', ''),
+			'category'				=> $this->EE->TMPL->fetch_param('category', ''),
 			'search_in'				=> $this->EE->TMPL->fetch_param('search_in', ''),
 			'where'					=> $this->EE->TMPL->fetch_param('where', 'all'),
 			'show_expired'			=> $this->EE->TMPL->fetch_param('show_expired', ''),
@@ -337,11 +346,11 @@ class Search {
 			$init_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
 			$init_vect = mcrypt_create_iv($init_size, MCRYPT_RAND);
 
-			$meta = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($this->EE->session->sess_crypt_key), $meta, MCRYPT_MODE_ECB, $init_vect);
+			$meta = mcrypt_encrypt(MCRYPT_RIJNDAEL_256, md5($this->EE->db->username.$this->EE->db->password), $meta, MCRYPT_MODE_ECB, $init_vect);
 		}
 		else
 		{
-			$meta = $meta.md5($this->EE->session->sess_crypt_key.$meta);
+			$meta = $meta.md5($this->EE->db->username.$this->EE->db->password.$meta);
 		}
 		
 		
@@ -365,12 +374,16 @@ class Search {
 			$init_size = mcrypt_get_iv_size(MCRYPT_RIJNDAEL_256, MCRYPT_MODE_ECB);
 			$init_vect = mcrypt_create_iv($init_size, MCRYPT_RAND);
 
-			$meta_array = rtrim(mcrypt_decrypt(MCRYPT_RIJNDAEL_256, 
-								md5($this->EE->session->sess_crypt_key), 
+			$meta_array = rtrim(
+				mcrypt_decrypt(
+					MCRYPT_RIJNDAEL_256, 
+								md5($this->EE->db->username.$this->EE->db->password), 
 								base64_decode($_POST['meta']), 
 								MCRYPT_MODE_ECB, 
-								$init_vect), 
-						"\0");
+					$init_vect
+				), 
+				"\0"
+			);
 		}
 		else
 		{
@@ -379,13 +392,26 @@ class Search {
 			$hash = substr($raw, -32);
 			$meta_array = substr($raw, 0, -32);
 
-			if ($hash != md5($this->EE->session->sess_crypt_key.$meta_array))
+			if ($hash != md5($this->EE->db->username.$this->EE->db->password.$meta_array))
 			{
 				$meta_array = '';
 			}
 		}
 		
 		$this->_meta = unserialize($meta_array);
+		
+		// Check for Advanced Form Inputs
+		$valid_inputs = array('search_in', 'where');
+		foreach ($valid_inputs as $current_input) 
+		{
+			if (
+				( ! isset($this->_meta[$current_input]) OR $this->_meta[$current_input] === '') &&
+				$this->EE->input->post($current_input)
+			)
+			{
+				$this->_meta[$current_input] = $this->EE->input->post($current_input);
+			}
+		}
 	}
 	
 	// ------------------------------------------------------------------------
@@ -484,7 +510,9 @@ class Search {
 		
         if (isset($_GET['mbr']) AND is_numeric($_GET['mbr']))
         {
-			$query = $this->EE->db->query("SELECT member_id FROM exp_members WHERE member_id = '".$this->EE->db->escape_str($_GET['mbr'])."'");
+			$query = $this->EE->db->select('member_id')->get_where('members', array(
+				'member_id' => $_GET['mbr']
+			));
 			
 			if ($query->num_rows() != 1)
 			{
@@ -499,18 +527,18 @@ class Search {
         {
 			if ($this->EE->input->post('member_name') != '')
 			{
-				$sql = "SELECT member_id FROM exp_members WHERE screen_name ";
+				$this->EE->db->select('member_id');
 				
 				if ($this->EE->input->post('exact_match') == 'y')
 				{
-					$sql .= " = '".$this->EE->db->escape_str($this->EE->input->post('member_name'))."' ";
+					$this->EE->db->where('screen_name', $this->EE->input->post('member_name'));
 				}
 				else
 				{
-					$sql .= " LIKE '%".$this->EE->db->escape_like_str($this->EE->input->post('member_name'))."%' ";
+					$this->EE->db->like('screen_name', $this->EE->input->post('member_name'));
 				}
 				
-				$query = $this->EE->db->query($sql);
+				$query = $this->EE->db->get('members');
 			
 				if ($query->num_rows() == 0)
 				{
@@ -556,20 +584,25 @@ class Search {
 
 			if ($query->num_rows() > 0)
 			{
-				$fql = "SELECT field_id, field_name, field_search FROM exp_channel_fields WHERE (";
-
+				$this->EE->db->select('field_id, field_name, field_search');
+			
+				// Build array of field groups
+				$field_groups = array();
 				foreach ($query->result_array() as $row)
 				{
-					$fql .= " group_id = '".$row['field_group']."' OR";	
+					$field_groups[] = $row['field_group'];
+				}
+				
+				if (count($field_groups) > 0)
+				{
+					$this->EE->db->where_in('group_id', $field_groups);
 				}
 
-				$fql = substr($fql, 0, -2).')';  
+				$field_query = $this->EE->db->get('channel_fields');
 
-				$query = $this->EE->db->query($fql);
-
-				if ($query->num_rows() > 0)
+				if ($field_query->num_rows() > 0)
 				{
-					foreach ($query->result_array() as $row)
+					foreach ($field_query->result_array() as $row)
 					{
 						if ($row['field_search'] == 'y')
 						{
@@ -595,7 +628,7 @@ class Search {
 				LEFT JOIN exp_channel_data ON exp_channel_titles.entry_id = exp_channel_data.entry_id ";
 
 		// is the comment module installed?
-		if ($this->EE->addons_model->module_installed('comments'))
+		if ($this->EE->addons_model->module_installed('comment'))
 		{
 			$sql .= "LEFT JOIN exp_comments ON exp_channel_titles.entry_id = exp_comments.entry_id";
 		}
@@ -625,7 +658,7 @@ class Search {
 		
 		$sql .= "\nAND exp_channel_titles.status != 'closed' ";
 		
-		if (($status = $this->_meta['status']) != '')
+		if (isset($this->_meta['status']) AND ($status = $this->_meta['status']) != '')
 		{
 			$status = str_replace('Open',	'open',	$status);
 			$status = str_replace('Closed', 'closed', $status);
@@ -881,7 +914,7 @@ class Search {
 			/**  Search in Comments
 			/** ----------------------------------*/
 
-			if (isset($this->_meta['search_in']) AND $this->_meta['search_in'] == 'everywhere' AND $this->EE->addons_model->module_installed('comments'))
+			if (isset($this->_meta['search_in']) AND $this->_meta['search_in'] == 'everywhere' AND $this->EE->addons_model->module_installed('comment'))
 			{
 				if (count($terms) == 1 && isset($this->_meta['where']) && $this->_meta['where'] == 'word')
 				{
@@ -959,7 +992,7 @@ class Search {
 				$sql .= "AND (exp_channel_titles.author_id {$member_ids} ";
 
 				// searching comments too?
-				if (isset($this->_meta['search_in']) AND $this->_meta['search_in'] == 'everywhere' AND $this->EE->addons_model->module_installed('comments'))
+				if (isset($this->_meta['search_in']) AND $this->_meta['search_in'] == 'everywhere' AND $this->EE->addons_model->module_installed('comment'))
 				{
 					$sql .= " OR exp_comments.author_id {$member_ids}";
 				}
@@ -982,11 +1015,29 @@ class Search {
 		/**  Limit query to a specific category
 		/** ----------------------------------------------*/
 				
-		if (isset($_POST['cat_id']) AND is_array($_POST['cat_id']))
+		// Check for different sets of category IDs, checking the parameters
+		// first, then the $_POST
+		if (isset($this->_meta['category']) AND $this->_meta['category'] != '' AND ! is_array($this->_meta['category']))
+		{
+			$this->_meta['category'] = explode('|', $this->_meta['category']);
+		}
+		else if (
+			( ! isset($this->_meta['category']) OR $this->_meta['category'] == '') AND
+			(isset($_POST['cat_id']) AND is_array($_POST['cat_id']))
+		)
+		{
+			$this->_meta['category'] = $_POST['cat_id'];
+		}
+		else
+		{
+			$this->_meta['category'] = '';
+		}
+		
+		if (is_array($this->_meta['category']))
 		{		
 			$temp = '';
 		
-			foreach ($_POST['cat_id'] as $val)
+			foreach ($this->_meta['category'] as $val)
 			{
 				if ($val != 'all' AND $val != '')
 				{
@@ -1263,7 +1314,7 @@ class Search {
 		
 		if ( ! class_exists('Channel'))
 		{
-			require PATH_MOD.'channel/mod.channel'.EXT;
+			require PATH_MOD.'channel/mod.channel.php';
 		}
 		
 		unset($this->EE->TMPL->var_single['auto_path']);
@@ -1295,9 +1346,10 @@ class Search {
 		}
 		
 		$this->EE->load->library('typography');
-		$this->EE->typography->initialize();
-		$this->EE->typography->convert_curly = FALSE;
-		$this->EE->typography->encode_email = FALSE;
+		$this->EE->typography->initialize(array(
+				'convert_curly'	=> FALSE,
+				'encode_email'	=> FALSE)
+				);
 		
 		$channel->fetch_categories();
 		$channel->parse_channel_entries();

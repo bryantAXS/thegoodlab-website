@@ -1,0 +1,46 @@
+Version 3.0.0
+- Redesigned the Fieldtype UI
+- Added an option to disable the "Most Used Tags" box
+- Added an option to enable a "Single Box UI", search and tag from 1 single box
+- Added an option to force all tags to be lowercase
+- Added an option that allows you to choose which separator to use in {tagger:urlsafe_tag}
+- Added {tagger:unitag} variable that is a foolproof unique urlsafe tag
+- Added unitag="" parameter to {exp:tagger:entries}
+- Added channel="" parameter to {exp:tagger:entries}
+- Added channel="" parameter to {exp:tagger:cloud}
+- Added {exp:tagger:tagname}
+- Added show_future_entries="" to Related & Entries tag
+- Added Tag Import for Solspace Tag module
+- Added pagination to {exp:tagger:entries}
+- Added natural sort to {exp:tagger:cloud orderby="tag_name"}
+- Added NSM Addon Updater compatibility 
+- {exp:tagger:entries} now parse {filedir_x}
+- Recoded Addon Updater Method
+- Tagger now uses the built-in jQuery UI Autocomplete
+- Fixed a bug in {exp:tagger:related} where duplicate entries where shown
+
+Version 2.1.5
+- Small CSS adjustments for SEAF
+
+Version 2.1.2
+- Adjusted the Tagger Model to work with EE 2.1.1 And EE 2.1.3, due to big changes in ExpressionEngine
+
+Version 2.1
+- Added groups="" to {exp:tagger:groups}
+- Added orderby=""/sort=""/tag_orderby=""/tag_sort="" to {exp:tagger:groups}
+
+Version 2.0
+- ExpressionEngine 1.6.x is no longer supported.
+- Added ability to group Tags in the Tagger Module Control Panel
+- Added ability to rename tags
+- Added ability to delete tags
+- Added {exp:tagger:entries} tag
+- Added {exp:tagger:related} tag
+- Renamed tagger_lite_module themes folder to tagger_module
+- Moved tagger theme folder to \themes\third_party\
+
+
+Version 1.1.0
+- Created tags now display in tagger module control panel
+- Tagger (for EE2) now plays nice with other control panel themes
+- Tagger (for EE2) styles updated to have dynamic width
