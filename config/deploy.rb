@@ -14,7 +14,7 @@ else   # add more as needed
  set :domain,      "thegoodlab.thegoodlab.com"
 end
 
-set :repository,  "git@github.com:bryantAXS/thegoodlab.git"
+set :repository,  "git@codebasehq.com:thegoodlab/the-good-lab-website/website.git"
 set :deploy_to,   "/var/www/#{domain}"
 set :shared_path, "#{deploy_to}/shared"
 set :use_sudo, false
