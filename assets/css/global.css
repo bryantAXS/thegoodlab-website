@@ -14,7 +14,7 @@ h2{
 .inside{
   margin:0 auto;
   padding:0 10px;
-  width:1120px;
+  width:790px;
 }
 li{
   list-style-type:none;
@@ -37,28 +37,32 @@ body{
 }
 
 #content-container{
-
+  position:relative;
 }
 
 /* T W I T T E R  C O N T A I N E R */
 #white-col-container{
   background: white url('/assets/images/bg-white-container.png') repeat-y right top;
-  float:left;
   height:500px;
+  left:10px;
   padding:200px 10px 0 20px;
+  position:absolute;
+  top:-76px;
   width:290px;
+  z-index:0;
 }
 #main-container{
   background: transparent url('../images/bg-main.png') repeat left top;
-  float:left;
-  padding-left:90px;
   width:700px;
+  padding-left:90px;
+  position:relative;
+  z-index:1;
 }
 
 /* H E A D E R */
 header{
   margin-bottom:23px;
-  margin-top:75px !important;
+  padding-top:75px !important;
   position:relative;
 }
 header h1{
@@ -67,7 +71,7 @@ header h1{
   left:-150px;
   position:absolute;
   text-indent:-99999px;
-  top:35px;
+  top:115px;
   width:123px;
 }
 header nav{
