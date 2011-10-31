@@ -11,30 +11,59 @@
   
   <div id='content-container' class='inside'>
     
-    <header class='clearfix'>
-      <a href='javascript:;'><h1>The Good Lab</h1></a>
-      <nav>
-        <ul class='has-layout'>
-          <li class='col-1 first {if segment_1 == "home" OR segment_1 == ""}here{/if}'><a href='{path="home"}'><span class='number'>01</span><span class='link-name'>Home</span></a></li>
-          <li class='col-1 {if segment_1 == "work"}here{/if}'><a href='{path="work"}'><span class='number'>02</span><span class='link-name'>Work</span></a></li>
-          <li class='col-1 {if segment_1 == "about"}here{/if}'><a href='{path="about"}'><span class='number'>03</span><span class='link-name'>About</span></a></li>
-          <li class='col-1 {if segment_1 == "contact"}here{/if}'><a href='{path="contact"}'><span class='number'>04</span><span class='link-name'>Contact</span></a></li>
-          <li class='col-1 {if segment_1 == "blog"}here{/if}'><a href='{path="blog"}'><span class='number'>05</span><span class='link-name'>Blog</span></a></li>
+    <section id='white-col-container'>
+      
+      <span id='twitter-title'>Obligatory Twitter Feed</span>
+
+      <div class='twitter-container'>
+        <p>
+          Launched a new site yesterday we did the development for.  A small site, but the content is amazing!
+        </p>
+        <span class='time'>About an hour ago</span>
+      </div><!-- .twitter-container -->
+
+      <div class='twitter-container'>
+        <p>
+          Launched a new site yesterday we did the development for.  A small site, but the content is amazing!
+        </p>
+        <span class='time'>About an hour ago</span>
+      </div><!-- .twitter-container -->
+
+      <div class='twitter-container'>
+        <p>
+          Launched a new site yesterday we did the development for.  A small site, but the content is amazing!
+        </p>
+        <span class='time'>About an hour ago</span>
+      </div><!-- .twitter-container -->
+
+    </section><!-- #white-col-container -->
+
+    <section id='main-container'>
+    
+      <header class='clearfix'>
+        <a href='javascript:;'><h1>The Good Lab</h1></a>
+        <nav>
+          <ul class='has-layout'>
+            <li class='col-1 first {if segment_1 == "home" OR segment_1 == ""}here{/if}'><a href='{path="home"}'><span class='number'>01</span><span class='link-name'>Home</span></a></li>
+            <li class='col-1 {if segment_1 == "work"}here{/if}'><a href='{path="work"}'><span class='number'>02</span><span class='link-name'>Work</span></a></li>
+            <li class='col-1 {if segment_1 == "about"}here{/if}'><a href='{path="about"}'><span class='number'>03</span><span class='link-name'>About</span></a></li>
+            <li class='col-1 {if segment_1 == "contact"}here{/if}'><a href='{path="contact"}'><span class='number'>04</span><span class='link-name'>Contact</span></a></li>
+            <li class='col-1 {if segment_1 == "blog"}here{/if}'><a href='{path="blog"}'><span class='number'>05</span><span class='link-name'>Blog</span></a></li>
+          </ul>
+        </nav>
+        <ul id='dots' class='has-layout'>
+          <li><a target="_blank" href='mailto:hello@thegoodlab.com'><img src='/assets/images/icon-mail.png' /></a></li>
+          <li><a target="_blank" href='http://www.twitter.com/thegoodlab'><img src='/assets/images/icon-twitter.png' /></a></li>
+          {exp:channel:entries
+            channel="fun_links"
+            disable="categories|category_fields|member_data|pagination|trackbacks"
+            dynamic="off"
+            order="random"
+            limit="1"
+          }
+          <li><a target="_blank" href='{fun_link_url}'><img src='/assets/images/icon-question.png' /></a></li>
+          {/exp:channel:entries}
+          
         </ul>
-      </nav>
-      <ul id='dots' class='has-layout'>
-        <li><a target="_blank" href='mailto:hello@thegoodlab.com'><img src='/assets/images/icon-mail.png' /></a></li>
-        <li><a target="_blank" href='http://www.twitter.com/thegoodlab'><img src='/assets/images/icon-twitter.png' /></a></li>
-        {exp:channel:entries
-          channel="fun_links"
-          disable="categories|category_fields|member_data|pagination|trackbacks"
-          dynamic="off"
-          order="random"
-          limit="1"
-        }
-        <li><a target="_blank" href='{fun_link_url}'><img src='/assets/images/icon-question.png' /></a></li>
-        {/exp:channel:entries}
-        
-      </ul>
-    </header>
-    <div class='dotted-line'>&nbsp;</div>
+      </header>
+      <div class='dotted-line'>&nbsp;</div>

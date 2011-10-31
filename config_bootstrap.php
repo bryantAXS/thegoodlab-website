@@ -60,7 +60,7 @@ if (NSM_ENV == 'local') {
     $env_db_config = array(
         'hostname' => '127.0.0.1',
         'username' => 'root',
-        'password' => '',
+        'password' => 'root',
         'database' => 'thegoodlab',
     );
     $env_global_vars = array(

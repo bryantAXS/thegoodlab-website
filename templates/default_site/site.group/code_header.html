@@ -37,8 +37,8 @@
 	<link rel="stylesheet" href="/assets/css/global.css?v=1" />
 	
 	{!-- asynchronous google analytics: change the UA-XXXXX-X to be your site's ID. --}
+  {if global:env == 'production'}
   <script>
-
     var _gaq = [['_setAccount', 'UA-23070397-1'], ['_trackPageview']]; 
     
     (function(d, t) {
@@ -49,6 +49,7 @@
       s.parentNode.insertBefore(g, s);
       })(document, 'script');
   </script>
+  {/if}
 	
 	{!-- Modernizr (Must be at top) --}
 	<script src="/assets/js/modernizr-1.6.min.js"></script>

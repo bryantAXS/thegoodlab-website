@@ -14,7 +14,7 @@ h2{
 .inside{
   margin:0 auto;
   padding:0 10px;
-  width:700px;
+  width:1120px;
 }
 li{
   list-style-type:none;
@@ -37,7 +37,24 @@ body{
 }
 
 #content-container{
+
 }
+
+/* T W I T T E R  C O N T A I N E R */
+#white-col-container{
+  background: white url('/assets/images/bg-white-container.png') repeat-y right top;
+  float:left;
+  height:500px;
+  padding:200px 10px 0 20px;
+  width:290px;
+}
+#main-container{
+  background: transparent url('../images/bg-main.png') repeat left top;
+  float:left;
+  padding-left:90px;
+  width:700px;
+}
+
 /* H E A D E R */
 header{
   margin-bottom:23px;
@@ -109,6 +126,36 @@ header ul#dots li img{
   top:0;
   width:312px;
 }
+#twitter-title{
+  color:#3b3b3b;
+  font-family:ProximaNovaBold;
+  font-size:14px;
+  line-height:22px;
+}
+.twitter-container{
+  margin-top:20px;
+}
+.twitter-container p{
+  border-left:4px solid #14ffa3;
+  color:#3b3b3b;
+  font-family:CallunaItalic;
+  font-size:14px;
+  line-height:22px;
+  padding-left:10px;
+}
+.twitter-container .time{
+  background: transparent url('/assets/images/icon-twitter.png') no-repeat left top;
+  color:#3b3b3b;
+  display:block;
+  font-family:ProximaNovaLight;
+  font-size:12px;
+  height:16px;
+  margin-left:12px;
+  margin-top:10px;
+  line-height:16px;
+  padding-left:20px;
+}
+
 #content-container{
   position:relative;
 }
@@ -400,6 +447,9 @@ header ul#dots li img{
 }
 
 /* A R T I C L E  */
+#article-intro-content-container p{
+
+}
 #article-content-container{
   font-family: ProximaNovaRegular;
   font-size: 14px;
@@ -448,6 +498,12 @@ header ul#dots li img{
   height:auto !important;
   max-width:100% !important;
 }
+.sidenote{
+	background: transparent url('../images/bg-white-dot.png') repeat top left;
+	color:#14ffa3;
+	font-style:italic;
+	padding:15px;
+}
 
 /* C O N T A C T */
 #contact-container{
@@ -479,7 +535,8 @@ footer{
   color:#fff;
   font-family:CallunaItalic;
   font-size:14px;
-  margin-top:25px !important;
+  margin:25px auto 0 auto !important;
+  width:700px;
 }
 footer div.dotted-line{
   margin-bottom:24px;
