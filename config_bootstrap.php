@@ -214,9 +214,9 @@ if(isset($config)) {
         'webmaster_name' => 'The Good Lab',
 
         // Localization preferences
-        'server_timezone' => 'UP10',
+        'server_timezone' => 'UM6',
         'server_offset' => FALSE,
-        'time_format' => 'eu',
+        'time_format' => 'us',
         'daylight_savings' => 'n',
         'honor_entry_dst' => 'y',
 
