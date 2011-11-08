@@ -11,39 +11,53 @@ $(document).ready(function(){
   //   var $el = $(this);
   //   $el.find('div').animate({opacity: 0},500);
   // });
-
-  $(window).bind('resize',function(){
-    var main_container_padding = $(this).height() - $('#main-container').height();
-    $('#main-container').css({
-      paddingBottom: main_container_padding
-    })
-    var white_col_container_height = $('#white-col-container').height() + $(this).height() - $('#white-col-container').outerHeight();
-    $('#white-col-container').css({
-      height: white_col_container_height
-    });
-  });
-
-  $(window).trigger('resize');
   
+  //init header dots
   $('header ul#dots li img').bind('mouseenter',function(){
     $(this).animate({opacity:'0.95'});
   }).bind('mouseleave',function(){
     $(this).animate({opacity:'0.7'});
-  })
-  
-  //init galleries drawn on page
-  // var $galleries = $('.work-gallery')
-  // if($galleries.length){
-  //   var work_gallery = new Work_Gallery();
-  //   work_gallery.init_galleries($galleries);
-  // }
-  
-  // //paginate work examples
-  // if($('#work-offset').length){
-  //   var work_pagination = new Work_Pagination();
-  //   work_pagination.init();
-  // }
-  
+  });
+ 
+  //init work galleries
+  if($('.work-gallery').length){
+    
+    $('.work-gallery').each(function(){
+      
+      $gallery = $(this);
+      $controls_container = $gallery.prev().find('div');
+      $next = $gallery.prev().find('.button-next');
+
+      $gallery.cycle({
+        activePagerClass: 'active'
+        ,fx:'fade'
+        ,pager: $controls_container
+        ,speed:  600 
+        ,timeout: 0
+        ,next: $next
+      });
+        
+    });
+  }
+
+  //resize content-container, so white bar goes to the bottom of the page
+  $(window).bind('resize',function(){
+    if($(window).width() < 1113){
+      $('#content-container').height('auto');
+    }else{
+      if($('#content-container').height() < $(document).height()){
+        $('#content-container').height($(document).height());
+      }
+    }
+  });
+  if($(window).width() < 1113){
+    $('#content-container').height('auto');
+  }else{
+    if($('#content-container').height() < $(document).height()){
+      $('#content-container').height($(document).height());
+    }
+  }
+
   //toggles on about page
   $('#about-content-container-right a.services-title').bind('click',function(){
     $el = $(this);

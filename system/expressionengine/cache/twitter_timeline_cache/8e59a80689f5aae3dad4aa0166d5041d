@@ -1,6 +1,128 @@
-1320446084
+1320770043
 <?xml version="1.0" encoding="UTF-8"?>
 <statuses type="array">
+<status>
+  <created_at>Mon Nov 07 16:00:48 +0000 2011</created_at>
+  <id>133574630039498752</id>
+  <text>Process process process...</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>75</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>61</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Sat Nov 05 18:55:04 +0000 2011</created_at>
+  <id>132893712492675075</id>
+  <text>On average a customer will tell 9 people about a good customer service experience... they will tell 16 people about a bad one.</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>75</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>61</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
 <status>
   <created_at>Fri Nov 04 21:05:10 +0000 2011</created_at>
   <id>132564064789475328</id>
@@ -23,7 +145,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -42,7 +164,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -88,7 +210,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -107,7 +229,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -153,7 +275,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -172,7 +294,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -221,7 +343,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -240,7 +362,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -282,7 +404,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -301,7 +423,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -356,7 +478,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -375,7 +497,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -417,7 +539,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -436,7 +558,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -485,7 +607,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -504,7 +626,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -553,7 +675,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -572,7 +694,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -614,7 +736,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -633,7 +755,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -681,7 +803,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -700,7 +822,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -748,7 +870,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -767,7 +889,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -813,7 +935,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -832,7 +954,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -874,7 +996,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -893,7 +1015,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -958,7 +1080,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -977,7 +1099,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1030,7 +1152,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -1049,7 +1171,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1108,7 +1230,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -1127,7 +1249,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1180,7 +1302,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>74</followers_count>
+    <followers_count>75</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -1199,7 +1321,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>59</statuses_count>
+    <statuses_count>61</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1222,138 +1344,6 @@
         <expanded_url/>
       </url>
     </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Fri Jul 29 15:29:38 +0000 2011</created_at>
-  <id>96965612458352640</id>
-  <text>We're working on 3&#8230;yes 3!, #eecms add-ons currently.  Hopefully releasing first versions of two of them next week.</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>1</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>74</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>59</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags>
-      <hashtag end="33" start="27">
-        <text>eecms</text>
-      </hashtag>
-    </hashtags>
-  </entities>
-</status>
-<status>
-  <created_at>Tue May 17 21:44:06 +0000 2011</created_at>
-  <id>70605536017645568</id>
-  <text>@conspirator woops didn't mean to retweet that but ohh well, thanks!</text>
-  <source>&lt;a href=&quot;http://twitter.com/#!/download/iphone&quot; rel=&quot;nofollow&quot;&gt;Twitter for iPhone&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id>70587919705972736</in_reply_to_status_id>
-  <in_reply_to_user_id>7460682</in_reply_to_user_id>
-  <in_reply_to_screen_name>conspirator</in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>74</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>59</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="12" start="0">
-        <id>7460682</id>
-        <screen_name>conspirator</screen_name>
-        <name>Christopher Webb</name>
-      </user_mention>
-    </user_mentions>
-    <urls/>
     <hashtags/>
   </entities>
 </status>

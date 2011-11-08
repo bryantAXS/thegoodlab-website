@@ -1,0 +1,28 @@
+/* EP Better Workflow from www.electricputty.co.uk */
+/* CP styles */
+
+.bwf_hide { display: none; }
+
+.mainTable td { vertical-align: top; }
+
+.bwf_checking { display: inline; }
+
+.bwf_status_mapping_form {
+	background: #FFFDD3;
+	border: 1px solid #FFE599;
+	margin: 10px 0 0;
+	padding: 10px 10px 0;
+}
+
+	.bwf_status_mapping_form .bwf_alert {
+		background: #FFE599;
+		color: #2A3940;
+		font-size: 16px;
+		font-weight: bold;
+		margin: -10px -10px 8px;
+		padding: 10px;
+	}
+
+	.bwf_status_mapping_form p { line-height: 1.4; }
+
+	.bwf_status_mapping_form table { width: 100%; }

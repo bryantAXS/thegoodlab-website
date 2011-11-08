@@ -33,17 +33,16 @@ li{
 
 body{
   background: transparent url('../images/bg-main.png') repeat left top;
-  padding-bottom:50px;
   position:relative;
 }
 
 #content-container{
+  background: transparent url('/assets/images/bg-white-gradient-static.png') repeat-y left top;
   position:relative;
 }
 
 /* T W I T T E R  C O N T A I N E R */
 #white-col-container{
-  background: #f8f8f8 url('/assets/images/bg-white-gradient.png') repeat-y right top;
   float:left;
   height:500px;
   padding:200px 10px 0 20px;
@@ -56,6 +55,7 @@ body{
 #main-container{
   background: transparent url('../images/bg-main.png') repeat left top;
   float:left;
+  margin-left:1px;
   min-width:700px;
   width:700px;
   padding-left:90px;
@@ -216,6 +216,9 @@ header ul#dots li img{
   width:220px;
 }
 .home-work-sample-container:nth-child(3n + 1){
+  margin-left:0;
+}
+.home-work-sample-container.first{
   margin-left:0;
 }
 .home-work-samples-content{
@@ -390,35 +393,41 @@ header ul#dots li img{
 }
 .work-slider-container ul li.title{
   color:#14ffa3;
-  font-family:CallunaBoldItalic;
+  font-family:ProximaNovaRegular;
   margin-top:0;
 }
 .build-list{
-  margin-top:10px;
+  margin-top:5px;
 }
 .gallery-controls-container{
   bottom:0;
   height:21px;
   position:absolute;
-  left:318px;
+  right:320px;
   z-index:10;
 }
-.gallery-controls-container a{
+.gallery-controls-container div{
+  float:left;
+}
+.gallery-controls-container div a{
   float:left;
   text-decoration:none;
+  text-indent:-99999px;
 }
 .gallery-controls-contaienr a.button-next{
+  float:left;
+  text-decoration:none;
   height:21px;
   width:20px;
 }
-.gallery-controls-container .dot{
+.gallery-controls-container div a{
   background: transparent url('/assets/images/dot-small-gray.png') no-repeat left top;
   height:8px;
   margin-top:7px;
   margin-right:6px;
   width:8px;
 }
-.gallery-controls-container .dot.active{
+.gallery-controls-container div a.active{
   background: transparent url('/assets/images/dot-small-green.png') no-repeat left top;
 }
 
@@ -529,7 +538,7 @@ header ul#dots li img{
   text-align:center;
 }
 #paginate-list li + li{
-  margin-left:5px;
+  margin-left:10px;
 }
 #paginate-list li a{
   color:#14ffa3;
@@ -649,6 +658,73 @@ footer a{
 footer a:hover{
   text-decoration:underline;
 }
+
+/* R E S P O S I V E  S T Y L E S */
+@media screen and (max-width: 1112px){
+  #white-col-container{
+    background-color:#f9f9f9;
+    float:none;
+    height:auto;
+    padding:15px 0 12px 0;
+    width:auto;
+  }
+  .responsive-inside > div, .responsive-inside  > span{
+    display:none;
+  }
+  .responsive-inside{
+    display:block;
+    width:700px;
+    margin:0 auto;
+  }
+  #white-col-container h1{
+    color:#14FFA3;
+    font-family:"GarageGothic";
+    font-weight:normal;
+    font-size:34px;
+    float:left;
+    line-height:34px;
+    text-transform:uppercase;
+  }
+  #white-col-container h1 + span{
+    color:#3B3B3B;
+    display:block;
+    font-family:"ProximaNovaRegular";
+    font-size:12px;
+    float:left;
+    line-height:32px;
+    margin-left:10px;
+    text-transform:lowercase;
+    width:30px;
+  }
+  #white-col-container .responsive-inside > h1 + span + div{
+    float:right;
+    display:block;
+    margin:0;
+    margin-top:5px;
+  }
+  #white-col-container .responsive-inside > h1 + span + div span{
+    display:none;
+  }
+  #main-container{
+    float:none;
+    margin: 0 auto;
+    padding-left:0;
+  }
+  #content-container{
+    background: none;
+    width:auto;
+  }
+  .inside{
+    margin: 0 auto;
+  } 
+  header{
+    padding-top:20px !important;
+  }
+  header h1{
+    display:none;
+  }
+}
+
 
 /* G R I D */
 .col-1{float:left;padding:0 0 0 20px;width:60px;}

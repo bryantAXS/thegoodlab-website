@@ -2,8 +2,9 @@
 
   {exp:channel:entries
     channel="work"
-    disable="categories|category_fields|member_data|pagination|trackbacks"
+    disable="categories|category_fields|member_data|trackbacks"
     limit="3"
+    pagination="bottom"
     sort="asc"
   }
   
@@ -17,9 +18,9 @@
     <div class='work-slider-container'>
       <div class='texture'></div>
       <div class='gallery-controls-container has-layout'>
-        {work_images}
-        <a href='javascript:;' rel='{row_index}' class='dot-{row_count} dot {if row_count == 1}active{/if}'>&nbsp;</a>
-        {/work_images}
+        <div class='clearfix'>
+            
+        </div>
         <a href='javascript:;' class='button-next'><img src='/assets/images/button-next.png' /></a>
       </div>
       <ul class='work-gallery'>
@@ -30,7 +31,11 @@
       <div class='work-copy-container'>
         <ul class='project-metrics'>
           <li class='title'>Client</li>
-          <li>{work_client}</li>  
+          <li>{work_client}</li>
+          <li class='title'>Roles</li>
+          <li>{work_roles}</li>
+          <li class='title'>Agency</li>
+          <li>{work_agency}</li>
         </ul> 
         <ul class='build-list'>
           <li class='title'>Build</li>
@@ -41,6 +46,27 @@
       </div>
     </div>
   </div>
+
+  {if segment_2 AND paginated == "false"}
+  <div id='paginate-container' class='has-layout'>
+    <ul id='paginate-list' class='has-layout'>
+      <li id=''><a href="/work">See More Work</a></li>
+    </ul>
+  </div>
+  {/if}
+
+  {paginate}
+  <div id='paginate-container' class='has-layout'>
+    <ul id='paginate-list' class='has-layout'>
+    {if previous_page}
+      <li id='paginate-previous'><a href="{auto_path}">Previous Work</a></li>
+    {/if}
+    {if next_page}
+      <li id='paginate-next'><a href="{auto_path}">See More Work</a></li>
+    {/if}
+    </ul>
+  </div>
+  {/paginate}
 
   {/exp:channel:entries}
 
