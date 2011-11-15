@@ -11,6 +11,28 @@ $(document).ready(function(){
   //   var $el = $(this);
   //   $el.find('div').animate({opacity: 0},500);
   // });
+
+  //triggering events for iphone/ipad -- an alternative to mouseenter/mouseleave
+  if(Modernizr.touch){
+    
+    var cb = function(){
+      
+      var $el = $('.home-work-sample-container.on').length ? $('.home-work-sample-container.on') : $('.home-work-sample-container:eq(0)');
+
+      if($el.hasClass('on')){
+        $next_el = $el.next('.home-work-sample-container').length ? $el.next('.home-work-sample-container') : $('.home-work-sample-container:eq(0)');
+         $('.home-work-sample-container.on').removeClass('on');
+         $next_el.addClass('on');
+      }else{
+        $('.home-work-sample-container.on').removeClass('on');
+        $el.addClass('on');
+      }
+
+    }
+
+    setInterval(cb, 6000);
+
+  }
   
   //init header dots
   $('header ul#dots li img').bind('mouseenter',function(){

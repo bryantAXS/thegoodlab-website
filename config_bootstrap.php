@@ -208,7 +208,7 @@ if(isset($config)) {
         // Some of these preferences might actually need to be set in the index.php files.
         // Not sure which ones yet, I'll figure that out when I have my first MSM site.
         'is_site_on' => 'y',
-        'site_404' => 'site/four04',
+        'site_404' => 'site/404',
 
         'webmaster_email' => 'info@' . 'thegoodlab.com',
         'webmaster_name' => 'The Good Lab',

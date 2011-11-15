@@ -52,6 +52,12 @@ body{
   width:290px;
   z-index:0;
 }
+#white-col-container h1{
+  display:none;
+}
+#white-col-container h1 + span{
+  display:none;
+}
 #main-container{
   background: transparent url('../images/bg-main.png') repeat left top;
   float:left;
@@ -213,6 +219,7 @@ header ul#dots li img{
   margin-left:20px;
   margin-top:20px;
   position:relative;
+  overflow:hidden;
   width:220px;
 }
 .home-work-sample-container:nth-child(3n + 1){
@@ -220,6 +227,22 @@ header ul#dots li img{
 }
 .home-work-sample-container.first{
   margin-left:0;
+}
+.home-work-sample-container img{
+  /**/
+  -webkit-backface-visibility: hidden;
+  -webkit-transition: all 100ms linear;
+  -moz-transition: all 100ms linear;
+  -o-transition: all 100ms linear;
+  transition: all 100ms linear;
+}
+.home-work-sample-container:hover img{
+  /**/
+  -moz-transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
+-webkit-transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
+-o-transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
+-ms-transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
+transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
 }
 .home-work-samples-content{
   background: transparent url('../images/bg-transparent-gray.png') repeat left top;
@@ -271,21 +294,36 @@ header ul#dots li img{
 }
 
 /* on */
-.home-work-sample-container:hover .home-work-samples-content{
+.home-work-sample-container:hover .home-work-samples-content, .home-work-sample-container.on .home-work-samples-content{
   opacity:1;
 }
-.home-work-sample-container:hover .home-work-samples-content strong{
+.home-work-sample-container:hover .home-work-samples-content strong, .home-work-sample-container.on .home-work-samples-content strong{
   margin-left:15px;
   opacity:1;
+  /**/
+  transition-delay: 150ms;
+  -moz-transition-delay: 150ms; /* Firefox 4 */
+  -webkit-transition-delay: 150ms; /* Safari and Chrome */
+  -o-transition-delay: 150ms; /* Opera */
 }
-.home-work-sample-container:hover .home-work-samples-content p{
+.home-work-sample-container:hover .home-work-samples-content p, .home-work-sample-container.on .home-work-samples-content p{
   margin-left:15px;
   opacity:1;
+  /**/
+  transition-delay: 150ms;
+  -moz-transition-delay: 150ms; /* Firefox 4 */
+  -webkit-transition-delay: 150ms; /* Safari and Chrome */
+  -o-transition-delay: 150ms; /* Opera */
 }
-.home-work-sample-container:hover .home-work-samples-content a{
+.home-work-sample-container:hover .home-work-samples-content a, .home-work-sample-container.on .home-work-samples-content a{
   margin-left:15px;
   opacity:1;
   bottom:auto;
+  /**/
+  transition-delay: 150ms;
+  -moz-transition-delay: 150ms; /* Firefox 4 */
+  -webkit-transition-delay: 150ms; /* Safari and Chrome */
+  -o-transition-delay: 150ms; /* Opera */
 }
 
 
@@ -659,6 +697,25 @@ footer a:hover{
   text-decoration:underline;
 }
 
+/* 4 0 4 */
+#fourorfour-container{
+  color:#fff;
+  padding-top:30px;
+}
+#fourorfour-container h2{
+}
+#fourorfour-container p{
+  color: #fff;
+  font-family: ProximaNovaRegular;
+  font-size: 14px;
+  line-height: 22px;
+  margin-top: 15px;
+}
+#fourorfour-container p a{
+  color: #14FFA3;
+  text-decoration:underline;
+}
+
 /* R E S P O S I V E  S T Y L E S */
 @media screen and (max-width: 1112px){
   #white-col-container{
@@ -678,6 +735,7 @@ footer a:hover{
   }
   #white-col-container h1{
     color:#14FFA3;
+    display:block;
     font-family:"GarageGothic";
     font-weight:normal;
     font-size:34px;

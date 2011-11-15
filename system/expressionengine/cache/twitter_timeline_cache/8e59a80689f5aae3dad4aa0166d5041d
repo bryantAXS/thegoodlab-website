@@ -1,6 +1,1070 @@
-1320770043
+1321370320
 <?xml version="1.0" encoding="UTF-8"?>
 <statuses type="array">
+<status>
+  <created_at>Tue Nov 15 15:05:24 +0000 2011</created_at>
+  <id>136459790695153664</id>
+  <text>Links delivered through a brands facebook page have a 3x better click through rate than standard news feed ads #facebook #advertising</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="120" start="111">
+        <text>facebook</text>
+      </hashtag>
+      <hashtag end="133" start="121">
+        <text>advertising</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Tue Nov 15 01:57:25 +0000 2011</created_at>
+  <id>136261491564351488</id>
+  <text>any chicago #eecms peeps want to get a meetup going?  We're thinking 1.5 hours, 4 15min talks, discussion after...thoughts?</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>1</retweet_count>
+  <retweeted>true</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="18" start="12">
+        <text>eecms</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Mon Nov 14 21:53:10 +0000 2011</created_at>
+  <id>136200020507631617</id>
+  <text>great article and explanation of popularity algorithms - http://t.co/uqcv2eMk</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <possibly_sensitive>false</possibly_sensitive>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls>
+      <url end="77" start="57">
+        <url>http://t.co/uqcv2eMk</url>
+        <display_url>blog.linkibol.com/2010/05/07/how&#8230;</display_url>
+        <expanded_url>http://blog.linkibol.com/2010/05/07/how-to-build-a-popularity-algorithm-you-can-be-proud-of/</expanded_url>
+      </url>
+    </urls>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Mon Nov 14 21:00:57 +0000 2011</created_at>
+  <id>136186880021626880</id>
+  <text>The PIE Principle: Program Intently and Expressively; or, clarity is better than clever</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Mon Nov 14 17:55:08 +0000 2011</created_at>
+  <id>136140118548422657</id>
+  <text>Constantly amazed at the capabilities of ExpressionEngine and the add-on community #eecms</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="89" start="83">
+        <text>eecms</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Fri Nov 11 18:14:00 +0000 2011</created_at>
+  <id>135057705420328960</id>
+  <text>Atwood's Law: any application that can be written in JavaScript, will eventually be written in JavaScript. http://t.co/zOrsJj8X</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <possibly_sensitive>false</possibly_sensitive>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls>
+      <url end="127" start="107">
+        <url>http://t.co/zOrsJj8X</url>
+        <display_url>codinghorror.com/blog/2009/08/a&#8230;</display_url>
+        <expanded_url>http://www.codinghorror.com/blog/2009/08/all-programming-is-web-programming.html</expanded_url>
+      </url>
+    </urls>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Fri Nov 11 16:01:16 +0000 2011</created_at>
+  <id>135024300028723200</id>
+  <text>Some coding notes I found from an old college notebook:
+- Clever = Bad
+- If its not business logic, put it in a library
+- Dont over abstract</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Fri Nov 11 01:18:35 +0000 2011</created_at>
+  <id>134802166987759616</id>
+  <text>@EllisLab will do! thanks!</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id>134731966401613824</in_reply_to_status_id>
+  <in_reply_to_user_id>7826472</in_reply_to_user_id>
+  <in_reply_to_screen_name>EllisLab</in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions>
+      <user_mention end="9" start="0">
+        <id>7826472</id>
+        <screen_name>EllisLab</screen_name>
+        <name>EllisLab</name>
+      </user_mention>
+    </user_mentions>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Thu Nov 10 22:05:11 +0000 2011</created_at>
+  <id>134753495722106880</id>
+  <text>A hard deadline foces you to make hard choices. #timeboxing</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="59" start="48">
+        <text>timeboxing</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Thu Nov 10 20:15:20 +0000 2011</created_at>
+  <id>134725851563556864</id>
+  <text>Is there an #eecms meetup in Chicago?  If not, we really need to get that going...</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="18" start="12">
+        <text>eecms</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Thu Nov 10 00:05:09 +0000 2011</created_at>
+  <id>134421297554931712</id>
+  <text>Things we've started to use this past year that have been game changers
+1. Capistrano
+2. Sublime Text 2
+3. Harvest
+4. Macbook Air</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>76</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Wed Nov 09 18:19:01 +0000 2011</created_at>
+  <id>134334190576615424</id>
+  <text>RT @Bryant_: Proxy: an #eecms add-on to assist with testing templates http://t.co/itLZKXB8 &#8230; Still pre-release, but looking for feedback ...</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>2</retweet_count>
+  <retweeted>false</retweeted>
+  <retweeted_status>
+    <created_at>Wed Nov 09 17:54:22 +0000 2011</created_at>
+    <id>134327986047549440</id>
+    <text>Proxy: an #eecms add-on to assist with testing templates http://t.co/itLZKXB8 &#8230; Still pre-release, but looking for feedback, testing :)</text>
+    <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+    <truncated>false</truncated>
+    <favorited>false</favorited>
+    <in_reply_to_status_id></in_reply_to_status_id>
+    <in_reply_to_user_id></in_reply_to_user_id>
+    <in_reply_to_screen_name></in_reply_to_screen_name>
+    <retweet_count>2</retweet_count>
+    <retweeted>false</retweeted>
+    <user>
+      <id>14208743</id>
+      <name>Bryant Hughes</name>
+      <screen_name>Bryant_</screen_name>
+      <location>Chicago</location>
+      <description>web developer and designer living in chicago | working at @TheGoodLab | hip hop connoisseur | love: grids, typography, smart code, process, tea, tshirts  </description>
+      <profile_image_url>http://a3.twimg.com/profile_images/1128444422/Screen_shot_2010-09-21_at_3.57.32_PM_normal.png</profile_image_url>
+      <profile_image_url_https>https://si0.twimg.com/profile_images/1128444422/Screen_shot_2010-09-21_at_3.57.32_PM_normal.png</profile_image_url_https>
+      <url>http://www.bryanthughes.com</url>
+      <protected>false</protected>
+      <followers_count>374</followers_count>
+      <profile_background_color>ffffff</profile_background_color>
+      <profile_text_color>c6c6c6</profile_text_color>
+      <profile_link_color>ff0fda</profile_link_color>
+      <profile_sidebar_fill_color>52004f</profile_sidebar_fill_color>
+      <profile_sidebar_border_color>ff47dc</profile_sidebar_border_color>
+      <friends_count>261</friends_count>
+      <created_at>Mon Mar 24 16:58:21 +0000 2008</created_at>
+      <favourites_count>15</favourites_count>
+      <utc_offset>-25200</utc_offset>
+      <time_zone>Mountain Time (US &amp; Canada)</time_zone>
+      <profile_background_image_url>http://a1.twimg.com/profile_background_images/2354434/flash.png</profile_background_image_url>
+      <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/2354434/flash.png</profile_background_image_url_https>
+      <profile_background_tile>true</profile_background_tile>
+      <profile_use_background_image>false</profile_use_background_image>
+      <notifications>false</notifications>
+      <geo_enabled>true</geo_enabled>
+      <verified>false</verified>
+      <following>false</following>
+      <statuses_count>5810</statuses_count>
+      <lang>en</lang>
+      <contributors_enabled>false</contributors_enabled>
+      <follow_request_sent>false</follow_request_sent>
+      <listed_count>24</listed_count>
+      <show_all_inline_media>false</show_all_inline_media>
+      <default_profile>false</default_profile>
+      <default_profile_image>false</default_profile_image>
+      <is_translator>false</is_translator>
+    </user>
+    <geo/>
+    <coordinates/>
+    <place/>
+    <possibly_sensitive>false</possibly_sensitive>
+    <contributors/>
+    <entities>
+      <user_mentions/>
+      <urls>
+        <url end="77" start="57">
+          <url>http://t.co/itLZKXB8</url>
+          <display_url>github.com/bryantAXS/Proxy</display_url>
+          <expanded_url>https://github.com/bryantAXS/Proxy</expanded_url>
+        </url>
+      </urls>
+      <hashtags>
+        <hashtag end="16" start="10">
+          <text>eecms</text>
+        </hashtag>
+      </hashtags>
+    </entities>
+  </retweeted_status>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <possibly_sensitive>false</possibly_sensitive>
+  <contributors/>
+  <entities>
+    <user_mentions>
+      <user_mention end="11" start="3">
+        <id>14208743</id>
+        <screen_name>Bryant_</screen_name>
+        <name>Bryant Hughes</name>
+      </user_mention>
+    </user_mentions>
+    <urls>
+      <url end="90" start="70">
+        <url>http://t.co/itLZKXB8</url>
+        <display_url>github.com/bryantAXS/Proxy</display_url>
+        <expanded_url>https://github.com/bryantAXS/Proxy</expanded_url>
+      </url>
+    </urls>
+    <hashtags>
+      <hashtag end="29" start="23">
+        <text>eecms</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Wed Nov 09 16:55:11 +0000 2011</created_at>
+  <id>134313092648677376</id>
+  <text>Show clients your work early and often.  They are more aware of the progress you are making and are able to help refine requirements.</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Tue Nov 08 17:20:43 +0000 2011</created_at>
+  <id>133957132671401984</id>
+  <text>@meganmhamilton whaaa?</text>
+  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id>133952854565191680</in_reply_to_status_id>
+  <in_reply_to_user_id>119309971</in_reply_to_user_id>
+  <in_reply_to_screen_name>meganmhamilton</in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions>
+      <user_mention end="15" start="0">
+        <id>119309971</id>
+        <screen_name>meganmhamilton</screen_name>
+        <name>Megan Marie Hamilton</name>
+      </user_mention>
+    </user_mentions>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
+<status>
+  <created_at>Tue Nov 08 17:01:04 +0000 2011</created_at>
+  <id>133952184302841856</id>
+  <text>Need to get setup in this EE pro network thing... whats all involved in that?? #eecms</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>75</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="85" start="79">
+        <text>eecms</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
 <status>
   <created_at>Mon Nov 07 16:00:48 +0000 2011</created_at>
   <id>133574630039498752</id>
@@ -23,7 +1087,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>75</followers_count>
+    <followers_count>76</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -42,7 +1106,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>61</statuses_count>
+    <statuses_count>76</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -84,7 +1148,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>75</followers_count>
+    <followers_count>76</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -103,7 +1167,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>61</statuses_count>
+    <statuses_count>76</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -145,7 +1209,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>75</followers_count>
+    <followers_count>76</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -164,7 +1228,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>61</statuses_count>
+    <statuses_count>75</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -210,7 +1274,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>75</followers_count>
+    <followers_count>76</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -229,7 +1293,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>61</statuses_count>
+    <statuses_count>76</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -275,7 +1339,7 @@
     <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
     <url>http://www.thegoodlab.com</url>
     <protected>false</protected>
-    <followers_count>75</followers_count>
+    <followers_count>76</followers_count>
     <profile_background_color>ededed</profile_background_color>
     <profile_text_color>333333</profile_text_color>
     <profile_link_color>ababab</profile_link_color>
@@ -294,7 +1358,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>61</statuses_count>
+    <statuses_count>75</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -316,1032 +1380,6 @@
         <url>http://t.co/vHyqwm8D</url>
         <display_url>imgur.com/4iIxE</display_url>
         <expanded_url>http://imgur.com/4iIxE</expanded_url>
-      </url>
-    </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Fri Nov 04 15:15:18 +0000 2011</created_at>
-  <id>132476015514628097</id>
-  <text>Brands/companies need to embrase the Amazon Prime model - After a customer joins Prime they spend more than double what they did before....</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 16:29:08 +0000 2011</created_at>
-  <id>132132209443344385</id>
-  <text>brining routes to #eecms &#8230; awesome http://t.co/qKfMpuyv</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>1</retweet_count>
-  <retweeted>true</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls>
-      <url end="55" start="35">
-        <url>http://t.co/qKfMpuyv</url>
-        <display_url>github.com/averyvery/free&#8230;</display_url>
-        <expanded_url>https://github.com/averyvery/freeway</expanded_url>
-      </url>
-    </urls>
-    <hashtags>
-      <hashtag end="24" start="18">
-        <text>eecms</text>
-      </hashtag>
-    </hashtags>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 16:00:47 +0000 2011</created_at>
-  <id>132125075041288192</id>
-  <text>1. Embrace the post-pc era
-2. Facilitate consumption or provide content
-3. Gather data to guide your decisions</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>1</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 15:52:29 +0000 2011</created_at>
-  <id>132122987028680705</id>
-  <text>whoops forgot to post the link to that first one: http://t.co/6fsNIXvH</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls>
-      <url end="70" start="50">
-        <url>http://t.co/6fsNIXvH</url>
-        <display_url>muji.us/store/</display_url>
-        <expanded_url>http://www.muji.us/store/</expanded_url>
-      </url>
-    </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 14:50:09 +0000 2011</created_at>
-  <id>132107302458236930</id>
-  <text>This place looks likes its got some nice supplies too http://t.co/Z7AJmoXt</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls>
-      <url end="74" start="54">
-        <url>http://t.co/Z7AJmoXt</url>
-        <display_url>poppin.com</display_url>
-        <expanded_url>http://www.poppin.com/</expanded_url>
-      </url>
-    </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 14:45:13 +0000 2011</created_at>
-  <id>132106060206051330</id>
-  <text>Stopped by this place, while in NYC a few weeks ago...it was like a wonderland of simple well designed office supplies/stationary....</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 13:21:27 +0000 2011</created_at>
-  <id>132084979730624513</id>
-  <text>@sparrowhelp awesome, great to hear!</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id>132020484748480512</in_reply_to_status_id>
-  <in_reply_to_user_id>243912379</in_reply_to_user_id>
-  <in_reply_to_screen_name>sparrowhelp</in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="12" start="0">
-        <id>243912379</id>
-        <screen_name>sparrowhelp</screen_name>
-        <name>Sparrow team</name>
-      </user_mention>
-    </user_mentions>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Nov 03 03:30:46 +0000 2011</created_at>
-  <id>131936326089060352</id>
-  <text>@sparrowmailapp please make your label filtering more like gmail.  i.e.: if I do &quot;move to folder&quot; then type a nested folder, let that work</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id>163449492</in_reply_to_user_id>
-  <in_reply_to_screen_name>sparrowmailapp</in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="15" start="0">
-        <id>163449492</id>
-        <screen_name>sparrowmailapp</screen_name>
-        <name>SparrowMail</name>
-      </user_mention>
-    </user_mentions>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Wed Nov 02 19:05:07 +0000 2011</created_at>
-  <id>131809078107316224</id>
-  <text>On twitter, people care what you say, but on facebook they are more likely to trust it. Twitter = views, Facebook = sign-ups #productlaunch</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags>
-      <hashtag end="139" start="125">
-        <text>productlaunch</text>
-      </hashtag>
-    </hashtags>
-  </entities>
-</status>
-<status>
-  <created_at>Tue Nov 01 13:22:37 +0000 2011</created_at>
-  <id>131360495281250304</id>
-  <text>busy work all morning...</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Wed Aug 31 20:46:35 +0000 2011</created_at>
-  <id>109004177107189760</id>
-  <text>Very excited to announce the lunch of http://t.co/7yKT1mf thanks to @grievesmusic @alexgoose and @rhymesayers</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>2</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="81" start="68">
-        <id>21034539</id>
-        <screen_name>Grievesmusic</screen_name>
-        <name>GRIEVES</name>
-      </user_mention>
-      <user_mention end="92" start="82">
-        <id>19756951</id>
-        <screen_name>AlexGoose</screen_name>
-        <name>Alex Goose</name>
-      </user_mention>
-      <user_mention end="109" start="97">
-        <id>8962732</id>
-        <screen_name>rhymesayers</screen_name>
-        <name>Rhymesayers Ent</name>
-      </user_mention>
-    </user_mentions>
-    <urls>
-      <url end="57" start="38">
-        <url>http://t.co/7yKT1mf</url>
-        <display_url>grievesmusic.com</display_url>
-        <expanded_url>http://www.grievesmusic.com</expanded_url>
-      </url>
-    </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Tue Aug 30 19:28:42 +0000 2011</created_at>
-  <id>108622190416629760</id>
-  <text>@mandabuck @hellogrip thanks! agreed, Marwen is awesome</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id>108616245238177792</in_reply_to_status_id>
-  <in_reply_to_user_id>29473530</in_reply_to_user_id>
-  <in_reply_to_screen_name>mandabuck</in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="10" start="0">
-        <id>29473530</id>
-        <screen_name>mandabuck</screen_name>
-        <name>Amanda Buck</name>
-      </user_mention>
-      <user_mention end="21" start="11">
-        <id>77034258</id>
-        <screen_name>hellogrip</screen_name>
-        <name>GRIP</name>
-      </user_mention>
-    </user_mentions>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Thu Aug 25 14:08:06 +0000 2011</created_at>
-  <id>106729567682707457</id>
-  <text>we're excited to announce of the launch of Marwen.org - http://t.co/aqoGqWf !  Big thanks to @hellogrip!</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>1</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="103" start="93">
-        <id>77034258</id>
-        <screen_name>hellogrip</screen_name>
-        <name>GRIP</name>
-      </user_mention>
-    </user_mentions>
-    <urls>
-      <url end="53" start="43">
-        <url>Marwen.org</url>
-        <expanded_url/>
-      </url>
-      <url end="75" start="56">
-        <url>http://t.co/aqoGqWf</url>
-        <display_url>marwen.org</display_url>
-        <expanded_url>http://www.marwen.org</expanded_url>
-      </url>
-    </urls>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Wed Aug 10 16:48:07 +0000 2011</created_at>
-  <id>101334017550462976</id>
-  <text>@howells @pieratt then what is a designer / front-end &amp; back-end developer?  Centaur?</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id>101332965258297344</in_reply_to_status_id>
-  <in_reply_to_user_id>11541192</in_reply_to_user_id>
-  <in_reply_to_screen_name>howells</in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions>
-      <user_mention end="8" start="0">
-        <id>11541192</id>
-        <screen_name>howells</screen_name>
-        <name>Daniel Howells</name>
-      </user_mention>
-      <user_mention end="17" start="9">
-        <id>22727874</id>
-        <screen_name>pieratt</screen_name>
-        <name>Ben Pieratt</name>
-      </user_mention>
-    </user_mentions>
-    <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Tue Aug 02 16:19:01 +0000 2011</created_at>
-  <id>98427594143318017</id>
-  <text>Just launched a small landing page at aventina.net - gotta love the fun quick projects!</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>1</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>75</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>61</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls>
-      <url end="50" start="38">
-        <url>aventina.net</url>
-        <expanded_url/>
       </url>
     </urls>
     <hashtags/>
