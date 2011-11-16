@@ -192,6 +192,12 @@ class CI_DB_forge {
 
 		$sql = $this->_create_table($this->db->dbprefix.$table, $this->fields, $this->primary_keys, $this->keys, $if_not_exists);
 
+		// Update the db data cache
+		if ( ! array_search($this->db->dbprefix.$table, $this->db->data_cache['table_names']))
+		{
+			$this->db->data_cache['table_names'][] = $this->db->dbprefix.$table;
+		}
+
 		$this->_reset();
 		return $this->db->query($sql);
 	}

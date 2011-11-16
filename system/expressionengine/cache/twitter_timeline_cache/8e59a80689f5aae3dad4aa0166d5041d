@@ -1,6 +1,138 @@
-1321370320
+1321418488
 <?xml version="1.0" encoding="UTF-8"?>
 <statuses type="array">
+<status>
+  <created_at>Wed Nov 16 04:10:05 +0000 2011</created_at>
+  <id>136657266597298176</id>
+  <text>Elliot Stabler is my hero #svu</text>
+  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id></in_reply_to_status_id>
+  <in_reply_to_user_id></in_reply_to_user_id>
+  <in_reply_to_screen_name></in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>78</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions/>
+    <urls/>
+    <hashtags>
+      <hashtag end="30" start="26">
+        <text>svu</text>
+      </hashtag>
+    </hashtags>
+  </entities>
+</status>
+<status>
+  <created_at>Tue Nov 15 19:11:31 +0000 2011</created_at>
+  <id>136521728661782529</id>
+  <text>@jaycrimes pshhh... Yeah right... Mel Gibson HATES math</text>
+  <source>&lt;a href=&quot;http://twitter.com/#!/download/iphone&quot; rel=&quot;nofollow&quot;&gt;Twitter for iPhone&lt;/a&gt;</source>
+  <truncated>false</truncated>
+  <favorited>false</favorited>
+  <in_reply_to_status_id>136472481388167169</in_reply_to_status_id>
+  <in_reply_to_user_id>20028873</in_reply_to_user_id>
+  <in_reply_to_screen_name>jaycrimes</in_reply_to_screen_name>
+  <retweet_count>0</retweet_count>
+  <retweeted>false</retweeted>
+  <user>
+    <id>175208922</id>
+    <name>The Good Lab</name>
+    <screen_name>TheGoodLab</screen_name>
+    <location>Chicago, IL</location>
+    <description>Web Development via Chicago, Il - Come say hello!</description>
+    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
+    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
+    <url>http://www.thegoodlab.com</url>
+    <protected>false</protected>
+    <followers_count>76</followers_count>
+    <profile_background_color>ededed</profile_background_color>
+    <profile_text_color>333333</profile_text_color>
+    <profile_link_color>ababab</profile_link_color>
+    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
+    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
+    <friends_count>116</friends_count>
+    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
+    <favourites_count>0</favourites_count>
+    <utc_offset>-21600</utc_offset>
+    <time_zone>Central Time (US &amp; Canada)</time_zone>
+    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
+    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
+    <profile_background_tile>true</profile_background_tile>
+    <profile_use_background_image>true</profile_use_background_image>
+    <notifications>false</notifications>
+    <geo_enabled>false</geo_enabled>
+    <verified>false</verified>
+    <following>true</following>
+    <statuses_count>78</statuses_count>
+    <lang>en</lang>
+    <contributors_enabled>false</contributors_enabled>
+    <follow_request_sent>false</follow_request_sent>
+    <listed_count>7</listed_count>
+    <show_all_inline_media>false</show_all_inline_media>
+    <default_profile>false</default_profile>
+    <default_profile_image>false</default_profile_image>
+    <is_translator>false</is_translator>
+  </user>
+  <geo/>
+  <coordinates/>
+  <place/>
+  <contributors/>
+  <entities>
+    <user_mentions>
+      <user_mention end="10" start="0">
+        <id>20028873</id>
+        <screen_name>jaycrimes</screen_name>
+        <name>Jason Schwartz</name>
+      </user_mention>
+    </user_mentions>
+    <urls/>
+    <hashtags/>
+  </entities>
+</status>
 <status>
   <created_at>Tue Nov 15 15:05:24 +0000 2011</created_at>
   <id>136459790695153664</id>
@@ -42,7 +174,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -110,7 +242,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -175,7 +307,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -243,7 +375,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -304,7 +436,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -369,7 +501,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -440,7 +572,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -501,7 +633,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -568,7 +700,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -633,7 +765,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -702,7 +834,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -756,13 +888,13 @@
       <profile_image_url_https>https://si0.twimg.com/profile_images/1128444422/Screen_shot_2010-09-21_at_3.57.32_PM_normal.png</profile_image_url_https>
       <url>http://www.bryanthughes.com</url>
       <protected>false</protected>
-      <followers_count>374</followers_count>
+      <followers_count>375</followers_count>
       <profile_background_color>ffffff</profile_background_color>
       <profile_text_color>c6c6c6</profile_text_color>
       <profile_link_color>ff0fda</profile_link_color>
       <profile_sidebar_fill_color>52004f</profile_sidebar_fill_color>
       <profile_sidebar_border_color>ff47dc</profile_sidebar_border_color>
-      <friends_count>261</friends_count>
+      <friends_count>263</friends_count>
       <created_at>Mon Mar 24 16:58:21 +0000 2008</created_at>
       <favourites_count>15</favourites_count>
       <utc_offset>-25200</utc_offset>
@@ -775,7 +907,7 @@
       <geo_enabled>true</geo_enabled>
       <verified>false</verified>
       <following>false</following>
-      <statuses_count>5810</statuses_count>
+      <statuses_count>5815</statuses_count>
       <lang>en</lang>
       <contributors_enabled>false</contributors_enabled>
       <follow_request_sent>false</follow_request_sent>
@@ -835,7 +967,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -913,7 +1045,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -974,7 +1106,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1041,7 +1173,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1106,7 +1238,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1167,7 +1299,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>76</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1228,7 +1360,7 @@
     <geo_enabled>false</geo_enabled>
     <verified>false</verified>
     <following>true</following>
-    <statuses_count>75</statuses_count>
+    <statuses_count>78</statuses_count>
     <lang>en</lang>
     <contributors_enabled>false</contributors_enabled>
     <follow_request_sent>false</follow_request_sent>
@@ -1245,143 +1377,6 @@
   <entities>
     <user_mentions/>
     <urls/>
-    <hashtags/>
-  </entities>
-</status>
-<status>
-  <created_at>Fri Nov 04 20:15:19 +0000 2011</created_at>
-  <id>132551517541642240</id>
-  <text>Work music of the week:
-- Little Brother, The Chittlin Circuit
-- Mark Farina, Mushroom Jazz vol 4.
-- Nefarious!, For the Night Time
-#beats</text>
-  <source>&lt;a href=&quot;http://www.hootsuite.com&quot; rel=&quot;nofollow&quot;&gt;HootSuite&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>76</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>76</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls/>
-    <hashtags>
-      <hashtag end="138" start="132">
-        <text>beats</text>
-      </hashtag>
-    </hashtags>
-  </entities>
-</status>
-<status>
-  <created_at>Fri Nov 04 15:38:26 +0000 2011</created_at>
-  <id>132481837841911808</id>
-  <text>Spot on - Are you using IE? http://t.co/vHyqwm8D</text>
-  <source>&lt;a href=&quot;http://itunes.apple.com/us/app/twitter/id409789998?mt=12&quot; rel=&quot;nofollow&quot;&gt;Twitter for Mac&lt;/a&gt;</source>
-  <truncated>false</truncated>
-  <favorited>false</favorited>
-  <in_reply_to_status_id></in_reply_to_status_id>
-  <in_reply_to_user_id></in_reply_to_user_id>
-  <in_reply_to_screen_name></in_reply_to_screen_name>
-  <retweet_count>0</retweet_count>
-  <retweeted>false</retweeted>
-  <user>
-    <id>175208922</id>
-    <name>The Good Lab</name>
-    <screen_name>TheGoodLab</screen_name>
-    <location>Chicago, IL</location>
-    <description>Web Development via Chicago, Il - Come say hello!</description>
-    <profile_image_url>http://a3.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url>
-    <profile_image_url_https>https://si0.twimg.com/profile_images/1267275641/download_normal.png</profile_image_url_https>
-    <url>http://www.thegoodlab.com</url>
-    <protected>false</protected>
-    <followers_count>76</followers_count>
-    <profile_background_color>ededed</profile_background_color>
-    <profile_text_color>333333</profile_text_color>
-    <profile_link_color>ababab</profile_link_color>
-    <profile_sidebar_fill_color>ebebeb</profile_sidebar_fill_color>
-    <profile_sidebar_border_color>e0e0e0</profile_sidebar_border_color>
-    <friends_count>116</friends_count>
-    <created_at>Fri Aug 06 00:10:13 +0000 2010</created_at>
-    <favourites_count>0</favourites_count>
-    <utc_offset>-21600</utc_offset>
-    <time_zone>Central Time (US &amp; Canada)</time_zone>
-    <profile_background_image_url>http://a1.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url>
-    <profile_background_image_url_https>https://si0.twimg.com/profile_background_images/215370792/download-1.png</profile_background_image_url_https>
-    <profile_background_tile>true</profile_background_tile>
-    <profile_use_background_image>true</profile_use_background_image>
-    <notifications>false</notifications>
-    <geo_enabled>false</geo_enabled>
-    <verified>false</verified>
-    <following>true</following>
-    <statuses_count>75</statuses_count>
-    <lang>en</lang>
-    <contributors_enabled>false</contributors_enabled>
-    <follow_request_sent>false</follow_request_sent>
-    <listed_count>7</listed_count>
-    <show_all_inline_media>false</show_all_inline_media>
-    <default_profile>false</default_profile>
-    <default_profile_image>false</default_profile_image>
-    <is_translator>false</is_translator>
-  </user>
-  <geo/>
-  <coordinates/>
-  <place/>
-  <possibly_sensitive>false</possibly_sensitive>
-  <contributors/>
-  <entities>
-    <user_mentions/>
-    <urls>
-      <url end="48" start="28">
-        <url>http://t.co/vHyqwm8D</url>
-        <display_url>imgur.com/4iIxE</display_url>
-        <expanded_url>http://imgur.com/4iIxE</expanded_url>
-      </url>
-    </urls>
     <hashtags/>
   </entities>
 </status>

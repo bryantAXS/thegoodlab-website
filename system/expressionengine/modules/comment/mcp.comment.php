@@ -35,6 +35,7 @@ class Comment_mcp {
 	protected $_limit;
 	protected $_offset;
 	protected $_order_by;
+	protected $_entry_id;
 
 	/**
 	 * Constructor
@@ -404,6 +405,10 @@ class Comment_mcp {
 			$url .= AMP.'status='.$this->_date_range;
 		}
 
+		if ($this->_entry_id)
+		{
+			$url .= AMP.'entry_id='.$this->_entry_id;
+		}
 
 		$p_button = "<img src=\"{$this->EE->cp->cp_theme_url}images/pagination_%s_button.gif\" width=\"13\" height=\"13\" alt=\"%s\" />";
 
@@ -489,6 +494,11 @@ class Comment_mcp {
 			
 			$this->EE->db->where('comment_date >', (int) $date_range);			
 		}
+
+		if ($this->_entry_id)
+		{
+			$this->EE->db->where('entry_id', (int) $this->_entry_id);		
+		}
 	}
 
 	// --------------------------------------------------------------------
@@ -535,6 +545,7 @@ class Comment_mcp {
 		$this->_offset = ($offset = $this->EE->input->get('offset')) ? $offset : 0;
 		$this->_dir = ($dir = $this->EE->input->get('dir')) ? $dir : 'desc'; 
 		$this->_order_by = ($ob = $this->EE->input->get('order_by')) ? $ob : 'comment_date';
+		$this->_entry_id = $this->EE->input->get('entry_id');
 	}
 
 	// --------------------------------------------------------------------
@@ -1267,10 +1278,10 @@ class Comment_mcp {
 		if ($this->EE->extensions->active_hook('update_comment_additional'))
 		{
 
-			$qry = $this->EE->db->where_in('comment_id', $comment_ids)
+			$qry = $this->EE->db->where_in('comment_id', $comments)
 								->get('comments');
 			
-			foreach ($qry->result() as $row)
+			foreach ($qry->result_array() as $row)
 			{
 				/* -------------------------------------------
 				/* 'update_comment_additional' hook.
@@ -1278,7 +1289,7 @@ class Comment_mcp {
 				*/
 					$edata = $this->EE->extensions->call(
 													'update_comment_additional', 
-													$row->comment_id, $row
+													$row['comment_id'], $row
 												);
 
 					if ($this->EE->extensions->end_script === TRUE) return;

@@ -1078,7 +1078,7 @@ class XML_RPC_Message extends CI_Xmlrpc
 			case 'PARAMS':
 			case 'FAULT':
 			case 'METHODCALL':
-			case 'METHORESPONSE':
+			case 'METHODRESPONSE':
 				// We're all good kids with nuthin' to do
 			break;
 			default:

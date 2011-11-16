@@ -61,8 +61,7 @@
  * Enable it only if you have a good reason to.
  * 
  */
-	$debug = 1;
-
+	$debug = 0;
 
 /*
  * --------------------------------------------------------------------
@@ -85,7 +84,6 @@
  *  Mandatory config overrides
  * --------------------------------------------------------------------
  */
-	$assign_to_config['enable_query_strings'] = TRUE;
 	$assign_to_config['subclass_prefix'] = 'EE_';
 	$assign_to_config['directory_trigger'] = 'D';	
 	$assign_to_config['controller_trigger'] = 'C';	

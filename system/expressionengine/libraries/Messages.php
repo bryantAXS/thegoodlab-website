@@ -3246,7 +3246,7 @@ DOH;
 			$row_count = 0;
 		}
 		
-		$this->per_page = 5;
+		$this->per_page = 25;
 		
 		$current_page = ($row_count / $this->per_page) + 1;
 			
@@ -4575,7 +4575,7 @@ EOT;
 		}
 		
 		
-		$path = $this->EE->config->slash_item('emoticon_path');
+		$path = $this->EE->config->slash_item('emoticon_url');
 				
 		$i = 1;
 		

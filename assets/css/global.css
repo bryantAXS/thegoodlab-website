@@ -562,6 +562,9 @@ transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
 }
 
 /* P A G I N A T I O N */
+#paginate-container{
+  margin-top:20px;
+}
 #paginate-list{
   float:right;
   margin-top:20px;
@@ -581,7 +584,7 @@ transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
 #paginate-list li a{
   color:#14ffa3;
   display:block;
-  padding:6px 5px 5px 5px;
+  padding:8px 8px 8px 8px;
   text-decoration:underline;
 }
 
@@ -617,6 +620,13 @@ transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
   font-family:"ProximaNovaRegular";
   font-size:14px;
 }
+#article-intro-content-container .intro-text p{
+  font-family:"CallunaItalic";
+  font-size:18px;
+  line-height:26px;
+  padding-bottom:3px;
+  margin:25px 0 25px;
+}
 #article-content-container blockquote{
   border-left:5px solid #14ffa3;
   font-family:"CallunaItalic";
@@ -642,6 +652,115 @@ transform: scale(1.1) rotate(0deg) translate(0px, 0px) skew(0deg, 0deg);
 	color:#14ffa3;
 	font-style:italic;
 	padding:15px;
+}
+
+/** comments **/
+#comments-container{
+  margin-top:30px;
+}
+.comments-container-title, .leave-a-comment-title{
+  display:block;
+  font-size:18px;
+  font-family:"CallunaItalic";
+  margin: 0 0 10px 0;
+}
+.leave-a-comment-title{
+  margin-top:25px;
+}
+.comment-container{
+  background: transparent url('/assets/images/bg-dots-lite.png') left top repeat;
+  padding:10px;
+}
+.comment-container{
+  margin-top:20px;
+}
+.comment-top{
+  
+}
+.comment-top img{
+  float:left;
+  margin-right:10px;
+  height:40px;
+  width:40px;
+}
+.comment-top div{
+  float:left;
+}
+.comment-top .name{
+  display:block;
+  font-family:"CallunaItalic";
+  font-size:14px;
+  margin:5px 0;
+}
+.comment-top a.name{
+  color:#14FFA3;
+}
+.comment-top .date{
+  color:#fff;
+  font-family:"ProximaNovaRegular";
+  font-size:12px;
+}
+.comment-top .reply{
+  color:#14FFA3;
+  font-family:"CallunaItalic";
+  font-size:12px;
+}
+.comment-body{
+  
+}
+#comment-form{
+  
+}
+#comment-form tr td{
+  padding-top:10px;
+}
+#comment-form tr:first-child{
+  /*padding-top:0;*/
+}
+#comment-form label{
+  color:#14FFA3;
+  font-family:"CallunaItalic";
+  font-size:14px;
+  margin-left:20px;
+}
+#comment-form input[type=text], #comment-form textarea{
+  background-color: rgba(252,252,252,.15);
+  border:none;
+  color:#fff;
+  font-size:14px;
+  font-family:"ProximaNovaRegular";
+  padding:10px;
+  resize:none;
+}
+#comment-form input[type=text]{
+  width:200px;
+}
+#comment-form textarea{
+  width:440px;
+  height:140px;
+}
+#no-comments p{
+  padding:0;
+  margin:0;
+}
+
+.green-button{
+  background-color:#14FFA3;
+  border-radius:3px;
+  border:none;
+  color:#000;
+  display:block;
+  font-family:"CallunaItalic";
+  font-size:14px;
+  height:35px;
+  width:120px;
+  text-align:center;
+  text-decoration:none;
+  line-height:35px;
+}
+.green-button span{
+  display:block;
+  margin:0 auto;
 }
 
 /* C O N T A C T */

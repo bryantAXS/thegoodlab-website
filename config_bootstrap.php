@@ -235,6 +235,15 @@ if(isset($config)) {
         'theme_folder_path' => NSM_BASEPATH . '/themes/',
         'theme_folder_url' => NSM_SITE_URL . '/themes/',
 
+        // Debugging and performance
+        'show_profiler'        => 'n', 
+        'template_debugging'   => 'n', 
+        'debug'                => '1', 
+        'disable_all_tracking' => 'y', 
+        'enable_sql_caching'   => 'n', 
+        'email_debug'          => 'n',
+        'compress_output'     => '1',
+
         // Tracking preferences
         'enable_online_user_tracking' => 'n',
         'dynamic_tracking_disabling' => '500',
