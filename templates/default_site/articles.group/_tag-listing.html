@@ -1,0 +1,39 @@
+<p id='topic-filter-copy'>
+  Topic filter: <span>{exp:tagger:tagname tag="{segment_3}"}</span>
+</p>
+
+{exp:tagger:entries
+  channel="articles"
+  disable="categories|category_fields|member_data|trackbacks"
+  dynamic="on"
+  limit="1"
+  tag="{segment_3}"
+  custom_fields="article_content"
+  pagination="bottom"
+  }
+  
+  {if no_results}{redirect="404"}{/if}
+  
+<div class='blog-listing-article-container'>
+  <h2><a href='/articles/{tagger:entry_url_title}' class='blog-title-link'>{tagger:entry_title}</a></h2>
+  <span class='blog-date'>{tagger:entry_date format="%l, %F %j%S %Y"}</span>
+  <p>
+    {exp:excerpt limit="50"}{tagger:article_content}{/exp:excerpt}...
+  </p>
+  <a href='/articles/{tagger:entry_url_title}' class='blog-read-more'>read more</a>
+</div>
+    
+{!-- {tagger:paginate}
+<div id='paginate-container' class='has-layout'>
+  <ul id='paginate-list' class='has-layout'>
+  {if tagger:previous_page}
+    <li id='paginate-previous'><a href="{auto_path}">previous page</a></li>
+  {/if}
+  {if tagger:next_page}
+    <li id='paginate-next'><a href="{auto_path}">next page</a></li>
+  {/if}
+  </ul>
+</div>
+{/tagger:paginate} --}
+
+{/exp:tagger:entries}

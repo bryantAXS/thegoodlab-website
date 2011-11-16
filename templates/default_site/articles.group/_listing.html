@@ -1,0 +1,32 @@
+{exp:channel:entries
+  channel="articles"
+  disable="categories|category_fields|member_data|trackbacks"
+  dynamic="on"
+  limit="5"
+  pagination="bottom"}
+  
+  {if no_results}{redirect="/"}{/if}
+  
+<div class='blog-listing-article-container'>
+  <h2><a href='{title_permalink="articles"}' class='blog-title-link'>{title}</a></h2>
+  <span class='blog-date'>{entry_date format="%l, %F %j%S %Y"}</span>
+  <p>
+    {exp:excerpt limit="50"}{article_intro}{/exp:excerpt}...
+  </p>
+  <a href='{title_permalink="articles"}' class='blog-read-more'>read more</a>
+</div>
+    
+{paginate}
+<div id='paginate-container' class='has-layout'>
+  <ul id='paginate-list' class='has-layout'>
+  {if previous_page}
+    <li id='paginate-previous'><a href="{auto_path}">previous page</a></li>
+  {/if}
+  {if next_page}
+    <li id='paginate-next'><a href="{auto_path}">next page</a></li>
+  {/if}
+  </ul>
+</div>
+{/paginate}
+
+{/exp:channel:entries}

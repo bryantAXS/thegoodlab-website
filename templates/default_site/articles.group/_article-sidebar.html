@@ -1,0 +1,23 @@
+
+  </section><!-- blog-listing-content-left -->
+  <section id='blog-listing-content-right' class='col-3 left'>
+    
+    <h2>All Topics</h2>
+    <ul id='topic-list'>
+      {exp:tagger:cloud prefix="tags"} 
+      <li><a href="/articles/tag/{tags:urlsafe_tagname}/" title="{tags:tag_name}">{tags:tag_name}</a></li>   
+      {/exp:tagger:cloud}
+    </ul>
+    
+    <h2>Share</h2>
+    <div id='share-container'>
+      <div>
+        <a href="http://twitter.com/share?url={embed:share_url}&via=The Good Lab" class="twitter-share-button">Tweet</a>
+      </div>
+     
+      <div>
+        <fb:like href="{embed:share_url}" layout="button_count" show_faces="false" width="70" font=""></fb:like>
+      </div>  
+    </div>
+    
+  </section>
