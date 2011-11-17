@@ -19,10 +19,14 @@
         {embed="articles/_tag-listing"}
         {embed="articles/_blog-sidebar"}
       {/case}
+
+      {case value="category"}
+        {embed="articles/_category-listing"}
+        {embed="articles/_blog-sidebar"}
+      {/case}
       
       {case value="article" default="Yes"}
         {embed="articles/_article"}
-        {embed="articles/_article-sidebar"}
       {/case}
       
       {/exp:switchee}

@@ -1,12 +1,12 @@
 <p id='topic-filter-copy'>
-  Topic filter: <span>{exp:tagger:tagname tag="{segment_3}"}</span>
+  Tag filter: <span>{exp:tagger:tagname tag="{segment_3}"}</span>
 </p>
 
 {exp:tagger:entries
   channel="articles"
   disable="categories|category_fields|member_data|trackbacks"
   dynamic="on"
-  limit="1"
+  limit="5"
   tag="{segment_3}"
   custom_fields="article_content"
   pagination="bottom"

@@ -1,14 +1,13 @@
 <?php
 
 /**
-* Low Seg2Cat Language file
-*
-* @package			low-seg2cat-ee2_addon
-* @author			Lodewijk Schutte ~ Low <low@loweblog.com>
-* @link				http://loweblog.com/software/low-seg2cat/
-* @license			http://creativecommons.org/licenses/by-sa/3.0/
-* @since			2.2
-*/
+ * Low Seg2Cat Language file
+ *
+ * @package         low-seg2cat-ee2_addon
+ * @author          Lodewijk Schutte ~ Low <hi@gotolow.com>
+ * @link            http://gotolow.com/addons/low-seg2cat
+ * @license         http://creativecommons.org/licenses/by-sa/3.0/
+ */
 
 $lang = array(
 
