@@ -1,0 +1,4 @@
+/images/*
+system/expressionengine/cache/*
+config_bootstrap.php
+/config/deploy.rb
