@@ -208,7 +208,7 @@ class CI_Image_lib {
 		}
 		else
 		{
-			if (strpos($this->new_image, '/') === FALSE)
+			if (strpos($this->new_image, DIRECTORY_SEPARATOR) === FALSE)
 			{
 				$this->dest_folder = $this->source_folder;
 				$this->dest_image = $this->new_image;
@@ -1448,7 +1448,7 @@ class CI_Image_lib {
 	{
 		if ( ! extension_loaded('gd'))
 		{
-			if ( ! dl('gd.so'))
+			if (! function_exists('dl') OR ! @dl('gd.so'))
 			{
 				return FALSE;
 			}

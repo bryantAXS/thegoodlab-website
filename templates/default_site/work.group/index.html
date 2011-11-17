@@ -2,29 +2,15 @@
 
   {exp:channel:entries
     channel="work"
-    disable="categories|category_fields|member_data|pagination|trackbacks"
-    {if segment_2 == ""}
-    dynamic="off"
-    {/if}
-    limit="1"
-    require_entry="yes"
+    disable="categories|category_fields|member_data|trackbacks"
+    limit="3"
+    pagination="bottom"
     sort="asc"
   }
-  
-  {if segment_2}
-  <input id='work-first-id' type='hidden' value='{entry_id}' />
-  {/if}
-  
-  <input id='work-offset' type='hidden' value='0' />
-  <input id='work-total-results' type='hidden' value='{exp:query sql="SELECT COUNT(entry_id) as work_count
-  FROM exp_channel_titles
-  WHERE channel_id = 2
-  AND status = 'open';"}{work_count}{/exp:query}' />
   
   <div class='work-container {if count == 1}first{/if}'>
     <div class='section-title-container has-layout'>
       <h2>{title}</h2>
-      <a id='next-project' href='javascript:;'>Next Project</a>
     </div>
     <div class='main-work-copy'>
       {work_description}
@@ -32,77 +18,56 @@
     <div class='work-slider-container'>
       <div class='texture'></div>
       <div class='gallery-controls-container has-layout'>
-        {work_images}
-        <a href='javascript:;' rel='{row_index}' class='dot-{row_count} dot {if row_count == 1}active{/if}'>&nbsp;</a>
-        {/work_images}
+        <div class='clearfix'>
+            
+        </div>
         <a href='javascript:;' class='button-next'><img src='/assets/images/button-next.png' /></a>
       </div>
       <ul class='work-gallery'>
         {work_images}
-        <li><img height='281' width='380' src='{work_file}' /></li>
+        <li><img height='281' width='380' src='{work_file}' href='' /></li>
         {/work_images}
       </ul>
       <div class='work-copy-container'>
-        <ul class='services-list'>
-          <li class='title'>Services</li>
-          {work_services}
-          <li>{service}</li>
-          {/work_services}
-        </ul>
-        <ul class='technology-list'>
-          <li class='title'>Technology</li>
-          {work_technologies}
-          <li>{work_technology}</li>
-          {/work_technologies}
+        <ul class='project-metrics'>
+          <li class='title'>Client</li>
+          <li>{work_client}</li>
+          <li class='title'>Roles</li>
+          <li>{work_roles}</li>
+          <li class='title'>Agency</li>
+          <li>{work_agency}</li>
+        </ul> 
+        <ul class='build-list'>
+          <li class='title'>Build</li>
+          {work_build}
+          <li>{item}</li>
+          {/work_build}
         </ul>
       </div>
     </div>
   </div>
-  
+
+  {if segment_2 AND paginated == "false"}
+  <div id='paginate-container' class='has-layout'>
+    <ul id='paginate-list' class='has-layout'>
+      <li id=''><a href="/work">See More Work</a></li>
+    </ul>
+  </div>
+  {/if}
+
+  {paginate}
+  <div id='paginate-container' class='has-layout'>
+    <ul id='paginate-list' class='has-layout'>
+    {if previous_page}
+      <li id='paginate-previous'><a href="{auto_path}">Previous Work</a></li>
+    {/if}
+    {if next_page}
+      <li id='paginate-next'><a href="{auto_path}">See More Work</a></li>
+    {/if}
+    </ul>
+  </div>
+  {/paginate}
+
   {/exp:channel:entries}
-  
-  <script id='work-template' type="text/x-jquery-tmpl">
-    
-    <div class='work-container first'>
-      <div class='section-title-container has-layout'>
-        <h2>${title}</h2>
-        <a id='next-project' href='javascript:;'>Next Project</a>
-      </div>
-      <p class='main-work-copy'>
-        ${work_description}
-      </p>
-      <div class='work-slider-container'>
-        <div class='texture'></div>
-        <div class='gallery-controls-container has-layout'>
-          {{each(i, value) work_images}}
-          <a href='javascript:;' rel='${i + 1}' class='dot-${i + 1} dot'>&nbsp;</a>
-          {{/each}}
-          <a href='javascript:;' class='button-next'><img src='/assets/images/button-next.png' /></a>
-        </div>
-        <ul class='work-gallery'>
-          {{each(index, value) work_images}}
-          <li><img height='281' width='380' src='${value.work_file}' /></li>
-          {{/each}}
-        </ul>
-        <div class='work-copy-container'>
-          <ul class='services-list'>
-            <li class='title'>Services</li>
-            {{each(index, value) work_services}}
-            <li>${value.service}</li>
-            {{/each}}
-          </ul>
-          <ul class='technology-list'>
-            <li class='title'>Technology</li>
-            {{each(index, value) work_technologies}}
-            <li>${value.work_technology}</li>
-            {{/each}}
-          </ul>
-        </div><!-- #work-copy-container -->
-      </div>
-    </div>
-    
-  </script>
-  
-</div><!-- #content-container -->
 
 {embed="site/footer"}

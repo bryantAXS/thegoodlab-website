@@ -208,15 +208,15 @@ if(isset($config)) {
         // Some of these preferences might actually need to be set in the index.php files.
         // Not sure which ones yet, I'll figure that out when I have my first MSM site.
         'is_site_on' => 'y',
-        'site_404' => 'site/four04',
+        'site_404' => 'site/404',
 
         'webmaster_email' => 'info@' . 'thegoodlab.com',
         'webmaster_name' => 'The Good Lab',
 
         // Localization preferences
-        'server_timezone' => 'UP10',
+        'server_timezone' => 'UM6',
         'server_offset' => FALSE,
-        'time_format' => 'eu',
+        'time_format' => 'us',
         'daylight_savings' => 'n',
         'honor_entry_dst' => 'y',
 
@@ -234,6 +234,15 @@ if(isset($config)) {
         // Theme preferences
         'theme_folder_path' => NSM_BASEPATH . '/themes/',
         'theme_folder_url' => NSM_SITE_URL . '/themes/',
+
+        // Debugging and performance
+        'show_profiler'        => 'n', 
+        'template_debugging'   => 'n', 
+        'debug'                => '1', 
+        'disable_all_tracking' => 'y', 
+        'enable_sql_caching'   => 'n', 
+        'email_debug'          => 'n',
+        'compress_output'     => '1',
 
         // Tracking preferences
         'enable_online_user_tracking' => 'n',

@@ -367,7 +367,7 @@ class Safecracker_file_ft extends File_ft
 		{
 			$this->EE->session->cache['safecracker']['add_js'] = TRUE;
 			
-			$this->EE->javascript->output('$(".safecracker_file_remove_button").live("click",function(){fs=$(this).parents(".safecracker_file_set");fs.find(".safecracker_file_thumb, .safecracker_file_input, .safecracker_file_existing").toggle();fs.find(".safecracker_file_input input").attr("disabled","");fs.find(".safecracker_file_remove input").click();h=fs.find(".safecracker_file_hidden input").val();p=(h&&$(this).is(":checked"))?h:"NULL";fs.find(".safecracker_file_placeholder_input input").val(p);return false;});');
+			$this->EE->javascript->output('$(".safecracker_file_remove_button").live("click",function(){fs=$(this).parents(".safecracker_file_set");fs.find(".safecracker_file_thumb, .safecracker_file_input, .safecracker_file_existing").toggle();fs.find(".safecracker_file_input input").attr("disabled", false);fs.find(".safecracker_file_remove input").click();h=fs.find(".safecracker_file_hidden input").val();p=(h&&$(this).is(":checked"))?h:"NULL";fs.find(".safecracker_file_placeholder_input input").val(p);return false;});');
 			$this->EE->javascript->output('$(".safecracker_file_undo_button").live("click",function(){fs=$(this).parents(".safecracker_file_set");fs.find(".safecracker_file_thumb, .safecracker_file_input, .safecracker_file_existing").toggle();fs.find(".safecracker_file_input input").attr("disabled","disabled");fs.find(".safecracker_file_remove input").click();return false;});');
 			/*
 				$(".safecracker_file_remove_button").click(function(){
@@ -637,6 +637,13 @@ class Safecracker_file_ft extends File_ft
 			return array();
 		}
 		
+		// Check to make sure the directory exists
+		$directory_info = $this->EE->file_upload_preferences_model->get_upload_preferences($directory_id);
+		if ($directory_info->num_rows() <= 0)
+		{
+			show_error(lang('upload_destination_does_not_exist'));
+		}
+		
 		// Check to see if there's an imposed limit
 		if ( ! is_numeric($this->settings('safecracker_num_existing')))
 		{
@@ -757,4 +764,3 @@ class Safecracker_file_ft extends File_ft
 
 /* End of file ft.safecracker_file.php */
 /* Location: ./system/expressionengine/third_party/safecracker_file/ft.safecracker_file.php */
-

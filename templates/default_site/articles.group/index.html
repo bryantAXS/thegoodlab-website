@@ -1,0 +1,36 @@
+{embed="site/header" page_title="Articles"}
+
+  <section id='blog-listing-content-container' class='has-layout'>
+    <section id='blog-listing-content-left' class='col-6 left first'>
+      
+      {exp:switchee variable = "{segment_2}" parse="inward"}
+      
+      {case value=""}
+        {embed="articles/_listing"}
+        {embed="articles/_blog-sidebar"}
+      {/case}
+      
+      {case value="#P[0-9]*#"}
+        {embed="articles/_listing"}
+        {embed="articles/_blog-sidebar"}
+      {/case}
+      
+      {case value="tag"}
+        {embed="articles/_tag-listing"}
+        {embed="articles/_blog-sidebar"}
+      {/case}
+
+      {case value="category"}
+        {embed="articles/_category-listing"}
+        {embed="articles/_blog-sidebar"}
+      {/case}
+      
+      {case value="article" default="Yes"}
+        {embed="articles/_article"}
+      {/case}
+      
+      {/exp:switchee}
+    
+  </section><!-- blog-listing-content-container -->
+
+{embed="site/footer"}

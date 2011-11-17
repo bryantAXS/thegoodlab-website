@@ -1,0 +1,69 @@
+<div id='comments-container'>
+    <span class='comments-container-title'>Comments</span>
+    
+    {exp:comment:entries sort="asc" entry_id="{embed:entry_id}"}
+
+    {if no_results}
+    <div class='comment-container' id='no-comments'>
+      <p>No one has posted a comment yet, be the first!</p>  
+    </div>
+    {/if}
+
+    <div class="comment-container">
+      <div class="comment-top clearfix">
+        {exp:ce_gravatar:pair email="{email}"}
+        {if gravatar}
+        <img src="{gravatar}" class='avatar' alt="{name}'s gravatar" />
+        {/if}
+        {/exp:ce_gravatar:pair}
+        <div>
+          {if url != ""}
+            <a class='name' href='{url}'>{name}</a>
+            {if:else}
+            <span class='name'>{name}</span>  
+          {/if}
+          <span class='date'>{comment_date format="%n.%j.%y"}</span>
+        </div>
+      </div>
+      <div class="comment-body">
+        {comment}
+      </div>
+    </div><!-- .comment-container -->
+
+    {/exp:comment:entries}
+
+  </div><!-- comments-container -->
+
+  <div class='dotted-line mt30'></div>
+
+  {exp:comment:form channel="articles" entry_id="{embed:entry_id}"}
+
+  <div id='comment-form-container'>
+    <span class='leave-a-comment-title'>Leave a comment</span>
+    
+    <table id='comment-form'>
+      <tbody>
+        {if logged_out}
+        <tr>
+          <td><input name='name' value="" type='text' /><label>Name (required)</label></td>
+        </tr>
+        <tr>
+          <td><input name='email' value="" type='text' /><label>Email (required)</label></td>
+        </tr>
+        <tr>
+          <td><input name='url' value="" type='text' /><label>Website</label></td>
+        </tr>
+        {/if}
+
+        <tr>
+          <td><textarea name='comment'></textarea></td>
+        </tr>
+        
+        <tr>
+          <td><input class='green-button' name='submit' value='Submit' type='submit' /></td>
+        </tr>
+      </tbody>
+    </table>
+  </div><!-- comment-form-container -->
+
+  {/exp:comment:form}

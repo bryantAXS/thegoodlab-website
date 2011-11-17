@@ -3,13 +3,13 @@ $(document).ready(function() {
 	$('#tabs').tabs();
 	
 	// create rounded corners
-	$("a.copy").corner();
-	$("h3.section-heading").corner("8px tl tr");
-	$(".snippetsTable thead th:first-child").corner("8px tl");
-	$(".snippetsTable thead th:last-child").corner("8px tr");
-	$(".globalVariableTable thead th:first-child").corner("8px tl");
-	$(".globalVariableTable thead th:last-child").corner("8px tr");
-	$("tfoot td").corner("8px bl br");
+	//$("a.copy").corner();
+	//$("h3.section-heading").corner("8px tl tr");
+	//$(".snippetsTable thead th:first-child").corner("8px tl");
+	//$(".snippetsTable thead th:last-child").corner("8px tr");
+	//$(".globalVariableTable thead th:first-child").corner("8px tl");
+	//$(".globalVariableTable thead th:last-child").corner("8px tr");
+	//$("tfoot td").corner("8px bl br");
 	
 	
 	// assign ZeroClipboard.swf path

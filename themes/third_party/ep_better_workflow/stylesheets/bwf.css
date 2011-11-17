@@ -1,0 +1,130 @@
+/* EP Better Workflow from www.electricputty.co.uk */
+
+/* Remove border/padding from the publish form */	
+#mainContent #publishForm { border-top: 0 !important; padding-top: 0 !important; }
+
+/* Set up relative position on publish form holder */
+#mainContent #publishForm #holder { position: relative; }
+
+/* Create overlay div to lock form inputs */
+#bwf_locked_publish { 
+	width: 100%; 
+	height: 100%; 
+	background: #000 url('../images/bwf-locked-stripe.png'); 
+	position: absolute; 
+	top: 0; 
+	left: 0; 
+	z-index: 999;
+	opacity: 0.3;
+	-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=30)";
+	filter: alpha(opacity=30);
+}
+
+/* Better Workflow publish page control unit */
+.bwf_control_unit { 	
+	padding: 10px;
+	border-left: 1px solid #D0D7DF; 
+	border-top: 1px solid #D1D5DE; 
+	border-bottom: 1px solid #D1D5DE;
+	border-right: 1px solid #D0D7DF;
+	min-height: 24px;
+}
+	
+	#mainContent .bwf_control_unit h3 { color: #323232; margin: 0; line-height: 24px; }
+		.bwf_control_unit h3 span { padding-left: 5px; font-size: 0.7em; font-weight: normal; }
+	
+	/* Status colours */
+	.bwf_control_unit.draft {
+		background: #FEFFD9; /* old browsers */
+		background: -moz-linear-gradient(top, #FFFFFF 0%, #FEFFD9 3%, #FDFEC9 100%); /* firefox */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(3%,#FEFFD9), color-stop(100%,#FDFEC9)); /* webkit */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#FDFEC9',GradientType=0 ); /* ie */
+	}
+	
+	.bwf_control_unit.open {
+		background: #c6e5c6; /* old browsers */
+		background: -moz-linear-gradient(top, #FFFFFF 0%, #d8ead6 3%, #c6e5c6 100%); /* firefox */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(3%,#D8EAD6), color-stop(100%,#C6E5C6)); /* webkit */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#C6E5C6',GradientType=0 ); /* ie */
+	}
+	
+	.bwf_control_unit.submitted {
+		background: #e5e5dd; /* old browsers */
+		background: -moz-linear-gradient(top, #FFFFFF 0%, #efeee6 3%, #e5e5dd 100%); /* firefox */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(3%,#EFEEE6), color-stop(100%,#E5E5DD)); /* webkit */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#E5E5DD',GradientType=0 ); /* ie */
+	}
+	
+	.bwf_control_unit.closed {
+		background: #e7d1d1; /* old browsers */
+		background: -moz-linear-gradient(top, #FFFFFF 0%, #f6e2e2 3%, #e7d1d1 100%); /* firefox */
+		background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#FFFFFF), color-stop(3%,#F6E2E2), color-stop(100%,#E7D1D1)); /* webkit */
+		filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#FFFFFF', endColorstr='#E7D1D1',GradientType=0 ); /* ie */
+	}
+
+	/* Button style */
+	.bwf_control_unit ul li { float: right; margin-left: 6px; }
+	
+		.bwf_control_unit ul li button { 
+			-moz-border-radius:3px; 
+			border-radius:3px; 
+			border: 0; 
+			padding: 5px 9px; 
+			color: #FFF; 
+			font: 12px/12px Arial,'Hevlvetica Neue',sans-serif; 
+			cursor: pointer; 
+			overflow: visible; /* hello IE7 */
+		}
+		
+		/* Button colours */
+		.bwf_control_unit ul li button.bwf_grey_button { 
+			background: #5E5E5E; 
+			background: -moz-linear-gradient(top, #AAAAAA 0%, #A4A4A4 3%, #525252 100%); 
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#AAAAAA), color-stop(3%,#A4A4A4), color-stop(100%,#525252));
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#AAAAAA', endColorstr='#525252',GradientType=0 );
+		}
+		
+		.bwf_control_unit ul li button.bwf_blue_button { 
+			background: #284455;
+			background: -moz-linear-gradient(top, #386179 0%, #3A647D 3%, #284455 100%);
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#386179), color-stop(3%,#3A647D), color-stop(100%,#284455));
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#386179', endColorstr='#284455',GradientType=0 );
+		}
+		
+		.bwf_control_unit ul li button.bwf_red_button { 
+			background: #790C0C;		
+			background: -moz-linear-gradient(top, #B21111 0%, #AC1010 3%, #790C0C 100%);		
+			background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#B21111), color-stop(3%,#AC1010), color-stop(100%,#790C0C));		
+			filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#B21111', endColorstr='#790C0C',GradientType=0 );
+		}
+			/* Button hover */
+			.bwf_control_unit ul li button:hover { 
+				opacity: 0.8;
+				-ms-filter: 0;
+				filter: 0;
+				-ms-filter:"progid:DXImageTransform.Microsoft.Alpha(Opacity=80)";
+				filter: alpha(opacity=80);
+			}
+
+		
+
+/* Edit list title cell styles */
+.mainTable td.bwf_edit_list_cell a { background-position: 0 50%; background-repeat: no-repeat; padding: 2px 0 2px 20px; }
+
+	/* Colours */
+	.mainTable td.bwf_draft_cell a, 
+	.mainTable td.bwf_draft_open_cell a,
+	.status_draft { color: #AB9501; }
+	
+	.mainTable td.bwf_submitted_cell a,
+	.mainTable td.bwf_submitted_open_cell a, 
+	.status_submitted  { color: #0A657C; }
+	
+	/* Icons */
+	.mainTable td.bwf_draft_cell a { background-image: url('../images/bwf-draft.png'); }
+	.mainTable td.bwf_draft_open_cell a { background-image: url('../images/bwf-draft-open.png'); }
+	.mainTable td.bwf_submitted_cell a { background-image: url('../images/bwf-submitted.png'); }
+	.mainTable td.bwf_submitted_open_cell a { background-image: url('../images/bwf-submitted-open.png'); }
+	
+/* Preview spinner for iFrame */
+#epBwf_preview_spinner { background: url('../images/bwf-loader.gif') no-repeat 50% 50%; height: 100%; }

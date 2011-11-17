@@ -1,0 +1,14 @@
+/* the humans responsible & colophon */
+/* humanstxt.org */
+
+
+/* TEAM */
+The Good Lab - Bryant Hughes bryant@thgoodlab.com
+Site: http://thegoodlab.com
+Twitter: @thegoodlab @bryant_
+Location: Chicago, IL
+
+/* SITE */
+Standards: HTML5, CSS3
+Components: Modernizr, jQuery, ExpressionEngine
+Software: Sublime Text 2, HTML5 Boilerplate, Capistrano

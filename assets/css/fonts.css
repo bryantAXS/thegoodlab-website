@@ -74,3 +74,16 @@
 
 }
 
+
+@font-face {
+    font-family: 'GarageGothic';
+    src: url('../fonts/garagegothicregular-webfont.eot');
+    src: url('../fonts/garagegothicregular-webfont.eot?#iefix') format('embedded-opentype'),
+         url('../fonts/garagegothicregular-webfont.woff') format('woff'),
+         url('../fonts/garagegothicregular-webfont.ttf') format('truetype'),
+         url('../fonts/garagegothicregular-webfont.svg#GarageGothicRegular') format('svg');
+    font-weight: normal;
+    font-style: normal;
+
+}
+

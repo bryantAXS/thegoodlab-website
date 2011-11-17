@@ -103,9 +103,14 @@ class Member_auth extends Member {
 			if ($this->EE->extensions->end_script === TRUE) return;
 		/*
 		/* -------------------------------------------*/
-
+		
+		// Figure out how many sites we're dealing with here
+		$sites = $this->EE->config->item('multi_login_sites');
+		$sites_array = explode('|', $sites);
+		
 		// No username/password?  Bounce them...
-		$multi	  = $this->EE->input->get('multi');
+		$multi	  = ($this->EE->input->get('multi') && count($sites_array) > 0) ? 
+						$this->EE->input->get('multi') : 0;
 		$username = $this->EE->input->post('username');
 		$password = $this->EE->input->post('password');
 		
@@ -123,25 +128,26 @@ class Member_auth extends Member {
 		// Check password lockout status
 		if (TRUE === $this->EE->session->check_password_lockout($username))
 		{
+			$this->EE->lang->loadfile('login');
+			
 			$line = lang('password_lockout_in_effect');
-			$line = str_replace("%x", $this->EE->config->item('password_lockout_interval'), $line);
+			$line = sprintf($line, $this->EE->config->item('password_lockout_interval'));
 
 			$this->EE->output->show_user_error('general', $line);
 		}
 
-
 		$success = '';
-		$sites	 = $this->EE->config->item('multi_login_sites');
 		
 		// Log me in.
 		if ($multi)
 		{
 			// Multiple Site Login
-			$incoming = $this->_do_multi_auth($sites);
+			$incoming = $this->_do_multi_auth($sites, $multi);
 			$success = '_build_multi_success_message';
-			
-			$current = $this->EE->input->get('cur') + 1;
-			$orig	 = $this->EE->input->get_post('orig');
+
+			$current_url = $this->EE->functions->fetch_site_index();
+			$current_search_url = preg_replace('/\/S=.*$/', '', $current_url);
+			$current_idx = array_search($current_search_url, $sites_array);
 		}
 		else
 		{
@@ -149,18 +155,18 @@ class Member_auth extends Member {
 			$incoming = $this->_do_auth($username, $password);
 			$success = '_build_success_message';
 			
-			$current = $this->EE->functions->fetch_site_index();
-			$orig	 = array_search($current, explode('|', $sites));
-			$current = $orig;
+			$current_url = $this->EE->functions->fetch_site_index();
+			$current_search_url = preg_replace('/\/S=.*$/', '', $current_url);
+			$current_idx = array_search($current_search_url, $sites_array);
 		}
 		
 		// More sites?
-		if ($sites && ! $this->EE->config->item('allow_multi_logins') == 'n')
+		if ($sites && $this->EE->config->item('allow_multi_logins') == 'y')
 		{
-			$this->_redirect_next_site($sites, $orig, $current);
+			$this->_redirect_next_site($sites, $current_idx, $current_url);
 		}
 		
-		$this->$success();
+		$this->$success($sites_array);
 	}
 
 	// --------------------------------------------------------------------
@@ -189,8 +195,8 @@ class Member_auth extends Member {
 				$this->basepath = $this->EE->input->get_post('mbase');
 				$trigger = $this->EE->input->get_post('trigger');
 			}
-
-			$path = 'unpw_update/'.$member_obj->member_id .'_'.$ulen.'_'.$plen;
+			
+			$path = 'unpw_update/' . $member_obj->member('member_id') . '_' . $ulen . '_' . $plen;
 
 			if ($trigger != '')
 			{
@@ -203,6 +209,13 @@ class Member_auth extends Member {
 
 	// --------------------------------------------------------------------
 
+	/**
+	 * Do member auth
+	 *
+	 * @param 	string 	POSTed username
+	 * @param 	string 	POSTed password
+	 * @return 	object 	session data.
+	 */
 	private function _do_auth($username, $password)
 	{
 		$sess = $this->EE->auth->authenticate_username($username, $password);
@@ -210,7 +223,15 @@ class Member_auth extends Member {
 		if ( ! $sess)
 		{
 			$this->EE->session->save_password_lockout($username);
-			return $this->EE->output->show_user_error('general', lang('not_authorized'));
+
+			if (empty($username) OR empty($password))
+			{
+				return $this->EE->output->show_user_error('general', lang('mbr_form_empty'));
+			}
+			else
+			{
+				return $this->EE->output->show_user_error('general', lang('invalid_existing_un_pw'));
+			}
 		}
 
 		// Banned
@@ -247,21 +268,15 @@ class Member_auth extends Member {
 	
 	// --------------------------------------------------------------------
 	
-	private function _do_multi_auth($sites)
+	/**
+	 * Do Multi-site authentication
+	 *
+	 * @param 	array 	array of sites
+	 * @return 	object 	member auth object
+	 */
+	private function _do_multi_auth($sites, $session_id)
 	{
-		$multi = $this->EE->input->get('multi');
-		
 		if ( ! $sites OR $this->EE->config->item('allow_multi_logins') == 'n')
-		{
-			return $this->EE->output->show_user_error('general', lang('not_authorized'));
-		}
-		
-		$cur	 = $this->EE->input->get('cur');
-		$orig	 = $this->EE->input->get_post('orig');
-		$orig_id = $this->EE->input->get('orig_site_id');
-
-		// Current site in list.  Original login site.
-		if ($cur === FALSE OR $orig === FALSE OR $orig_id === FALSE)
 		{
 			return $this->EE->output->show_user_error('general', lang('not_authorized'));
 		}
@@ -272,8 +287,10 @@ class Member_auth extends Member {
 		
 		// Grab session
 		$sess_q = $this->EE->db->get_where('sessions', array(
-			'session_id' => $multi
+			'session_id' => $session_id
 		));
+		
+ 
 		
 		if ( ! $sess_q->num_rows())
 		{
@@ -299,38 +316,67 @@ class Member_auth extends Member {
 		}
 		
 		// hook onto an existing session
-		$incoming->use_session_id($multi);
+		$incoming->use_session_id($session_id);
 		$incoming->start_session();
 		
+		$new_row = $sess_q->row_array();
+		$some_row['site_id'] = $this->EE->config->item('site_id');
+
 		return $incoming;
-	}
-	
-	public function _redirect_next_site($sites, $orig, $current)
+	}	
+	// --------------------------------------------------------------------
+
+	/**
+	 * Redirect next site
+	 *
+	 * This function redirects to the next site for multi-site login based on
+	 * the array setup in config.php
+	 *
+	 *
+	 */
+	public function _redirect_next_site($sites, $current_idx, $current_url)
 	{
 		$sites = explode('|', $sites);
+		$num_sites = count($sites);
 		$orig_id = $this->EE->input->get('orig_site_id');
+		$orig_idx = $this->EE->input->get('orig');
+		$return = $this->EE->input->get('RET');
 		
-		$current = $this->EE->functions->fetch_site_index();
-		$orig = array_search($current, $sites);
+		$next_idx = $current_idx + 1;
 		
-		if ($cur == $orig)
+		// first site, no qs yet
+		if ($orig_id === FALSE)
 		{
-			$next++;
+			$orig_id = $this->EE->config->item('site_id');
+			$orig_idx = $current_idx;
+			$next_idx = ($current_idx == '0') ? '1' : '0';
+			$return = $this->EE->functions->remove_double_slashes($this->EE->functions->form_backtrack());
+			$return = strtr(base64_encode($return), '/=', '_-');
+		}
+		elseif ($next_idx == $orig_idx)
+		{
+			$next_idx++;
 		}
 		
 		// Do we have another?
-		if (isset($sites[$next]))
+		if (isset($sites[$next_idx]))
 		{
+			$action_id = $this->EE->db->select('action_id')
+									  ->where('class', 'Member')
+									  ->where('method', 'member_login')
+									  ->get('actions');
+			
 			// next site
 			$next_qs = array(
-				'ACT'	=> $this->EE->functions->fetch_action_id('Member', 'member_login'),
-				'cur'	=> $next,
-				'orig'	=> $orig,
-				'multi'	=> $multi,
-				'orig_site_id' => $orig_id
+				'ACT'	=> $action_id->row('action_id'),
+				'RET'	=> $return,
+				'cur'	=> $next_idx,
+				'orig'	=> $orig_idx,
+				'multi'	=> $this->EE->session->userdata('session_id'),
+				'orig_site_id' => $orig_id,
 			);
 			
-			$next_url = $sites[$next].'?'.http_build_query($next_qs);
+			$next_url = $sites[$next_idx].'?'.http_build_query($next_qs);
 
 			return $this->EE->functions->redirect($next_url);
 		}
@@ -339,19 +385,31 @@ class Member_auth extends Member {
 
 	// --------------------------------------------------------------------
 
-	private function _build_multi_success_message()
+	private function _build_multi_success_message($sites)
 	{
+		// Figure out return
+		if  ( ! $ret = $this->EE->input->get('RET'))
+		{
+			$ret = $sites[$this->EE->input->get('orig')];
+		}
+		else
+		{
+			$ret = base64_decode(strtr($ret, '_-', '/='));
+		}
+				
 		// That was our last site, show the success message
 		
 		$data = array(
 			'title' 	=> lang('mbr_login'),
 			'heading'	=> lang('thank_you'),
 			'content'	=> lang('mbr_you_are_logged_in'),
-			'redirect'	=> $sites[$orig],
-			'link'		=> array($sites[$orig], lang('back'))
+			'redirect'	=> $ret,
+			'link'		=> array($ret, lang('back'))
 		);
 		
 		// Pull preferences for the original site
+		$orig_id = $this->EE->input->get('orig_site_id');
+		
 		if (is_numeric($orig_id))
 		{
 			$this->EE->db->select('site_name, site_id');
@@ -374,7 +432,7 @@ class Member_auth extends Member {
 	/**
 	 * Build Success Message
 	 */
-	private function _build_success_message()
+	private function _build_success_message($sites)
 	{
 		// Build success message
 		$site_name = ($this->EE->config->item('site_name') == '') ? lang('back') : stripslashes($this->EE->config->item('site_name'));
@@ -718,7 +776,27 @@ class Member_auth extends Member {
 		$address = $query->row('email') ;
 		$username = $query->row('username') ;
 
-		$rand = $this->EE->functions->random('alnum', 8);
+		// Generate a new password that is valid according to our
+		// security preferences
+		$len = $this->EE->config->item('pw_min_len');
+		
+		if ($len < 8)
+		{
+			$len = 8;
+		}
+		
+		$rand = $this->EE->functions->random('alnum', $len);
+		
+		// add one of each character we require
+		if ($this->EE->config->item('require_secure_passwords') == 'y')
+		{
+			$alpha = range('a', 'z');
+			$number = rand(0, 9);
+			
+			shuffle($alpha);
+			
+			$rand .= $number.$alpha[0].strtoupper($alpha[1]);
+		}
 
 		// Update member's password
 
@@ -728,8 +806,9 @@ class Member_auth extends Member {
 
 		// Kill old data from the reset_password field
 		$this->EE->db->where('date <', $time)
-					 ->where('member_id', $member_id)
+					 ->or_where('member_id', $member_id)
 					 ->delete('reset_password');
+					
 
 		// Buid the email message
 		if ($this->EE->input->get_post('r') == 'f')
