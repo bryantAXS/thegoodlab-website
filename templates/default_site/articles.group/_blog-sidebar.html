@@ -3,7 +3,7 @@
   <section id='blog-listing-content-right' class='col-3 left'>
     <h2>All Categories</h2>
     <ul id='topic-list'>
-      {exp:gwcode_categories show_empty="no"}
+      {exp:gwcode_categories show_empty="no" status="open"}
       <li><a href="/articles/category/{cat_url_title}/" title="{cat_url_title}">{cat_name}</a></li>   
       {/exp:gwcode_categories}
     </ul>

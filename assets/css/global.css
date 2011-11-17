@@ -561,8 +561,9 @@ header ul#dots li img{
 .blog-title-link:hover{
   color:#14ffa3;
 }
-#topic-filter-copy {
-  margin
+html body #topic-filter-copy {
+  padding:0;
+  margin:0;
 }
 #topic-filter-copy span{
   color:#14ffa3;
@@ -608,7 +609,7 @@ header ul#dots li img{
   font-family: ProximaNovaRegular;
   font-size: 14px;
   line-height: 22px;
-  margin-top: 10px;
+  /*margin-top: 10px;*/
 }
 #article-content-container ul{
   margin: 15px 0 20px 20px;

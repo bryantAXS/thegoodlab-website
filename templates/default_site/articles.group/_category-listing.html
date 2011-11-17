@@ -1,0 +1,23 @@
+<p id='topic-filter-copy'>
+  Category filter: <span>{exp:tagger:tagname tag="{segment_3}"}</span>
+</p>
+
+{exp:channel:entries
+  channel="articles"
+  disable="pagination|member_data|trackbacks"
+  dynamic="on"
+  category="{segment_3_category_id}"
+  limit="5"}
+  
+  {if no_results}{redirect="/"}{/if}
+  
+<div class='blog-listing-article-container'>
+  <h2><a href='{title_permalink="articles"}' class='blog-title-link'>{title}</a></h2>
+  <span class='blog-date'>{entry_date format="%l, %F %j%S %Y"}</span>
+  <p>
+    {exp:excerpt limit="50"}{article_intro}{/exp:excerpt}...
+  </p>
+  <a href='{title_permalink="articles"}' class='blog-read-more'>read more</a>
+</div>
+    
+{/exp:channel:entries}
