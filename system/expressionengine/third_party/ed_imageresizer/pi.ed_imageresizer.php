@@ -68,9 +68,13 @@ Class Ed_imageresizer
      */
     public function Ed_imageresizer( )
     {
+        
         $EE =& get_instance();
         $EE->load->library('typography'); 
         
+        $this->server_path = NSM_BASEPATH;
+        $this->cache_path = NSM_BASEPATH . '/images/cache/'; 
+
         $this->forceWidth     = $EE->TMPL->fetch_param('forceWidth') != 'yes' ? FALSE : TRUE;
         $this->forceHeight    = $EE->TMPL->fetch_param('forceHeight') != 'yes' ? FALSE : TRUE;
         $this->image          = $EE->typography->parse_file_paths(preg_replace('/^(s?f|ht)tps?:\/\/[^\/]+/i', '', (string) html_entity_decode($EE->TMPL->fetch_param('image'))));
