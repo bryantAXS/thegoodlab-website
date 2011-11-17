@@ -1,4 +1,4 @@
-
+{if global:env == 'production'}
 <!-- get clicky -->
 <script type="text/javascript">
 var clicky_site_ids = clicky_site_ids || [];
@@ -11,6 +11,7 @@ clicky_site_ids.push(66504950);
   ( document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0] ).appendChild( s );
 })();
 </script>
+{/if}
 
 {!-- JAVASCRIPT --}
 {!-- jQuery --}
