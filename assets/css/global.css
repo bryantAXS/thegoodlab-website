@@ -232,6 +232,7 @@ header ul#dots li img{
   position:relative;
   overflow:hidden;
   width:220px;
+  -webkit-backface-visibility: hidden;
 }
 .home-work-sample-container:nth-child(3n + 1){
   margin-left:0;
