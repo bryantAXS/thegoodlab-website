@@ -16,6 +16,12 @@ h3{
   font-family:ProximaNovaBold;
   font-weight:normal;
 }
+h4{
+  padding-top:8px;
+  font-family:ProximaNovaSemibold;
+  font-weight:normal;
+  font-style:italic;
+}
 .inside{
   margin:0 0 0 0;
   padding:0;
