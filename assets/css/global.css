@@ -788,6 +788,13 @@ html body #topic-filter-copy {
   margin:0 auto;
 }
 
+#honeepot{
+  display: block !important;
+  left: -9999px !important;
+  position: absolute !important;
+  top: -9999px !important;
+}
+
 /* C O N T A C T */
 #contact-container{
   color:#fff;
