@@ -789,10 +789,10 @@ html body #topic-filter-copy {
 }
 
 #honeepot{
-  display: block !important;
+/*  display: block !important;
   left: -9999px !important;
   position: absolute !important;
-  top: -9999px !important;
+  top: -9999px !important;*/
 }
 
 /* C O N T A C T */

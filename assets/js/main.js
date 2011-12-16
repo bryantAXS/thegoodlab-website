@@ -147,6 +147,15 @@ $(document).ready(function(){
       $el.find('p').addClass('white');
     }
   });
+
+  //honey pot for comment form
+  $('#comment_form').bind('submit',function(){
+    
+    if($('#honeepot').val() != ""){
+      return false;
+    }
+
+  });
   
 });
 
