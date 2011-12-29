@@ -4,14 +4,6 @@
 
 $(document).ready(function(){
   
-  // $('.home-work-sample-container').bind('mouseenter',function(){
-  //   var $el = $(this);
-  //   $el.find('div').animate({opacity: 1},500);
-  // }).bind('mouseleave',function(){
-  //   var $el = $(this);
-  //   $el.find('div').animate({opacity: 0},500);
-  // });
-
   //triggering events for iphone/ipad -- an alternative to mouseenter/mouseleave
   
   if( ! Modernizr.cssanimations){
@@ -71,6 +63,7 @@ $(document).ready(function(){
 
   }
   
+  
   //init header dots
   $('header ul#dots li img').bind('mouseenter',function(){
     $(this).animate({opacity:'0.95'});
@@ -78,6 +71,7 @@ $(document).ready(function(){
     $(this).animate({opacity:'0.7'});
   });
  
+  
   //init work galleries
   if($('.work-gallery').length){
     
@@ -99,23 +93,6 @@ $(document).ready(function(){
     });
   }
 
-  //resize content-container, so white bar goes to the bottom of the page
-  // $(window).bind('resize',function(){
-  //   if($(window).width() < 1113){
-  //     $('#content-container').height('auto');
-  //   }else{
-  //     if($('#content-container').height() < $(document).height()){
-  //       $('#content-container').height($(document).height());
-  //     }
-  //   }
-  // });
-  // if($(window).width() < 1113){
-  //   $('#content-container').height('auto');
-  // }else{
-  //   if($('#content-container').height() < $(document).height()){
-  //     $('#content-container').height($(document).height());
-  //   }
-  // }
 
   //toggles on about page
   $('#about-content-container-right a.services-title').bind('click',function(){
@@ -136,6 +113,7 @@ $(document).ready(function(){
     }
   });
   
+  
   //colors insdide ol and ul lists in article content
   $('#article-content-container ol li, #article-content-container ul li').each(function(){
     
@@ -148,6 +126,7 @@ $(document).ready(function(){
     }
   });
 
+  
   //honey pot for comment form
   $('#comment_form').bind('submit',function(){
     
@@ -156,6 +135,12 @@ $(document).ready(function(){
     }
 
   });
+
+  $('pre').each(function(){
+    $(this).addClass("brush: xml");
+  })
+
+  SyntaxHighlighter.all()
   
 });
 
