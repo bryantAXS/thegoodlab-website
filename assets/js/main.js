@@ -124,6 +124,7 @@ $(document).ready(function(){
     }else{
       $el.find('p').addClass('white');
     }
+
   });
 
   
@@ -136,10 +137,7 @@ $(document).ready(function(){
 
   });
 
-  $('pre').each(function(){
-    $(this).addClass("brush: xml");
-  })
-
+  SyntaxHighlighter.defaults['tab-size'] = 2;
   SyntaxHighlighter.all()
   
 });

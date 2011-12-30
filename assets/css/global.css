@@ -621,6 +621,10 @@ html body #topic-filter-copy {
   line-height: 22px;
   /*margin-top: 10px;*/
 }
+#article-content-container pre{
+  font-weight:bold;
+  padding:5px 0;
+}
 #article-content-container ul{
   margin: 15px 0 20px 20px;
 }
