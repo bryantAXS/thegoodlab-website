@@ -138,6 +138,7 @@ $(document).ready(function(){
   });
 
   SyntaxHighlighter.defaults['tab-size'] = 2;
+  SyntaxHighlighter.defaults['toolbar'] = true;
   SyntaxHighlighter.all()
   
 });

@@ -54,7 +54,8 @@ class Wygwam_Helper {
 			array('FontSize'),
 			array('TextColor', 'BGColor'),
 			array('Maximize', 'ShowBlocks'),
-			array('About')
+			array('About'),
+			array('Syntaxhighlight')
 		);
 	}
 
@@ -119,7 +120,8 @@ class Wygwam_Helper {
 			'ShowBlocks'     => 'Show Blocks',
 			'About'          => 'About CKEditor',
 			'EmbedMedia'     => 'Embed Media',
-			'ReadMore'       => 'Read More'
+			'ReadMore'       => 'Read More',
+			'Syntaxhighlight'	=> 'Syntaxhighlight'
 		);
 	}
 
@@ -194,10 +196,10 @@ class Wygwam_Helper {
 	function default_toolbars()
 	{
 		return array(
-			'Basic' => array('Bold','Italic','Underline','Strike','NumberedList','BulletedList','Link','Unlink','Anchor','About'),
+			'Basic' => array('Bold','Italic','Underline','Strike','NumberedList','BulletedList','Link','Unlink','Anchor','About','Syntaxhighlight'),
 			'Full'  => array('Source','Save','NewPage','Preview','Templates','Cut','Copy','Paste','PasteText','PasteFromWord','Print','SpellChecker','Scayt','Undo','Redo','Find','Replace','SelectAll','RemoveFormat','Form','Checkbox','Radio','TextField','Textarea','Select','Button','ImageButton','HiddenField','/',
 			                 'Bold','Italic','Underline','Strike','Subscript','Superscript','NumberedList','BulletedList','Outdent','Indent','Blockquote','CreateDiv','JustifyLeft','JustifyCenter','JustifyRight','JustifyBlock','Link','Unlink','Anchor','Image','Flash','Table','HorizontalRule','Smiley','SpecialChar','PageBreak','ReadMore','EmbedMedia','/',
-			                 'Styles','Format','Font','FontSize','TextColor','BGColor','Maximize','ShowBlocks','About')
+			                 'Styles','Format','Font','FontSize','TextColor','BGColor','Maximize','ShowBlocks','About','Syntaxhighlight')
 		);
 	}
 
