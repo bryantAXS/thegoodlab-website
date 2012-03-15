@@ -685,6 +685,9 @@ html body #topic-filter-copy {
 	font-style:italic;
 	padding:15px;
 }
+#article-content-contaienr li img{
+  margin: 10px 0;
+}
 
 /** comments **/
 #comments-container{
