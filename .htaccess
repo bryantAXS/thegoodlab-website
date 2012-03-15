@@ -13,6 +13,7 @@ AddType text/x-component .htc
 
 </IfModule> 
 
+
 <IfModule !mod_rewrite.c>
     # If we don't have mod_rewrite installed, all 404's
     # can be sent to index.php, and everything works as normal.
