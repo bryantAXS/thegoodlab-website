@@ -1,5 +1,4 @@
 /content
 /system/expressionengine/cache/*
-/bootstrap.php
 /config/deploy.rb
 /Capfile
