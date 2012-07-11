@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Control Panel
  * @category	Control Panel
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Publish 
@@ -93,7 +93,7 @@ class Publish
 				}
 			}
 		}
-		elseif ( ! isset($selected_categories))
+		elseif ( ! isset($selected_categories) AND $entry_id !== 0)
 		{
 			if ($file)
 			{
@@ -159,12 +159,22 @@ class Publish
 				}
 			}
 		}
-
-
+		
+		// Load in necessary lang keys
+		$this->EE->lang->loadfile('admin_content');
+		$this->EE->javascript->set_global(array(
+			'publish.lang' => array(
+				'update'		=> lang('update'),
+				'edit_category'	=> lang('edit_category')
+			)
+		));
+		
+		// EE.publish.lang.update_category
+		
 		// Build the mess
 		$data = compact('categories', 'edit_links');
 
-		$default['options']			= $categories;		
+		$default['options']			= $categories;
 		$default['string_override'] = $this->EE->load->view('content/_assets/categories', $data, TRUE);
 		
 		return array('category' => $default);

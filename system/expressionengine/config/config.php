@@ -10,7 +10,7 @@
 |
 */
 
-$config['app_version'] = "231";
+$config['app_version'] = "252";
 $config['install_lock'] = "";
 $config['license_number'] = "";
 $config['debug'] = '1';
@@ -328,4 +328,4 @@ $config['proxy_ips'] = "";
 /* End of file config.php */
 /* Location: ./system/expressionengine/config/config.php */
 
-require($_SERVER['DOCUMENT_ROOT']."/config_bootstrap.php");
+require($_SERVER['DOCUMENT_ROOT']."/bootstrap.php");

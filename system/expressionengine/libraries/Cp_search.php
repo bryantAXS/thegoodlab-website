@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Core
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Cp_search {
@@ -535,7 +535,6 @@ class Cp_search {
 					),
 					'tools_utilities'	=> array(
 							'member_import'					=> array('access' => 'can_access_utilities', TRUE),
-							'import_from_mt'				=> array('access' => 'can_access_utilities', TRUE),
 							'import_from_xml'				=> array('access' => 'can_access_utilities', TRUE),
 							'translation_tool'				=> array('access' => 'can_access_utilities', TRUE)
 					),

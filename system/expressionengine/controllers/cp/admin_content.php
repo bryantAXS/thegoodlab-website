@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Control Panel
  * @category	Control Panel
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Admin_content extends CI_Controller {
@@ -28,10 +28,6 @@ class Admin_content extends CI_Controller {
 					'random', 'date', 'title', 'url_title', 'edit_date', 
 					'comment_total', 'username', 'screen_name', 
 					'most_recent_comment', 'expiration_date');
-
-	// Default "open" and "closed" status colors
-	var $status_color_open	= '009933';
-	var $status_color_closed = '990000';
 
 	// Category arrays
 	var $categories = array();
@@ -135,7 +131,7 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->lang->loadfile('admin_content');
-		$this->load->helper(array('form', 'snippets'));
+		$this->load->helper('snippets');
 		$this->load->model('channel_model');
 		$this->load->model('category_model');
 
@@ -157,7 +153,7 @@ class Admin_content extends CI_Controller {
 
 		$vars['duplicate_channel_prefs_options'][''] = lang('do_not_duplicate');
 
-		if ($channels->num_rows() > 0)
+		if ($channels != FALSE && $channels->num_rows() > 0)
 		{
 			foreach($channels->result() as $channel)
 			{
@@ -209,24 +205,9 @@ class Admin_content extends CI_Controller {
 			}
 		}
 
-		$data = $this->functions->create_directory_map(PATH_THEMES.'site_themes/', TRUE);
-		
 		// New themes may contain more than one group, thus naming collisions will happen
 		// unless this is revamped.
 		$vars['themes'] = array();
-
-		//if (count($data) > 0)
-		//{
-		//	foreach ($data as $val)
-		//	{
-		//		if ($val == 'rss.php')
-		//		{
-		//			continue;
-		//		}
-
-		//		$vars['themes'][$val] = ucwords(str_replace("_", " ", $val));
-		//	}
-		//}
 
 		$this->db->select('group_id, group_name, s.site_label');
 		$this->db->from('template_groups tg, sites s');
@@ -272,11 +253,12 @@ class Admin_content extends CI_Controller {
 
 		$this->lang->loadfile('admin_content');
 		$this->load->library('table');
-		$this->load->helper(array('form', 'snippets'));
+		$this->load->helper('snippets');
 		$this->load->model('channel_model');
 		$this->load->model('template_model');
 		$this->load->model('status_model');
 		$this->load->model('field_model');
+		$this->load->model('admin_model');
 
 		$channel_id = $this->input->get_post('channel_id');
 
@@ -395,6 +377,8 @@ class Admin_content extends CI_Controller {
 				'all'	=> lang('allow_all_html_not_recommended')
 			);		
 		}
+		
+		$vars['languages'] = $this->admin_model->get_xml_encodings();
 
 		$this->javascript->compile();
 
@@ -524,7 +508,7 @@ class Admin_content extends CI_Controller {
 
 		if ($edit == FALSE)
 		{
-			$create_templates	= $this->input->get_post('create_templates');
+			$create_templates	= ($this->input->get_post('create_templates') == FALSE OR $this->input->get_post('create_templates') == 'no') ? 'no' : $this->input->get_post('create_templates');
 			$old_group_id		= $this->input->get_post('old_group_id');
 			$group_name			= $this->input->post('group_name');
 
@@ -745,6 +729,9 @@ class Admin_content extends CI_Controller {
 			$insert_id = $this->db->insert_id();
 			$channel_id = $insert_id;
 			
+			// If they made the channel?  Give access to that channel to the member group?
+
+
 			if ($dupe_id !== FALSE AND is_numeric($dupe_id) && $edit_group_prefs == FALSE)
 			{
 				// Duplicate layouts
@@ -977,7 +964,7 @@ class Admin_content extends CI_Controller {
 
 		if (isset($_POST['cat_group']) && is_array($_POST['cat_group']))
 		{
-			$data['cat_group'] = implode('|', $_POST['cat_group']);
+			$data['cat_group'] = ltrim(implode('|', $_POST['cat_group']), '|');
 		}
 		
 		if ( ! isset($data['cat_group']) OR $data['cat_group'] == '')
@@ -1082,7 +1069,6 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->lang->loadfile('admin_content');
-		$this->load->helper('form');
 		$this->load->model(array(
  			'channel_model', 'category_model', 'status_model', 'field_model'
 		));
@@ -1181,7 +1167,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('channel_model');
 
@@ -1362,7 +1347,6 @@ class Admin_content extends CI_Controller {
 
 		$this->load->model('admin_model');
 		$this->load->model('category_model');
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->library('table');
 
@@ -1598,7 +1582,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
@@ -1699,7 +1682,6 @@ class Admin_content extends CI_Controller {
 		$this->load->model('category_model');
 		$this->load->library('table');
 		$this->load->library('api');
-		$this->load->helper('form');
 		
 		$this->api->instantiate('channel_categories');
 		
@@ -1820,7 +1802,6 @@ class Admin_content extends CI_Controller {
 
 		$this->load->model('category_model');
 		$this->lang->loadfile('admin_content');
-		$this->load->helper('form');
 		$this->load->helper('string');
 		$this->load->library('form_validation');
 
@@ -1918,18 +1899,39 @@ class Admin_content extends CI_Controller {
 		{	
 			// Pipe in necessary globals
 			$this->javascript->set_global(array(
-				'publish.word_separator'   => $this->config->item('word_separator') != "dash" ? '_' : '-',
-				'publish.foreignChars'				=> $foreign_characters,
+				'publish.word_separator'	=> $this->config->item('word_separator') != "dash" ? '_' : '-',
+				'publish.foreignChars'		=> $foreign_characters,
 			));
 			
 			// Load in necessary js files
 			$this->cp->add_js_script(array(
-				'file' => array('cp/global'),
-				'plugin' => array('ee_url_title'),
+				'plugin'	=> array('ee_url_title')
 			));
 			
 			$this->javascript->keyup('#cat_name', '$("#cat_name").ee_url_title($("#cat_url_title"));');
 		}
+		
+		$this->load->library('file_field');
+		
+		// If there is data in the category image field but the file field library
+		// can't parse it, it's likely legacy data from when a URL was entered in a
+		// text field for the category image. Let's prompt the user to update the
+		// field before they save, otherwise the image will be cleared out.
+		$vars['cat_image_error'] = '';
+		if ( ! empty($vars['cat_image']) &&
+			$this->file_field->parse_field($vars['cat_image']) === FALSE)
+		{
+			$vars['cat_image_error'] = lang('update_category_image');
+		}
+		
+		// Setup category image
+		$this->file_field->browser();
+		$vars['cat_image'] = $this->file_field->field(
+			'cat_image',
+			$vars['cat_image'],
+			'all',
+			'image'
+		);
 
 		$vars['form_hidden']['group_id'] = $group_id;
 
@@ -2026,7 +2028,7 @@ class Admin_content extends CI_Controller {
 		$this->javascript->compile();
 		$this->load->view('admin/category_edit', $vars);
 	}
-
+	
 	// --------------------------------------------------------------------
 
 	/**
@@ -2064,7 +2066,6 @@ class Admin_content extends CI_Controller {
 		$zurl .= ($this->input->get_post('cat_group') !== FALSE) ? AMP.'cat_group='.$this->input->get_post('cat_group') : '';
 		$zurl .= ($this->input->get_post('integrated') !== FALSE) ? AMP.'integrated='.$this->input->get_post('integrated') : '';
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
@@ -2191,11 +2192,19 @@ class Admin_content extends CI_Controller {
 
 		$this->form_validation->set_rules('cat_name',		'lang:category_name',		'required');
 		$this->form_validation->set_rules('cat_url_title',	'lang:cat_url_title',	'callback__cat_url_title');
-
 		$this->form_validation->set_rules('cat_description', '', '');
-		$this->form_validation->set_rules('cat_image', '', '');
-
-
+		
+		// Get the Category Image
+		$this->load->library('file_field');
+		$cat_image = $this->file_field->validate(
+			$this->input->post('cat_image'), 
+			'cat_image'
+		);
+		
+		$_POST['cat_image'] = $this->file_field->format_data(
+			$cat_image['value']
+		);
+		
 		// Finish data prep for insertion
 		if ($this->config->item('auto_convert_high_ascii') == 'y')
 		{
@@ -2330,7 +2339,11 @@ class Admin_content extends CI_Controller {
 				{
 					if (($key = array_search($this->input->get_post('parent_id'), $children)) !== FALSE)
 					{
-						$this->db->query($this->db->update_string('exp_categories', array('parent_id' => $query->row('parent_id') ), "cat_id = '".$children[$key]."'"));
+						$this->db->update(
+							'categories',
+							array('parent_id' => $query->row('parent_id')),
+							array('cat_id' => $children[$key])
+						);
 					}
 					else	// Find All Descendants
 					{
@@ -2344,7 +2357,11 @@ class Admin_content extends CI_Controller {
 								{
 									if ($key == $this->input->get_post('parent_id'))
 									{
-										$this->db->query($this->db->update_string('exp_categories', array('parent_id' => $query->row('parent_id') ), "cat_id = '".$key."'"));
+										$this->db->update(
+											'categories',
+											array('parent_id' => $query->row('parent_id')),
+											array('cat_id' => $key)
+										);
 										break 2;
 									}
 
@@ -2357,21 +2374,19 @@ class Admin_content extends CI_Controller {
 			}
 
 			$sql = $this->db->update_string(
-										'exp_categories',
-
-										array(
-												'cat_name'  		=> $this->input->post('cat_name'),
-												'cat_url_title'		=> $this->input->post('cat_url_title'),
-												'cat_description'	=> $this->input->post('cat_description'),
-												'cat_image' 		=> $this->input->post('cat_image'),
-												'parent_id' 		=> $this->input->post('parent_id')
-											 ),
-
-										array(
-												'cat_id'	=> $this->input->post('cat_id'),
-												'group_id'  => $this->input->post('group_id')
-											  )
-									 );
+				'exp_categories',
+				array(
+					'cat_name'  		=> $this->input->post('cat_name'),
+					'cat_url_title'		=> $this->input->post('cat_url_title'),
+					'cat_description'	=> $this->input->post('cat_description'),
+					'cat_image' 		=> $this->input->post('cat_image'),
+					'parent_id' 		=> $this->input->post('parent_id')
+				),
+				array(
+					'cat_id'	=> $this->input->post('cat_id'),
+					'group_id'  => $this->input->post('group_id')
+				)
+			);
 
 			$this->db->query($sql);
 			$update = TRUE;
@@ -2523,7 +2538,6 @@ class Admin_content extends CI_Controller {
 			return FALSE;
 		}
 		
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		
 		$this->cp->set_variable('cp_page_title', lang('global_sort_order'));
@@ -2870,7 +2884,7 @@ class Admin_content extends CI_Controller {
 		}
 
 		$this->load->model('addons_model');
-		$this->load->helper(array('snippets_helper', 'form'));
+		$this->load->helper('snippets_helper');
 		$this->lang->loadfile('admin_content');
 		$this->load->library('table');
 
@@ -3244,7 +3258,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('category_model');
 
@@ -3367,7 +3380,6 @@ class Admin_content extends CI_Controller {
 	{
 		$this->_restrict_prefs_access();
 
-		$this->load->helper('form');
 		$this->load->model('status_model');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
@@ -3433,7 +3445,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
@@ -3693,248 +3704,32 @@ class Admin_content extends CI_Controller {
 
 		$this->load->library('api');
 		$this->load->helper(array('snippets_helper', 'form'));
-		$this->load->model('field_model');
 		
 		$this->api->instantiate('channel_fields');
 		$this->lang->loadfile('admin_content');
 
 		$this->cp->set_breadcrumb(BASE.AMP.'C=admin_content'.AMP.'M=field_group_management', lang('field_management'));
 
-		$vars = array(
-			'group_id' => $this->input->get_post('group_id'),
-			'field_id' => $this->input->get_post('field_id')
-		);
-		
-		$this->db->select('f.*');
-		$this->db->from('channel_fields AS f, field_groups AS g');
-		$this->db->where('f.group_id = g.group_id');
-		$this->db->where('g.site_id', $this->config->item('site_id'));
-		$this->db->where('f.field_id', $vars['field_id']);
-		
-		$field_query = $this->db->get();
+		$group_id = $this->input->get_post('group_id');
+		$field_id = $this->input->get_post('field_id');
 
-		if ($vars['field_id'] == '')
+		if ($field_id == '')
 		{
 			$type = 'new';
 			$this->cp->set_variable('cp_page_title', lang('create_new_custom_field'));
-
-			foreach ($field_query->list_fields() as $f)
-			{
-				if ( ! isset($vars[$f]))
-				{
-					$vars[$f] = '';
-				}
-			}
-
-			$this->db->select('group_id');
-			$this->db->where('group_id', $vars['group_id']);
-			$this->db->where('site_id', $this->config->item('site_id'));
-			$query = $this->db->get('channel_fields');
-
-			$vars['field_order'] = $query->num_rows() + 1;
-
-			if ($query->num_rows() > 0)
-			{
-				$vars['group_id'] = $query->row('group_id');
-			}
-			else
-			{
-				// if there are no existing fields yet for this group, this allows us to still validate the group_id
-				$this->db->where('group_id', $vars['group_id']);
-				$this->db->where('site_id', $this->config->item('site_id'));
-
-				if ($this->db->count_all_results('field_groups') != 1)
-				{
-					show_error(lang('unauthorized_access'));
-				}
-			}
 		}
 		else
 		{
 			$type = 'edit';
 			$this->cp->set_variable('cp_page_title', lang('edit_field'));
-			
-			// No valid edit id?  No access
-			if ($field_query->num_rows() == 0)
-			{
-				show_error(lang('unauthorized_access'));
-			}
-
-			foreach ($field_query->row_array() as $key => $val)
-			{
-				if ($key == 'field_settings' && $val)
-				{
-					$ft_settings = unserialize(base64_decode($val));
-					$vars = array_merge($vars, $ft_settings);
-				}
-				else
-				{
-					$vars[$key] = $val;
-				}
-			}
-			
-			$vars['update_formatting']	= FALSE;
 		}
 		
-		extract($vars);
-		
-		// Fetch the name of the group
-		$query = $this->field_model->get_field_group($group_id);
-		
-		$vars['group_name']			= $query->row('group_name');
-		$vars['submit_lang_key']	= ($type == 'new') ? 'submit' : 'update';
+		$vars = $this->api_channel_fields->field_edit_vars($group_id, $field_id);
 
-		// Fetch the channel names
-
-		$this->db->select('channel_id, channel_title, field_group');
-		$this->db->where('site_id', $this->config->item('site_id'));
-		$this->db->order_by('channel_title', 'asc');
-		$query = $this->db->get('channels');
-
-		$vars['field_pre_populate_id_options'] = array();
-
-		foreach ($query->result_array() as $row)
+		if ($vars === FALSE)
 		{
-			// Fetch the field names
-			$this->db->select('field_id, field_label');
-			$this->db->where('group_id', $row['field_group']);
-			$this->db->order_by('field_label','ASC');
-			$rez = $this->db->get('channel_fields');
-
-			if ($rez->num_rows() > 0)
-			{
-				$vars['field_pre_populate_id_options'][$row['channel_title']] = array();
-				
-				foreach ($rez->result_array() as $frow)
-				{
-					$vars['field_pre_populate_id_options'][$row['channel_title']][$row['channel_id'].'_'.$frow['field_id']] = $frow['field_label'];
-				}
-			}
+			show_error(lang('unauthorized_access'));
 		}
-
-		$vars['field_pre_populate_id_select'] = $field_pre_channel_id.'_'.$field_pre_field_id;
-
-		// build list of formatting options
-		if ($type == 'new')
-		{
-			$vars['edit_format_link'] = '';
-			$vars['field_fmt_options'] = array(
-				'none'		=> lang('none'),
-				'br'		=> lang('auto_br'),
-				'xhtml'		=> lang('xhtml')
-			);
-		}
-		else
-		{
-			$confirm = "onclick=\"if( !confirm('".lang('list_edit_warning')."')) return false;\"";
-			$vars['edit_format_link'] = '<strong><a '.$confirm.' href="'.BASE.AMP.'C=admin_content'.AMP.'M=edit_formatting_options'.AMP.'id='.$field_id.'" title="'.lang('edit_list').'">'.lang('edit_list').'</a></strong>';
-
-			$this->db->select('field_fmt');
-			$this->db->where('field_id', $field_id);
-			$this->db->order_by('field_fmt');
-			$query = $this->db->get('field_formatting');
-
-			if ($query->num_rows() > 0)
-			{
-				foreach ($query->result_array() as $row)
-				{
-					$name = ucwords(str_replace('_', ' ', $row['field_fmt']));
-				
-					if ($name == 'Br')
-					{
-						$name = lang('auto_br');
-					}
-					elseif ($name == 'Xhtml')
-					{
-						$name = lang('xhtml');
-					}
-					$vars['field_fmt_options'][$row['field_fmt']] = $name;
-				}
-			}
-		}
-
-		$vars['field_fmt'] = (isset($field_fmt) && $field_fmt != '') ? $field_fmt : 'xhtml';
-
-		// Prep our own fields
-		
-		$fts = $this->api_channel_fields->fetch_installed_fieldtypes();
-		
-		$default_values = array(
-			'field_type'					=> isset($fts['text']) ? 'text' : key($fts),
-			'field_show_fmt'				=> 'n',
-			'field_required'				=> 'n',
-			'field_search'					=> 'n',
-			'field_is_hidden'				=> 'n',
-			'field_pre_populate'			=> 'n',
-			'field_show_spellcheck'			=> 'n',
-			'field_show_smileys'			=> 'n',
-			'field_show_glossary'			=> 'n',
-			'field_show_formatting_btns'	=> 'n',
-			'field_show_writemode'			=> 'n',
-			'field_show_file_selector'		=> 'n',
-			'field_text_direction'			=> 'ltr'
-		);
-
-		foreach($default_values as $key => $val)
-		{
-			$vars[$key] = ( ! isset($vars[$key]) OR $vars[$key] == '') ? $val : $vars[$key];
-		}
-		
-		foreach(array('field_pre_populate', 'field_required', 'field_search', 'field_show_fmt') as $key)
-		{
-			$current = ($vars[$key] == 'y') ? 'y' : 'n';
-			$other = ($current == 'y') ? 'n' : 'y';
-			
-			$vars[$key.'_'.$current] = TRUE;
-			$vars[$key.'_'.$other] = FALSE;
-		}
-		
-		// Text Direction
-		$current = $vars['field_text_direction'];
-		$other = ($current == 'rtl') ? 'ltr' : 'rtl';
-		
-		$vars['field_text_direction_'.$current] = TRUE;
-		$vars['field_text_direction_'.$other] = FALSE;
-		
-		// Grab Field Type Settings
-		
-		$vars['field_type_table']	= array();
-		$vars['field_type_options']	= array();
-
-		$created = FALSE;
-
-		foreach($fts as $key => $attr)
-		{
-			// Global settings
-			$settings = unserialize(base64_decode($fts[$key]['settings']));
-			
-			$settings['field_type'] = $key;
-			
-			$this->table->clear();
-			
-			$this->api_channel_fields->set_settings($key, $settings);
-			$this->api_channel_fields->setup_handler($key);
-			
-			$str = $this->api_channel_fields->apply('display_settings', array($vars));
-
-			$vars['field_type_tables'][$key]	= $str;
-			$vars['field_type_options'][$key]	= $attr['name'];
-			
-			if (count($this->table->rows))
-			{
-				$vars['field_type_tables'][$key] = $this->table->rows;
-			}
-		}
-
-		asort($vars['field_type_options']);	// sort by title
-
-		$vars['form_hidden'] = array(
-			'group_id'		=> $group_id,
-			'field_id'		=> $field_id,
-			'site_id'		=> $this->config->item('site_id')
-		);
-
-		$ft_selector = "#ft_".implode(", #ft_", array_keys($fts));
 
 		if ($type == 'new') {
 			$this->cp->add_js_script('plugin', 'ee_url_title');
@@ -3942,13 +3737,13 @@ class Admin_content extends CI_Controller {
 			$this->javascript->output('
 				$("#edit_group_prefs").hide();
 				$("#field_label").bind("keyup keydown", function() {
-					$(this).ee_url_title("#field_name");
+					$(this).ee_url_title("#field_name", true);
 				});
 			');
 		}
 
 		$this->javascript->output('
-			var ft_divs = $("'.$ft_selector.'"),
+			var ft_divs = $("'.$vars['ft_selector'].'"),
 				ft_dropdown = $("#field_type");
 		
 			ft_dropdown.change(function() {
@@ -4006,325 +3801,24 @@ class Admin_content extends CI_Controller {
 
 		$group_id = $this->input->post('group_id');
 
-		// Check for required fields
-
-		$error = array();
-		$this->load->model('field_model');
-
-		// little check in case they switched sites in MSM after leaving a window open.
-		// otherwise the landing page will be extremely confusing
-		if ( ! isset($_POST['site_id']) OR $_POST['site_id'] != $this->config->item('site_id'))
-		{
-			$error[] = lang('site_id_mismatch');
-		}
-
-		// Was a field name supplied?
-		if ($_POST['field_name'] == '')
-		{
-			$error[] = lang('no_field_name');
-		}
-		// Is the field one of the reserved words?
-		else if (in_array($_POST['field_name'], $this->cp->invalid_custom_field_names()))
-		{
-			$error[] = lang('reserved_word');
-		}
-
-		// Was a field label supplied?
-		if ($_POST['field_label'] == '')
-		{
-			$error[] = lang('no_field_label');
-		}
-
-		// Does field name contain invalid characters?
-		if (preg_match('/[^a-z0-9\_\-]/i', $_POST['field_name']))
-		{
-			$error[] = lang('invalid_characters').': '.$_POST['field_name'];
-		}
-
-		// Is the field name taken?
-		$this->db->select('COUNT(*) as count');
-		$this->db->where('site_id', $this->config->item('site_id'));
-		$this->db->where('field_name', $this->input->post('field_name'));
-
-		if ($edit == TRUE)
-		{
-			$this->db->where('field_id !=', $this->input->post('field_id'));
-		}
-
-		$query = $this->db->get('channel_fields');
-
-		if ($query->row('count')  > 0)
-		{
-			$error[] = lang('duplicate_field_name');
-		}
-
-		$field_type = $_POST['field_type'];
-
-		// If they are setting a file type, ensure there is at least one upload directory available
-		if ($field_type == 'file')
-		{
-			$this->load->model('tools_model');
-			$upload_dir_prefs = $this->tools_model->get_upload_preferences();
-			
-			// count upload dirs
-			if ($upload_dir_prefs->num_rows() == 0)
-			{
-				$this->lang->loadfile('filemanager');
-				$error[] = lang('please_add_upload');
-			}
-		}
+		//perform the field update
+		$this->api_channel_fields->update_field($_POST);
 
 		// Are there errors to display?
 
-		if (count($error) > 0)
+		if ($this->api_channel_fields->error_count() > 0)
 		{
 			$str = '';
 
-			foreach ($error as $msg)
+			foreach ($this->api_channel_fields->errors as $msg)
 			{
 				$str .= $msg.BR;
 			}
 
 			show_error($str);
 		}
-		
-		$native = array(
-			'field_id', 'site_id', 'group_id',
-			'field_name', 'field_label', 'field_instructions',
-			'field_type', 'field_list_items', 'field_pre_populate',
-			'field_pre_channel_id', 'field_pre_field_id',
-			'field_related_id', 'field_related_orderby', 'field_related_sort', 'field_related_max',
-			'field_ta_rows', 'field_maxl', 'field_required',
-			'field_text_direction', 'field_search', 'field_is_hidden', 'field_fmt', 'field_show_fmt',
-			'field_order'
-		);
-		
-		$_posted = array();
-		$_field_posted = preg_grep('/^'.$field_type.'_.*/', array_keys($_POST));
-		$_keys = array_merge($native,  $_field_posted);
 
-		foreach($_keys as $key)
-		{
-			if (isset($_POST[$key]))
-			{
-				$_posted[$key] = $this->input->post($key);
-			}
-		}
-
-		// Get the field type settings
-		$this->api_channel_fields->fetch_all_fieldtypes();
-		$this->api_channel_fields->setup_handler($field_type);
-		$ft_settings = $this->api_channel_fields->apply('save_settings', array($_posted));
-		
-		// Default display options
-		foreach(array('smileys', 'glossary', 'spellcheck', 'formatting_btns', 'file_selector', 'writemode') as $key)
-		{
-			$tmp = $this->_get_ft_post_data($field_type, 'field_show_'.$key);
-			$ft_settings['field_show_'.$key] = $tmp ? $tmp : 'n';
-		}
-		
-		// Now that they've had a chance to mess with the POST array,
-		// grab post values for the native fields (and check namespaced fields)
-		foreach($native as $key)
-		{
-			$native_settings[$key] = $this->_get_ft_post_data($field_type, $key);
-		}
-		
-		// Set some defaults
-		$native_settings['field_related_id']		= ($tmp = $this->_get_ft_post_data($field_type, 'field_related_channel_id')) ? $tmp : '0';
-		$native_settings['field_list_items']		= ($tmp = $this->_get_ft_post_data($field_type, 'field_list_items')) ? $tmp : '';
-				
-		$native_settings['field_text_direction']	= ($native_settings['field_text_direction'] !== FALSE) ? $native_settings['field_text_direction'] : 'ltr';
-		$native_settings['field_show_fmt']			= ($native_settings['field_show_fmt'] !== FALSE) ? $native_settings['field_show_fmt'] : 'n';
-		$native_settings['field_fmt']				= ($native_settings['field_fmt'] !== FALSE) ? $native_settings['field_fmt'] : 'xhtml';
-		
-		if ($native_settings['field_list_items'] != '')
-		{
-			// This results in double encoding later on
-			//$this->load->helper('string');
-			//$native_settings['field_list_items'] = quotes_to_entities($native_settings['field_list_items']);
-		}
-		
-		if ($native_settings['field_pre_populate'] == 'y')
-		{
-			$x = explode('_', $this->_get_ft_post_data($field_type, 'field_pre_populate_id'));
-
-			$native_settings['field_pre_channel_id']	= $x['0'];
-			$native_settings['field_pre_field_id'] = $x['1'];
-		}
-		
-		// If they returned a native field value as part of their settings instead of changing the post array,
-		// we'll merge those changes into our native settings
-		
-		foreach($ft_settings as $key => $val)
-		{
-			if (in_array($key, $native))
-			{
-				unset($ft_settings[$key]);
-				$native_settings[$key] = $val;
-			}
-		}
-
-		if ($_POST['field_order'] == 0 OR $_POST['field_order'] == '')
-		{
-			$query = $this->db->select('MAX(field_order) as max')
-							  ->where('site_id', $this->config->item('site_id'))
-							  ->get_where('channel_fields', array('group_id' => (int) $group_id));
-				
-			$native_settings['field_order'] = (int) $query->row('max') + 1;
-		}
-		
-		$native_settings['field_settings'] = base64_encode(serialize($ft_settings));
-		
-		// Construct the query based on whether we are updating or inserting
-		if ($edit === TRUE)
-		{
-			$cp_message = lang('custom_field_edited');
-
-			if ( ! is_numeric($native_settings['field_id']))
-			{
-				return FALSE;
-			}
-
-			// Update the formatting for all existing entries
-			if ($this->_get_ft_post_data($field_type, 'update_formatting') == 'y')
-			{
-				$this->db->update('channel_data', array('field_ft_'.$native_settings['field_id'] => $native_settings['field_fmt']));
-			}
-
-				
-			// Send it over to drop old fields, add new ones, and modify as needed
-			$this->api_channel_fields->edit_datatype(
-				$native_settings['field_id'],
-				$field_type,
-				$native_settings
-			);
-			
-			unset($native_settings['group_id']);
-			
-			$this->db->where('field_id', $native_settings['field_id']);
-			$this->db->where('group_id', $group_id);
-			$this->db->update('channel_fields', $native_settings);
-
-			// Update saved layouts if necessary
-			$collapse = ($native_settings['field_is_hidden'] == 'y') ? TRUE : FALSE;
-			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? TRUE : FALSE;
-			
-			// Add to any custom layouts
-			// First, figure out what channels are associated with this group
-			// Then using the list of channels, figure out the layouts associated with those channels
-			// Then update each layout individually
-			
-			$channels_for_group = $this->field_model->get_assigned_channels($group_id);
-			
-			if ($channels_for_group->num_rows() > 0)
-			{
-				$this->load->model('layout_model');
-				
-				foreach ($channels_for_group->result() as $channel)
-				{
-					$channel_ids[] = $channel->channel_id;
-				}
-				
-				$this->db->select('layout_id');
-				$this->db->where_in('channel_id', $channel_ids);
-				$layouts_for_group = $this->db->get('layout_publish');
-				
-				foreach ($layouts_for_group->result() as $layout) 
-				{
-					// Figure out visibility for the field in the layout
-					$layout_settings = $this->layout_model->get_layout_settings(array('layout_id' => $layout->layout_id), TRUE);
-					
-					$visibility = TRUE;
-					$width = '100%';
-					
-					if (array_key_exists('field_id_'.$native_settings['field_id'], $layout_settings)) 
-					{
-						$field_settings = $layout_settings['field_id_'.$native_settings['field_id']];
-						
-						$width = ($field_settings['width'] !== NULL) ? 
-							$field_settings['width'] : 
-							$width;
-						
-						$visibility = ($field_settings['visible'] !== NULL) ? 
-							$field_settings['visible'] : 
-							$visibility;
-					}
-					
-					$field_info[$native_settings['field_id']] = array(
-						'visible'     => $visibility,
-						'collapse'    => $collapse,
-						'htmlbuttons' => $buttons,
-						'width'       => $width
-					);
-					
-					$this->layout_model->edit_layout_group_fields($field_info, $layout->layout_id);
-				}
-			}
-		}
-		else
-		{
-			$cp_message = lang('custom_field_created');
-			
-			if ( ! $native_settings['field_ta_rows'])
-			{
-				$native_settings['field_ta_rows'] = 0;
-			}
-
-			// as its new, there will be no field id, unset it to prevent an empty string from attempting to pass
-			unset($native_settings['field_id']);
-
-			$this->db->insert('channel_fields', $native_settings);
-
-			$insert_id = $this->db->insert_id();
-			$native_settings['field_id'] = $insert_id;
-
-			$this->api_channel_fields->add_datatype(
-				$insert_id, 
-				$native_settings
-			);
-
-			$this->db->update('channel_data', array('field_ft_'.$insert_id => $native_settings['field_fmt'])); 
-
-			foreach (array('none', 'br', 'xhtml') as $val)
-			{
-				$f_data = array('field_id' => $insert_id, 'field_fmt' => $val);
-				$this->db->insert('field_formatting', $f_data); 
-			}
-			
-			$collapse = ($native_settings['field_is_hidden'] == 'y') ? TRUE : FALSE;
-			$buttons = ($ft_settings['field_show_formatting_btns'] == 'y') ? TRUE : FALSE;
-			
-			$field_info['publish'][$insert_id] = array(
-								'visible'		=> 'true',
-								'collapse'		=> $collapse,
-								'htmlbuttons'	=> $buttons,
-								'width'			=> '100%'
-			);
-			
-			// Add to any custom layouts
-			$query = $this->field_model->get_assigned_channels($group_id);
-			
-			if ($query->num_rows() > 0)
-			{
-				foreach ($query->result() as $row)
-				{
-					$channel_ids[] = $row->channel_id;
-				}
-				
-				$this->load->library('layout');
-				$this->layout->add_layout_fields($field_info, $channel_ids);
-			}
-		}
-		
-		$_final_settings = array_merge($native_settings, $ft_settings);
-		unset($_final_settings['field_settings']);
-		
-		$this->api_channel_fields->set_settings($native_settings['field_id'], $_final_settings);
-		$this->api_channel_fields->setup_handler($native_settings['field_id']);
-		$this->api_channel_fields->apply('post_save_settings', array($_posted));
-
-		$this->functions->clear_caching('all', '', TRUE);
+		$cp_message = ($edit) ? lang('custom_field_edited') : lang('custom_field_created');
 
 		$strlen = strlen($this->input->post('field_name'));
 
@@ -4379,7 +3873,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('field_model');
 
@@ -4485,7 +3978,6 @@ class Admin_content extends CI_Controller {
 		
 		$group_id = $query->row('group_id');		
 
-		$this->load->helper('form');
 		$this->load->library('table');
 		$this->load->model('addons_model');
 		$this->lang->loadfile('admin_content');
@@ -4616,7 +4108,6 @@ class Admin_content extends CI_Controller {
 	{
 		$this->_restrict_prefs_access();
 
-		$this->load->helper('form');
 		$this->load->model('status_model');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
@@ -4683,7 +4174,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
@@ -4797,7 +4287,7 @@ class Admin_content extends CI_Controller {
 		// Construct the query based on whether we are updating or inserting
 		if ($edit == FALSE)
 		{
-			$this->status_model->insert_statuses($group_name, $this->status_color_open, $this->status_color_closed);
+			$this->status_model->insert_statuses($group_name);
 
 			$cp_message = lang('status_group_created').NBS.$group_name;
 
@@ -4826,7 +4316,7 @@ class Admin_content extends CI_Controller {
 		}
 		else
 		{
-			$this->status_model->update_statuses($group_name, $group_id, $this->status_color_open, $this->status_color_closed);
+			$this->status_model->update_statuses($group_name, $group_id);
 
 			$cp_message = lang('status_group_updated').NBS.$group_name;
 		}
@@ -4908,7 +4398,6 @@ class Admin_content extends CI_Controller {
 		));
 
 		$this->load->library('table');
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
@@ -4930,7 +4419,7 @@ class Admin_content extends CI_Controller {
 			$status_order = $this->status_model->get_next_status_order($this->input->get_post('group_id'));
 			$vars['status']			= '';
 			$vars['status_order']	= $status_order;
-			$vars['highlight']	 	= '';
+			$vars['highlight']	 	= '000000';
 		}
 
 		$vars['form_hidden']['status_id'] = $status_id;
@@ -5125,7 +4614,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('not_authorized'));
 		}
 
-		$this->load->helper('form');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('status_model');
 
@@ -5233,7 +4721,6 @@ class Admin_content extends CI_Controller {
 			show_error(lang('unauthorized_access'));
 		}
 
-		$this->load->helper(array('form', 'url'));
 		$this->load->library('table');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('admin_model');
@@ -5403,7 +4890,6 @@ class Admin_content extends CI_Controller {
 	{
 		$this->_restrict_prefs_access();
 
-		$this->load->helper(array('form', 'url'));
 		$this->load->library('table');
 		$this->lang->loadfile('admin_content');
 		$this->load->model('admin_model');
@@ -5566,7 +5052,6 @@ class Admin_content extends CI_Controller {
 			}
 		}');
 
-		$this->load->helper('form');
 		$this->load->library('table');
 		$this->load->model('admin_model');
 

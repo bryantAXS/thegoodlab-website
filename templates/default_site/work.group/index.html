@@ -1,5 +1,7 @@
 {embed="site/header" page_title="Work"}
 
+  {exp:ce_cache:it id='work' tags="work"}
+
   {exp:channel:entries
     channel="work"
     disable="categories|category_fields|member_data|trackbacks"
@@ -26,13 +28,8 @@
       <ul class='work-gallery'>
         {work_images}
         <li>
-          {exp:ed_imageresizer
-          image="{work_file}"
-          default=""
-          maxWidth="380"
-          class=""
-          alt=""}
-      </li>
+          {exp:ce_img:single src="{work_file}" width="380" height="" crop="" allow_scale_larger="yes" attributes=""}
+        </li>
         {/work_images}
       </ul>
       <div class='work-copy-container'>
@@ -76,5 +73,7 @@
   {/paginate}
 
   {/exp:channel:entries}
+
+  {/exp:ce_cache:it}
 
 {embed="site/footer"}

@@ -187,9 +187,6 @@ Assets.ListView = Assets.Class({
 		$(window).unbind('.'+NS);
 		this.$ths.unbind('.'+NS);
 		this.$tbodyContainer.unbind('.'+NS);
-
-		// delete this ListView instance
-		delete this;
 	},
 
 	/**
@@ -197,6 +194,13 @@ Assets.ListView = Assets.Class({
 	 */
 	getContainer: function() {
 		return this.$tbody;
+	},
+
+	/**
+	 * Get Scrollpane
+	 */
+	getScrollpane: function() {
+		return this.$tbodyContainer;
 	},
 
 	/**

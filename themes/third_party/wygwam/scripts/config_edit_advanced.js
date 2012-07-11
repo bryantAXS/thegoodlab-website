@@ -162,8 +162,10 @@ var languages = {
 };
 
 var settings = {
+	// autoGrow_bottomSpace
 	autoGrow_maxHeight: { desc: 'The maximum height to which the editor can reach using AutoGrow. Zero means unlimited.', type: 'number', val: '0' },
 	autoGrow_minHeight: { desc: 'The minimum height to which the editor can reach using AutoGrow', type: 'number', val: 200 },
+	autoGrow_onStartup: { desc: 'Whether to have the auto grow happen on editor creation.', type: 'bool' },
 	autoParagraph: { desc: 'Whether automatically create wrapping blocks around inline contents inside document body, this helps to ensure the integrality of the block enter mode.', type: 'bool', val: 'y' },
 	// autoUpdateElement, baseFloatZIndex
 	baseHref: { desc: 'The base href URL used to resolve relative and absolute URLs in the editor content.' },
@@ -178,12 +180,13 @@ var settings = {
 	contentsLangDirection: { desc: 'The writting direction of the language used to write the editor contents.', type: 'select', options: { ltr: 'Left-to-right', rtl: 'Right-to-left' }},
 	customConfig: { desc: 'The URL path for the custom configuration file to be loaded. If not overloaded with inline configurations, it defaults to the “config.js” file present in the root of the CKEditor installation directory.' },
 	defaultLanguage: { desc: 'The language to be used if the “language” setting isn’t set and it’s not possible to localize the editor to the user language.', type: 'select', options: languages, val: 'en' },
-	// devtools_styles, dialog_backgroundCoverColor, dialog_backgroundCoverOpacity
+	// devtools_styles, dialog_backgroundCoverColor, dialog_backgroundCoverOpacity, dialog_buttonsOrder
 	dialog_buttonsOrder: { desc: 'The guideline to follow when generating the dialog buttons.', type: 'select', options: { OS: 'Operating System Default', ltr: 'Left-to-right', rtl: 'Right-to-left' }},
 	// dialog_magnetDistance,
 	disableNativeSpellChecker: { desc: 'Disables the built-in spell checker while typing natively available in the browser (currently Firefox and Safari only).', type: 'bool', val: 'y' },
 	// disableNativeTableHandles
 	disableObjectResizing: { desc: 'Disables the ability of resize objects (image and tables) in the editing area.', type: 'bool' },
+	// disableReadonlyStyling
 	disableReadonlyStyling: { desc: 'Disables inline styling on read-only elements.', type: 'bool' },
 	docType: { desc: 'Sets the doctype to be used when loading the editor content as HTML.', val: '<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">' },
 	editingBlock: { desc: 'Whether to render or not the editing block area in the editor interface.', type: 'bool', val: 'y' },
@@ -196,6 +199,8 @@ var settings = {
 	entities_processNumerical: { desc: 'Whether to convert all remaining characters, not comprised in the ASCII character table, to their relative numeric representation of HTML entity. For example, the phrase “This is Chinese: 汉语.” is outputted as “This is Chinese: &amp;#27721;&amp;#35821;.”', type: 'bool', val: 'y' },
 	extraPlugins: { desc: 'Comma-separated list of additional plugins to be loaded.' },
 	//filebrowserWindowFeatures: { desc: 'The “features” to use in the file browser popup window.', val: 'location=no,menubar=no,toolbar=no,dependent=yes,minimizable=no,modal=no,alwaysRaised=yes,resizable=yes,scrollbars=yes' },
+	// filebrowserWindowHeight, filebrowserWindowWidth
+	fillEmptyBlocks: { desc: 'Whether a non-breaking space should be inserted into empty block elements in the HTML output.', type: 'bool', val: 'y' },
 	// find_highlight
 	font_defaultLabel: { desc: 'The text to be displayed in the Font combo if none of the available values matches the current cursor position or text selection.' },
 	font_names: { desc: 'The list of fonts names to be displayed in the Font combo in the toolbar. Entries are separated by semi-colons (;), while it’s possible to have more than one font for each entry, in the HTML way (separated by comma). A display name may be optionally defined by prefixing the entries with the name and the slash character. For example, “Arial/Arial, Helvetica, sans-serif” will be displayed as “Arial” in the list, but will be outputted as “Arial, Helvetica, sans-serif”.', type: 'textarea' },

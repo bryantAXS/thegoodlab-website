@@ -26,6 +26,9 @@ class Matrix_file_ft {
 	{
 		$this->EE =& get_instance();
 
+		// Load the file_field library
+		$this->EE->load->library('file_field');
+
 		// -------------------------------------------
 		//  Prepare Cache
 		// -------------------------------------------
@@ -48,6 +51,49 @@ class Matrix_file_ft {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Get Upload Preferences
+	 * @param  int $group_id Member group ID specified when returning allowed upload directories only for that member group
+	 * @param  int $id       Specific ID of upload destination to return
+	 * @return array         Result array of DB object, possibly merged with custom file upload settings (if on EE 2.4+)
+	 */
+	private function _get_upload_preferences($group_id = NULL, $id = NULL)
+	{
+		if (version_compare(APP_VER, '2.4', '>='))
+		{
+			$this->EE->load->model('file_upload_preferences_model');
+			return $this->EE->file_upload_preferences_model->get_file_upload_preferences($group_id, $id);
+		}
+
+		if (version_compare(APP_VER, '2.1.5', '>='))
+		{
+			$this->EE->load->model('file_upload_preferences_model');
+			$result = $this->EE->file_upload_preferences_model->get_upload_preferences($group_id, $id);
+		}
+		else
+		{
+			$this->EE->load->model('tools_model');
+			$result = $this->EE->tools_model->get_upload_preferences($group_id, $id);
+		}
+
+		// If an $id was passed, just return that directory's preferences
+		if ( ! empty($id))
+		{
+			return $result->row_array();
+		}
+
+		// Use upload destination ID as key for row for easy traversing
+		$return_array = array();
+		foreach ($result->result_array() as $row)
+		{
+			$return_array[$row['id']] = $row;
+		}
+
+		return $return_array;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
 	 * Display Cell Settings
 	 */
 	function display_cell_settings($data)
@@ -58,11 +104,11 @@ class Matrix_file_ft {
 		{
 			$directory_options['all'] = lang('all');
 
-			$filedirs = $this->EE->file_upload_preferences_model->get_upload_preferences(1);
+			$filedirs = $this->_get_upload_preferences(1);
 
-			foreach ($filedirs->result() as $filedir)
+			foreach ($filedirs as $filedir)
 			{
-				$directory_options[$filedir->id] = $filedir->name;
+				$directory_options[$filedir['id']] = $filedir['name'];
 			}
 
 			$r[] = array(
@@ -84,22 +130,25 @@ class Matrix_file_ft {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Data exists?
-	 */
-	private function _data_exists($data)
-	{
-		return (isset($data['filename']) && $data['filename']);
-	}
-
-	/**
 	 * Display Cell
 	 */
 	function display_cell($data)
 	{
+		if (REQ == 'PAGE')
+		{
+			return 'File cells don’t work within SafeCracker. Use SafeCracker File instead.';
+		}
+
 		$this->_prep_settings($this->settings);
 
 		if (! isset($this->cache['displayed']))
 		{
+			if (isset($this->var_id))
+			{
+				// Load the file browser (thanks Rob!)
+				$this->EE->file_field->browser();
+			}
+
 			// include matrix_text.js
 			$theme_url = $this->EE->session->cache['matrix']['theme_url'];
 			$this->EE->cp->add_to_foot('<script type="text/javascript" src="'.$theme_url.'scripts/matrix_file.js"></script>');
@@ -117,25 +166,25 @@ class Matrix_file_ft {
 
 		$upload_dirs = array();
 
-		$upload_prefs = $this->EE->tools_model->get_upload_preferences($this->EE->session->userdata('group_id'));
+		$upload_prefs = $this->_get_upload_preferences($this->EE->session->userdata('group_id'));
 
-		foreach ($upload_prefs->result() as $row)
+		foreach ($upload_prefs as $row)
 		{
-			$upload_dirs[$row->id] = $row->name;
+			$upload_dirs[$row['id']] = $row['name'];
 		}
 
 		// -------------------------------------------
 		//  Existing file?
 		// -------------------------------------------
 
-		if ($this->_data_exists($data))
+		if ($data)
 		{
-			if (is_array($data))
+			if (is_array($data) && ! empty($data['filedir']) && ! empty($data['filename']))
 			{
 				$filedir = $data['filedir'];
 				$filename = $data['filename'];
 			}
-			else if (preg_match('/^{filedir_([0-9]+)}(.*)/', $data, $matches))
+			else if (is_string($data) && preg_match('/^{filedir_([0-9]+)}(.*)/', $data, $matches))
 			{
 				$filedir  = $matches[1];
 				$filename = $matches[2];
@@ -152,20 +201,28 @@ class Matrix_file_ft {
 
 				if (! isset($thumb_info['thumb_path']))
 				{
-					$filedir_info = $this->EE->tools_model->get_upload_preferences(1, $filedir);
-					$thumb_info['thumb_path'] = $filedir_info->row('server_path').'_thumb/'.$filename;
+					$filedir_info = $this->_get_upload_preferences(1, $filedir);
+					$thumb_info['thumb_path'] = $filedir_info['server_path'].'_thumb/'.$filename;
 				}
 
-				$thumb_size = file_exists($thumb_info['thumb_path']) ? getimagesize($thumb_info['thumb_path']) : array(64, 64);
+				if (file_exists($thumb_info['thumb_path']))
+				{
+					$thumb_size = getimagesize($thumb_info['thumb_path']);
+				}
+				else
+				{
+					$thumb_url = PATH_CP_GBL_IMG.'default.png';
+					$thumb_size = array(64, 64);
+				}
 			}
 			else
 			{
-				$filedir_info = $this->EE->tools_model->get_upload_preferences(1, $filedir);
-				$thumb_filename = $filedir_info->row('server_path').'_thumbs/thumb_'.$filename;
+				$filedir_info = $this->_get_upload_preferences(1, $filedir);
+				$thumb_filename = $filedir_info['server_path'].'_thumbs/thumb_'.$filename;
 
 				if (file_exists($thumb_filename))
 				{
-					$thumb_url = $filedir_info->row('url').'_thumbs/thumb_'.$filename;
+					$thumb_url = $filedir_info['url'].'_thumbs/thumb_'.$filename;
 					$thumb_size = getimagesize($thumb_filename);
 				}
 				else
@@ -219,7 +276,7 @@ class Matrix_file_ft {
 	function validate_cell($data)
 	{
 		// is this a required column?
-		if ($this->settings['col_required'] == 'y' && ! $this->_data_exists($data))
+		if ($this->settings['col_required'] == 'y' && (empty($data['filename']) || empty($data['filedir'])))
 		{
 			return lang('col_required');
 		}
@@ -232,104 +289,143 @@ class Matrix_file_ft {
 	 */
 	function save_cell($data)
 	{
-		if ($this->_data_exists($data))
-		{
-			return '{filedir_'.$data['filedir'].'}'.$data['filename'];
-		}
-
-		return '';
+		return $this->EE->file_field->format_data($data['filename'], $data['filedir']);
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Replace Tag
+	 * Pre-processes the field data for replace_tag().
+	 * @param string $data The file path in "{filedir_X}filename.ext" format
+	 * @return array Info about the file
 	 */
-	function replace_tag($data, $params = array(), $tagdata = FALSE)
+	function pre_process($data)
 	{
-		if (! $data) return '';
+		return $this->EE->file_field->parse_field($data);
+	}
 
-		// -------------------------------------------
-		//  Get the file info
-		//   - Down the road Matrix should support a
-		//     pre_process_cell() method that this could go in
-		// -------------------------------------------
+	/**
+	 * Replaces a File cell tag.
+	 * @param array  $file_info Whatever was returned by pre_process()
+	 * @param array  $params
+	 * @param string $tagdata
+	 * @return string
+	 */
+	function replace_tag($file_info, $params = array(), $tagdata = FALSE)
+	{
+		// Ignore if there's no image
+		if (! $file_info) return;
 
-		$file_info['path'] = '';
-
-		if (preg_match('/^{filedir_(\d+)}(.*)$/', $data, $matches))
+		if (isset($params['raw_output']) && $params['raw_output'] == 'yes')
 		{
-			$file_paths = $this->EE->functions->fetch_file_paths();
-
-			if (isset($file_paths[$matches[1]]))
-			{
-				$file_info['path'] = $file_paths[$matches[1]];
-
-				// while we're here, get the filesize?
-				if ($tagdata && strpos($tagdata, 'filesize') !== FALSE)
-				{
-					$file_info['filesize'] = $this->_get_filesize($matches[1], $matches[2], array('format' => 'no'));
-				}
-			}
-
-			$data = $matches[2];
+			return $file_info['raw_output'];
 		}
 
-		$file_info['extension'] = $this->replace_extension($data);
-		$file_info['filename'] = basename($data, '.'.$file_info['extension']);
+		if (!empty($params['manipulation']))
+		{
+			$file_info['path'] .= '_'.$params['manipulation'].'/';
+		}
 
-		// -------------------------------------------
-		//  Tagdata
-		// -------------------------------------------
-
+		// Make sure we have file_info to work with
 		if ($tagdata)
 		{
+			// Parse legacy {filesize} tags
+			if (strpos($tagdata, 'filesize') !== FALSE)
+			{
+				$file_info['filesize'] = $this->_format_filesize($file_info['file_size'], array('format' => 'no'));
+			}
+
+			// Parse conditionals
 			$tagdata = $this->EE->functions->prep_conditionals($tagdata, $file_info);
+
+			// Parse date variables
+			$this->file_info = $file_info;
+			$tagdata = preg_replace_callback('/'.LD.'(upload_date|modified_date)\s+format=([\'"])(.*?)\2'.RD.'/s', array($this, '_replace_date_tag'), $tagdata);
+			unset($this->file_info);
+
+			// Parse any remaining tags
 			$tagdata = $this->EE->functions->var_swap($tagdata, $file_info);
+
+			// Backspace param
+			if (isset($params['backspace']))
+			{
+				$tagdata = substr($tagdata, 0, -$params['backspace']);
+			}
 
 			return $tagdata;
 		}
-
-		$full_url = $file_info['path'].$data;
-
-		if (isset($params['wrap']))
+		else if ($file_info['path'] && $file_info['filename'] && $file_info['extension'] !== FALSE)
 		{
-			if ($params['wrap'] == 'link')
+			$full_path = $file_info['path'].$file_info['filename'].'.'.$file_info['extension'];
+
+			if (isset($params['wrap']))
 			{
-				return '<a href="'.$full_url.'">'.$file_info['filename'].'</a>';
+				if ($params['wrap'] == 'link')
+				{
+					return '<a href="'.$full_path.'">'.$file_info['filename'].'</a>';
+				}
+				elseif ($params['wrap'] == 'image')
+				{
+					return '<img src="'.$full_path.'" alt="'.$file_info['filename'].'" />';
+				}
 			}
 
-			if ($params['wrap'] == 'image')
-			{
-				return '<img src="'.$full_url.'" alt="'.$file_info['filename'].'" />';
-			}
+			return $full_path;
 		}
+	}
 
-		return $full_url;
+	/**
+	 * Replaces a date tag with a formatted date.
+	 * @access private
+	 * @param array $match
+	 * @return string
+	 */
+	private function _replace_date_tag($match)
+	{
+		$var = $match[1];
+		if (! isset($this->file_info[$var])) return;
+
+		$dvars = $this->EE->localize->fetch_date_params($match[3]);
+		if (!$dvars) return;
+
+		$return = $match[3];
+
+		foreach ($dvars as $dvar)
+		{
+			$formatted_dvar = $this->EE->localize->convert_timestamp($dvar, $this->file_info[$var], TRUE);
+			$return = str_replace($dvar, $formatted_dvar, $return);
+		}
+		
+		return $return;
 	}
 
 	/**
 	 * Replace File Name
 	 */
-	function replace_filename($data, $params = array())
+	function replace_filename($file_info)
 	{
-		if (preg_match('/^{filedir_(\d+)}(.*)$/', $data, $matches))
-		{
-			$data = $matches[2];
-		}
-
-		$extension = $this->replace_extension($data);
-		$filename = basename($data, '.'.$extension);
-
-		return $filename;
+		return $file_info['file_name'];
 	}
 
 	/**
 	 * Replace Extension
 	 */
-	function replace_extension($data)
+	function replace_extension($file_info)
 	{
-		return substr(strrchr($data, '.'), 1);
+		return $file_info['extension'];
+	}
+
+	/**
+	 * Replaces a file manipulation tag, e.g. {my_file_col:thumbnail}
+	 * @param array  $file_info
+	 * @param array  $params
+	 * @param string $tagdata
+	 * @param string $modifier
+	 */
+	function replace_tag_catchall($file_info, $params, $tagdata, $modifier)
+	{
+		$params['manipulation'] = $modifier;
+		return $this->replace_tag($file_info, $params, $tagdata);
 	}
 
 	// --------------------------------------------------------------------
@@ -337,7 +433,7 @@ class Matrix_file_ft {
 	/**
 	 * Get Filesize
 	 */
-	private function _get_filesize($upload_dir, $filename, $params)
+	private function _format_filesize($upload_dir, $filename, $params)
 	{
 		$this->EE->db->select('server_path');
 		$query = $this->EE->db->get_where('upload_prefs', array('id' => $upload_dir));

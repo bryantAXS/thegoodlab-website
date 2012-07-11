@@ -40,7 +40,7 @@ class Matrix_date_ft {
 	function settings_modify_matrix_column($data)
 	{
 		return array(
-			'col_id_'.$data['col_id'] => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'default' => 0)
+			'col_id_'.$data['col_id'] => array('type' => 'int', 'constraint' => 10, 'default' => 0)
 		);
 	}
 
@@ -63,10 +63,12 @@ class Matrix_date_ft {
 		$r['class'] = 'matrix-date matrix-text';
 
 		// quick save / validation error?
-		if (preg_match('/^\d{4}-\d{2}-\d{2} \d{1,2}:\d{2} \w{2}$/', $data))
+		$datestr = trim($data);
+		$datestr = preg_replace('/\040+/', ' ', $datestr);
+		if (preg_match('/^[0-9]{2,4}\-[0-9]{1,2}\-[0-9]{1,2}\s[0-9]{1,2}:[0-9]{1,2}(?::[0-9]{1,2})?(?:\s[AP]M)?$/i', $datestr))
 		{
 			// convert human time to a unix timestamp
-			$data = $this->EE->localize->convert_human_date_to_gmt($data);
+			$data = $this->EE->localize->convert_human_date_to_gmt($datestr);
 		}
 
 		// set the default date to the current time
@@ -121,10 +123,6 @@ class Matrix_date_ft {
 		if (isset($params['format']))
 		{
 			$data = $this->EE->localize->decode_date($params['format'], $data);
-		}
-		else
-		{
-			$data = $this->EE->localize->set_human_time($data);
 		}
 
 		return $data;

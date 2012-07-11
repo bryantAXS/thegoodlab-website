@@ -1,4 +1,5 @@
-/images/*
-system/expressionengine/cache/*
-config_bootstrap.php
+/content
+/system/expressionengine/cache/*
+/bootstrap.php
 /config/deploy.rb
+/Capfile

@@ -124,9 +124,35 @@
 		
 		return array('uristr' => $uristr, 'qstring' => $qstring);		
 	}	
+
+	/**
+	 * Parse category ID from query string
+	 *
+	 * @param	string	$qstring Query string
+	 * @return	string	URL title or ID of category, whichever is present in the URL
+	 */
+	function parse_category($qstring = '')
+	{
+		$EE =& get_instance();
 		
+		$reserved_category_word = $EE->config->item("reserved_category_word");
 		
-		
+		// Parse out URL title from query string
+		if (strpos($qstring, $reserved_category_word) !== FALSE 
+			&& $EE->config->item("use_category_name") == 'y' 
+			&& $reserved_category_word != ''
+		)
+		{
+			return preg_replace("/(.*?)\/".preg_quote($reserved_category_word)."\//i", '', '/'.$qstring);
+		}
+		// Parse out category ID in the format of CXX
+		else if (preg_match("#(^|\/)C(\d+)#", $qstring, $match))
+		{
+			return $match[2];
+		}
+
+		return '';
+	}
 
 
 /* End of file snippets_helper.php */

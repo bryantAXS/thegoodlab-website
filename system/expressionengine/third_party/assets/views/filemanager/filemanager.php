@@ -1,5 +1,9 @@
+<?php
+	if (! isset($filedirs)) $filedirs = 'all';
+	if (! isset($site_id))  $site_id = NULL;
+?>
 <div class="assets-fm">
-	<div class="assets-toolbar">
+	<div class="assets-fm-toolbar">
 		<ul class="assets-fm-view">
 			<li><a class="assets-btn assets-btn-big assets-fm-thumbs assets-active" title="<?=lang('view_files_as_thumbnails')?>"><span></span></a></li>
 			<li><a class="assets-btn assets-btn-big assets-fm-list" title="<?=lang('view_files_in_list')?>"><span></span></a></li>
@@ -23,15 +27,18 @@
 
 	$vars['folders'] = array();
 
-	foreach ($helper->get_filedir_prefs()->result() as $filedir)
+	foreach ($helper->get_filedir_prefs($filedirs, $site_id) as $filedir)
 	{
-		if (! isset($filedirs) || ! $filedirs || $filedirs == 'all' || in_array($filedir->id, $filedirs))
+		if ($helper->is_folder($filedir->server_path))
 		{
-			$vars['folders'][] = array($filedir->name, $helper->get_server_path($filedir), "{filedir_{$filedir->id}}");
+			$vars['folders'][] = array(
+				'name' => $filedir->name,
+				'path' => "{filedir_{$filedir->id}}"
+			);
 		}
 	}
 
-	$this->load->view('filemanager/folders', $vars)
+	$this->load->view('filemanager/folders', $vars);
 ?>
 			</ul>
 		</div>
@@ -40,11 +47,11 @@
 
 	<div class="assets-fm-right">
 		<div class="assets-fm-files">
-<?php $this->load->view('thumbview/thumbview') ?>
+			<?php $this->load->view('thumbview/thumbview'); ?>
 		</div>
 
 		<div class="assets-footer">
-			<div class="assets-fm-total">0 <?=lang('files')?></div>
+			<div class="assets-fm-status">0 <?=lang('files')?></div>
 			<div class="assets-fm-btns">
 <?php if ($mode == 'full'): ?>
 				<a class="assets-btn assets-disabled"><?=lang('edit_file')?></a>
@@ -53,6 +60,12 @@
 				<a class="assets-btn assets-submit assets-disabled"><?=lang($multi ? 'add_files' : 'add_file')?></a>
 <?php endif ?>
 			</div>
+		</div>
+	</div>
+
+	<div class="assets-fm-uploadprogress">
+		<div class="assets-fm-progressbar">
+			<div class="assets-fm-pb-bar"></div>
 		</div>
 	</div>
 </div>

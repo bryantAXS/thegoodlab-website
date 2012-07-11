@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -21,7 +21,7 @@
  * @package		CodeIgniter
  * @subpackage	Libraries
  * @category	Uploads
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/libraries/file_uploading.html
  */
 class CI_Upload {
@@ -855,6 +855,10 @@ class CI_Upload {
 			if ( ! preg_match('/<(a|body|head|html|img|plaintext|pre|script|table|title)[\s>]/i', $opening_bytes))
 			{
 				return TRUE; // its an image, no "triggers" detected in the first 256 bytes, we're good
+			}
+			else
+			{
+				return FALSE;
 			}
 		}
 

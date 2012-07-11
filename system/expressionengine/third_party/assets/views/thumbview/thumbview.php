@@ -3,6 +3,6 @@
 		<ul>
 			<?=$this->load->view('thumbview/files')?>
 		</ul>
-		<div style="clear: left; height: 8px;"></div>
+		<div style="clear: left;"></div>
 	</div>
 </div>

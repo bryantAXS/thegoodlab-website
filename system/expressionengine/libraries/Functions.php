@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Core
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class EE_Functions {  
@@ -156,7 +156,7 @@ class EE_Functions {
 	 * @access	public
 	 * @return	string
 	 */
-	function create_page_url($base_url, $segment, $trailing_slash = true)
+	function create_page_url($base_url, $segment, $trailing_slash = FALSE)
 	{
 		// Load the string helper
 		$this->EE->load->helper('string');       
@@ -243,7 +243,7 @@ class EE_Functions {
 	 */
 	function encode_ee_tags($str, $convert_curly = FALSE)
 	{
-		if ($str != '')
+		if ($str != '' && strpos($str, '{') !== FALSE)
 		{
 			if ($convert_curly === TRUE)
 			{
@@ -363,6 +363,15 @@ class EE_Functions {
 	 */
 	function redirect($location, $method = FALSE)
 	{
+		// Remove hard line breaks and carriage returns
+		$location = str_replace(array("\n", "\r"), '', $location);
+
+		// Remove any and all line breaks
+		while (stripos($location, '%0d') !== FALSE OR stripos($location, '%0a') !== FALSE)
+		{
+			$location = str_ireplace(array('%0d', '%0a'), '', $location);
+		}
+
 		$location = str_replace('&amp;', '&', $this->insert_action_ids($location));
 
 		if (count($this->EE->session->flashdata))
@@ -410,6 +419,9 @@ class EE_Functions {
 	 */
 	function hash($str)
 	{
+		$this->EE->load->library('logger');
+		$this->EE->logger->deprecated('2.0', 'Security_helper::do_hash');
+		
 		$this->EE->load->helper('security');
 		return do_hash($str);
 	}
@@ -477,20 +489,31 @@ class EE_Functions {
 			$data['hidden_fields'][$this->EE->security->get_csrf_token_name()] = $this->EE->security->get_csrf_hash();
 		}
 
+		// -------------------------------------------
 		// 'form_declaration_modify_data' hook.
 		//  - Modify the $data parameters before they are processed
+		//  - Added EE 1.4.0
+		//
 		if ($this->EE->extensions->active_hook('form_declaration_modify_data') === TRUE)
 		{
 			$data = $this->EE->extensions->call('form_declaration_modify_data', $data);
 		}
-		
+		//
+		// -------------------------------------------
+
+		// -------------------------------------------
 		// 'form_declaration_return' hook.
 		//  - Take control of the form_declaration function
+		//  - Added EE 1.4.0
+		//
 		if ($this->EE->extensions->active_hook('form_declaration_return') === TRUE)
 		{
 			$form = $this->EE->extensions->call('form_declaration_return', $data);
 			if ($this->EE->extensions->end_script === TRUE) return $form;
 		}
+		//
+		// -------------------------------------------		
+
 			
 		if ($data['action'] == '')
 		{
@@ -548,6 +571,7 @@ class EE_Functions {
 		return $form;
 	}
 	
+
 	// --------------------------------------------------------------------
 
 	/**
@@ -652,7 +676,7 @@ class EE_Functions {
 	 * @return	mixed
 	 */	
 	function evaluate($str)
-	{	
+	{
 		return eval('?'.'>'.$str.'<?php ');		
 	}
 	
@@ -722,39 +746,42 @@ class EE_Functions {
 	 */
 	function set_cookie($name = '', $value = '', $expire = '')
 	{
+
+		$data['name'] = $name;
+
 		if ( ! is_numeric($expire))
 		{
-			$expire = time() - 86500;
+			$data['expire'] = time() - 86500;
 		}
 		else
 		{
 			if ($expire > 0)
 			{
-				$expire = time() + $expire;
+				$data['expire'] = time() + $expire;
 			}
 			else
 			{
-				$expire = 0;
+				$data['expire'] = 0;
 			}
 		}
 					
-		$prefix = ( ! $this->EE->config->item('cookie_prefix')) ? 'exp_' : $this->EE->config->item('cookie_prefix').'_';
-		$path	= ( ! $this->EE->config->item('cookie_path'))	? '/'	: $this->EE->config->item('cookie_path');
+		$data['prefix'] = ( ! $this->EE->config->item('cookie_prefix')) ? 'exp_' : $this->EE->config->item('cookie_prefix').'_';
+		$data['path']	= ( ! $this->EE->config->item('cookie_path'))	? '/'	: $this->EE->config->item('cookie_path');
 		
 		if (REQ == 'CP' && $this->EE->config->item('multiple_sites_enabled') == 'y')
 		{
-			$domain = $this->EE->config->cp_cookie_domain;
+			$data['domain'] = $this->EE->config->cp_cookie_domain;
 		}
 		else
 		{
-			$domain = ( ! $this->EE->config->item('cookie_domain')) ? '' : $this->EE->config->item('cookie_domain');
+			$data['domain'] = ( ! $this->EE->config->item('cookie_domain')) ? '' : $this->EE->config->item('cookie_domain');
 		}
 		
-		$value = stripslashes($value);
+		$data['value'] = stripslashes($value);
 		
-		$secure_cookie = ($this->EE->config->item('cookie_secure') === TRUE) ? 1 : 0;
+		$data['secure_cookie'] = ($this->EE->config->item('cookie_secure') === TRUE) ? 1 : 0;
 
-		if ($secure_cookie)
+		if ($data['secure_cookie'])
 		{
 			$req = isset($_SERVER['HTTPS']) ? $_SERVER['HTTPS'] : FALSE;
 
@@ -763,8 +790,20 @@ class EE_Functions {
 				return FALSE;
 			}
 		}
+
+		/* -------------------------------------------
+		/* 'set_cookie_end' hook.
+		/*  - Take control of Cookie setting routine
+		/*  - Added EE 2.5.0
+		*/
+			$this->EE->extensions->call('set_cookie_end', $data);
+			if ($this->EE->extensions->end_script === TRUE) return;
+		/*
+		/* -------------------------------------------*/
+
 					
-		setcookie($prefix.$name, $value, $expire, $path, $domain, $secure_cookie);
+		setcookie($data['prefix'].$data['name'], $data['value'], $data['expire'], 
+			$data['path'], $data['domain'], $data['secure_cookie']);
 	}
 
 	// --------------------------------------------------------------------
@@ -874,8 +913,6 @@ class EE_Functions {
 			return array('title' => $query->row('data_title') , 'data' => $query->row('template_data') );
 		}
 		
-		$this->EE->load->library('security');
-		
 		if ($this->EE->session->userdata['language'] != '')
 		{
 			$user_lang = $this->EE->session->userdata['language'];
@@ -939,6 +976,9 @@ class EE_Functions {
 	 */
 	function encoding_menu($name, $selected = '')
 	{
+		$this->EE->load->library('logger');
+		$this->EE->logger->deprecated('2.0');
+		
 		$file = APPPATH.'config/languages.php';	
 
 		if ( ! file_exists($file)) 
@@ -969,6 +1009,9 @@ class EE_Functions {
 	 */
 	function create_directory_map($source_dir, $top_level_only = FALSE)
 	{
+		$this->EE->load->library('logger');
+		$this->EE->logger->deprecated('2.2');
+		
 		if ( ! isset($filedata))
 			$filedata = array();
 		
@@ -2575,9 +2618,9 @@ class EE_Functions {
 			// aren't going to be available yet.  So this is a quick workaround
 			// to ensure advanced conditionals using embedded variables can do
 			// their thing in mod tags.
-			$vars = array_merge($vars, $this->EE->TMPL->embed_vars);			
+			$vars = array_merge($vars, $this->EE->TMPL->embed_vars);
 		}
-					
+		
 		if (count($vars) == 0) return $str;
 
 		$switch  = array();
@@ -2600,15 +2643,28 @@ class EE_Functions {
 		if (preg_match_all("/".preg_quote(LD)."((if:else)*if)\s+(.*?)".preg_quote(RD)."/", $str, $matches))
 		{
 			// PROTECT QUOTED TEXT
-			//  That which is in quotes should be protected and ignored as it will screw
-			//  up the parsing if the variable is found within a string
+			// That which is in quotes should be protected and ignored as it will screw
+			// up the parsing if the variable is found within a string
 			
 			if (preg_match_all('/([\"\'])([^\\1]*?)\\1/s', implode(' ', $matches[3]), $quote_matches))
 			{
-				foreach($quote_matches[0] as $quote_match)
+				foreach($quote_matches[0] as $ii => $quote_match)
 				{
 					$md5_key = (string) hexdec($prep_id.md5($quote_match));
 					$protect[$quote_match] = $md5_key;
+
+					// We do these conversions on variables below, so we need
+					// to also do them on the hardcoded values to make sure
+					// the conditionals resolve as expected.
+					// e.g. {if location == "pony's house"}
+					$quote_match = '"'.
+						str_replace(
+							array("'", '"', '(', ')', '$', '{', '}', "\n", "\r", '\\'), 
+							array('&#39;', '&#34;', '&#40;', '&#41;', '&#36;', '', '', '', '', '&#92;'), 
+							$quote_matches[2][$ii]
+						).
+						'"';
+
 					$switch[$md5_key] = $quote_match;
 				}
 				
@@ -2622,11 +2678,8 @@ class EE_Functions {
 				$matches['t'] = str_replace($valid, ' ', $matches[3]);
 			}
 			
-			// FIND WHAT WE NEED, NOTHING MORE!
-			// On reedmaniac.com with no caching this code below knocked off, 
-			// on average, about .07 seconds on a .34 page load. Not too shabby.
-			// Sadly, its influence is far less on a cached page.  Ah well...			
-			$data		= array();
+			// Find what we need, nothing more!!
+			$data = array();
 
 			foreach($matches['t'] as $cond)
 			{
@@ -2722,7 +2775,7 @@ class EE_Functions {
 				$matches['s'] = preg_replace("/(^|\s+)[0-9]+(\s|$)/", ' ', $matches['s']); // Remove unquoted numbers
 				$done = array();
 			}
-			
+
 			for($i=0, $s = count($matches[0]); $i < $s; ++$i)
 			{	
 				if ($safety == 'y' && ! in_array($matches[0][$i], $done))
@@ -2803,14 +2856,14 @@ class EE_Functions {
 
 			$str = str_replace(array_keys($switch), array_values($switch), $str);
 		}
-		
+
 		unset($data);
 		unset($switch);
 		unset($matches);
 		unset($protect);
-		
+
 		$str = str_replace(unique_marker('if_else_safety'),LD.'if:else'.RD, $str);
-		
+
 		return $str;
 	}
 	
@@ -2836,10 +2889,10 @@ class EE_Functions {
 			return array();	
 		}
 
-		$qry = $this->EE->db->select('id, url')
-							->get('upload_prefs');
+		$this->EE->load->model('file_upload_preferences_model');
+		$upload_prefs = $this->EE->file_upload_preferences_model->get_file_upload_preferences(NULL, NULL, TRUE);
 
-		if ($qry->num_rows() === 0)
+		if (count($upload_prefs) == 0)
 		{
 			// Set $this->file_paths to FALSE so we check for it
 			// the next time through a coupla lines up.
@@ -2847,10 +2900,10 @@ class EE_Functions {
 			$this->file_paths = FALSE;
 			return array();
 		}
-				
-		foreach ($qry->result() as $row)
-		{			
-			$this->file_paths[$row->id] = $row->url;
+		
+		foreach ($upload_prefs as $row)
+		{
+			$this->file_paths[$row['id']] = $row['url'];
 		}
 		
 		return $this->file_paths;
@@ -2870,6 +2923,9 @@ class EE_Functions {
 	 */
 	function clone_object($object)
 	{
+		$this->EE->load->library('logger');
+		$this->EE->logger->deprecated('2.1.2');
+		
 		return clone $object;
 	}
 	

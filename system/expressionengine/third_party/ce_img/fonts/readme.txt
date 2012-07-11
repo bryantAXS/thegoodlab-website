@@ -1,0 +1,3 @@
+The heros-bold.ttf font was downloaded from http://www.gust.org.pl/projects/e-foundry/tex-gyre/whole in .otf format and converted to .ttf format using FontForge ( http://fontforge.sourceforge.net/ ). The 'TeXGyre' text was also removed from the font file name to keep the name short for use with CE Image. The font license is included in the directory under the name GUST-FONT-LICENSE.txt and can also be found here: http://www.gust.org.pl/projects/e-foundry/licenses
+
+You can download 32 additional open source .ttf fonts that can be used with CE Image from http://www.causingeffect.com/downloads/fonts.zip if you wish.

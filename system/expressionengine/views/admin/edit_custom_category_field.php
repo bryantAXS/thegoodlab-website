@@ -17,23 +17,22 @@ if ($EE_view_disable !== TRUE)
 
 		<?=form_open('C=admin_content'.AMP.'M=update_custom_category_fields', '', $form_hidden)?>
 		<?php
-			$this->table->set_template($cp_table_template);
 			$this->table->set_heading(
 										array('data' => lang('preference'), 'style' => 'width:50%;'),
 										lang('setting')
 									);			
 			
 			$this->table->add_row(array(
-					required().lang('field_name', 'field_name').
-					'<div class="subtext">'.lang('field_name_cont').'</div>',
-					form_input(array('id'=>'field_name','name'=>'field_name','class'=>'field','value'=>$field_name))
-				)
-			);
-
-			$this->table->add_row(array(
 					required().lang('field_label', 'field_label').
 					'<div class="subtext">'.lang('cat_field_label_info').'</div>',
 					form_input(array('id'=>'field_label','name'=>'field_label','class'=>'field','value'=>$field_label))
+				)
+			);
+			
+			$this->table->add_row(array(
+					required().lang('field_name', 'field_name').
+					'<div class="subtext">'.lang('field_name_cont').'</div>',
+					form_input(array('id'=>'field_name','name'=>'field_name','class'=>'field','value'=>$field_name))
 				)
 			);
 

@@ -70,6 +70,58 @@ Assets.caseInsensativeSort = function(a, b) {
 }
 
 /**
+ * Get Path Parts
+ */
+Assets.getPathParts = function(path) {
+	var match = /^(\{filedir_\d+\})(.*)$/.exec(path),
+		subpathParts = match[2] ? match[2].replace(/\/+$/, '').split('/') : [];
+
+	return [match[1]].concat(subpathParts);
+};
+
+/**
+ * Scroll Container To Element
+ */
+Assets.scrollContainerToElement = function($container, $elem) {
+	if (! $container.length || ! $elem.length) return;
+
+	var scrollTop = $container.scrollTop(),
+		elemOffset = $elem.offset().top,
+		containerOffset = $container.offset().top,
+		offsetDiff = elemOffset - containerOffset;
+
+	if (offsetDiff < 0) {
+		$container.scrollTop(scrollTop + offsetDiff);
+	}
+	else {
+		var elemHeight = $elem.outerHeight(),
+			containerHeight = $container[0].clientHeight;
+
+		if (offsetDiff + elemHeight > containerHeight) {
+			$container.scrollTop(scrollTop + (offsetDiff - (containerHeight - elemHeight)));
+		}
+	}
+};
+
+/**
+ * Parse Tags
+ */
+Assets.parseTags = function(str, tags) {
+	for (var tag in tags) {
+		str = Assets.parseTag(str, tag, tags[tag]);
+	}
+
+	return str;
+};
+
+/**
+ * Parse Tag
+ */
+Assets.parseTag = function(str, tag, val) {
+	return str.replace('{'+tag+'}', val);
+};
+
+/**
  * Really basic class constructor
  */
 Assets.Class = function(p) {
@@ -104,7 +156,7 @@ Assets.FileManager = Assets.Class({
 
 		this.options = $.extend({}, Assets.FileManager.defaultOptions, options);
 
-		this.$toolbar = $('> .assets-toolbar', this.$fm);
+		this.$toolbar = $('> .assets-fm-toolbar', this.$fm);
 
 		this.$viewAsThumbsBtn = $('> .assets-fm-view a.assets-fm-thumbs', this.$toolbar);
 		this.$viewInListBtn   = $('> .assets-fm-view a.assets-fm-list', this.$toolbar);
@@ -124,12 +176,16 @@ Assets.FileManager = Assets.Class({
 		this.$files = $('> .assets-fm-files', this.$right);
 
 		this.$rightFooter = $('> .assets-footer', this.$right);
-		this.$totalFiles = $('> .assets-fm-total', this.$rightFooter);
+		this.$status = $('> .assets-fm-status', this.$rightFooter);
 		this.$buttons = $('> .assets-fm-btns a', this.$rightFooter);
+
+		this.$uploadProgress = $('> .assets-fm-uploadprogress', this.$fm);
+		this.$uploadProgressBar = $('.assets-fm-pb-bar', this.$uploadProgress);
 
 		this.folders = {};
 
-		this.selectedFolderIds = [];
+		this.selectedFolderPaths = [];
+		this.selectedFilePaths = [];
 		this.view = 'thumbs';
 		this.searchTimeout;
 		this.searchVal = '';
@@ -178,16 +234,41 @@ Assets.FileManager = Assets.Class({
 		// -------------------------------------------
 
 		this.uploader = new Assets.qq.FileUploader({
-			element: this.$upload[0],
-			action:  Assets.actions.upload_file,
-			onSubmit: $.proxy(function(id, fileName) {
-				this.$spinner.show();
-			}, this),
-			onComplete: $.proxy(function(id, fileName, responseJSON) {
-				if (! this.uploader.getInProgress()) {
-					this._updateFiles();
-				}
-			}, this)
+			element:      this.$upload[0],
+			action:       Assets.actions.upload_file,
+
+			template:     '<div class="assets-qq-uploader">'
+			              +   '<div class="assets-qq-upload-drop-area"></div>'
+			              +   '<div class="assets-qq-upload-button assets-btn assets-btn-big assets-disabled"><span></span>'+Assets.lang.upload_a_file+'</div>'
+			              +   '<ul class="assets-qq-upload-list"></ul>'
+			              + '</div>',
+
+			fileTemplate: '<li>'
+			              +   '<span class="assets-qq-upload-file"></span>'
+			              +   '<span class="assets-qq-upload-spinner"></span>'
+			              +   '<span class="assets-qq-upload-size"></span>'
+			              +   '<a class="assets-qq-upload-cancel" href="#">Cancel</a>'
+			              +   '<span class="assets-qq-upload-failed-text">Failed</span>'
+			              + '</li>',
+
+			classes:      {
+			                  button:     'assets-qq-upload-button',
+			                  drop:       'assets-qq-upload-drop-area',
+			                  dropActive: 'assets-qq-upload-drop-area-active',
+			                  list:       'assets-qq-upload-list',
+
+			                  file:       'assets-qq-upload-file',
+			                  spinner:    'assets-qq-upload-spinner',
+			                  size:       'assets-qq-upload-size',
+			                  cancel:     'assets-qq-upload-cancel',
+
+			                  success:    'assets-qq-upload-success',
+			                  fail:       'assets-qq-upload-fail'
+			              },
+
+			onSubmit:     $.proxy(this, '_onUploadSubmit'),
+			onProgress:   $.proxy(this, '_onUploadProgress'),
+			onComplete:   $.proxy(this, '_onUploadComplete')
 		});
 
 		// -------------------------------------------
@@ -204,6 +285,9 @@ Assets.FileManager = Assets.Class({
 		// initialize top-level folders
 		this.$topFolderUl = $('> ul', this.$folders),
 		this.$topFolderLis = $('> li', this.$topFolderUl);
+
+		// stop initializing everything if there are no folders
+		if (! this.$topFolderLis.length) return;
 
 		for (var i = 0; i < this.$topFolderLis.length; i++) {
 			var folder = new Assets.FileManager.Folder(this, this.$topFolderLis[i], 1);
@@ -266,8 +350,8 @@ Assets.FileManager = Assets.Class({
 				dropTargets: $.proxy(function() {
 					var targets = [];
 
-					for (var folderId in this.folders) {
-						var folder = this.folders[folderId];
+					for (var folderPath in this.folders) {
+						var folder = this.folders[folderPath];
 
 						if (folder.visible && $.inArray(folder.$li[0], this.folderDrag.$draggees) == -1) {
 							targets.push(folder.$a);
@@ -295,39 +379,39 @@ Assets.FileManager = Assets.Class({
 					});
 
 					if (this.folderDrag.activeDropTarget) {
-						var targetFolderId = this.folderDrag.activeDropTarget.attr('data-id');
+						var targetFolderPath = this.folderDrag.activeDropTarget.attr('data-path');
 
-						this._collapseExtraExpandedFolders(targetFolderId);
+						this._collapseExtraExpandedFolders(targetFolderPath);
 
 						this.$spinner.show();
 
 						// get the old folder IDs, and sort them so that we're moving the most-nested folders first
-						var folderIds = [];
+						var folderPaths = [];
 
 						for (var i = 0; i < this.folderDrag.$draggees.length; i++) {
 							var $a = $('> a', this.folderDrag.$draggees[i]),
-								folderId = $a.attr('data-id'),
-								folder = this.folders[folderId];
+								folderPath = $a.attr('data-path'),
+								folder = this.folders[folderPath];
 
 							// make sure it's not already in the target folder
-							if (folder.parent.id != targetFolderId) {
-								folderIds.push(folderId);
+							if (folder.parent.path != targetFolderPath) {
+								folderPaths.push(folderPath);
 							}
 						}
 
-						if (folderIds.length) {
-							folderIds.sort();
-							folderIds.reverse();
+						if (folderPaths.length) {
+							folderPaths.sort();
+							folderPaths.reverse();
 
 							// now prep the data for move_folder()
 							var data = {};
 
-							for (var i = 0; i < folderIds.length; i++) {
-								var parts = folderIds[i].split(/[\}\/]/),
-									newFolderId = targetFolderId + parts[parts.length-2]+'/';
+							for (var i = 0; i < folderPaths.length; i++) {
+								var parts = Assets.getPathParts(folderPaths[i]),
+									newFolderPath = targetFolderPath + parts[parts.length-1]+'/';
 
-								data['old_folder['+i+']'] = folderIds[i];
-								data['new_folder['+i+']'] = newFolderId;
+								data['old_folder['+i+']'] = folderPaths[i];
+								data['new_folder['+i+']'] = newFolderPath;
 							}
 
 							$.post(Assets.actions.move_folder, data, $.proxy(function(data, textStatus) {
@@ -376,8 +460,8 @@ Assets.FileManager = Assets.Class({
 				dropTargets: $.proxy(function() {
 					var targets = [];
 
-					for (var folderId in this.folders) {
-						var folder = this.folders[folderId];
+					for (var folderPath in this.folders) {
+						var folder = this.folders[folderPath];
 
 						if (folder.visible) {
 							targets.push(folder.$a);
@@ -401,18 +485,18 @@ Assets.FileManager = Assets.Class({
 						// keep it selected
 						this.fileDrag.activeDropTarget.addClass('assets-selected');
 
-						var targetFolderId = this.fileDrag.activeDropTarget.attr('data-id');
+						var targetFolderPath = this.fileDrag.activeDropTarget.attr('data-path');
 
-						this._collapseExtraExpandedFolders(targetFolderId);
+						this._collapseExtraExpandedFolders(targetFolderPath);
 
 						var oldFilePaths = [],
 							newFilePaths = [];
 
 						for (var i = 0; i < this.fileDrag.$draggees.length; i++) {
-							var oldFilePath = this.fileDrag.$draggees[i].getAttribute('data-file-path'),
-								parts = oldFilePath.split(/[\}\/]/),
+							var oldFilePath = this.fileDrag.$draggees[i].getAttribute('data-path'),
+								parts = Assets.getPathParts(oldFilePath),
 								fileName = parts[parts.length-1],
-								newFilePath = targetFolderId + fileName;
+								newFilePath = targetFolderPath + fileName;
 
 							// make sure it's not already in the target folder
 							if (newFilePath != oldFilePath) {
@@ -435,9 +519,14 @@ Assets.FileManager = Assets.Class({
 
 							$.post(Assets.actions.move_file, data, $.proxy(function(data, textStatus) {
 								if (textStatus == 'success') {
+									for (var i = 0; i < data.length; i++) {
+										if (data[i][1] == 'success') {
+											this._updateFilePath(data[i][0], data[i][2]);
+										}
+									}
+
 									this.fileDrag.fadeOutHelpers();
 									this._updateSelectedFolders();
-									this._updateFiles();
 								}
 							}, this), 'json');
 
@@ -492,14 +581,24 @@ Assets.FileManager = Assets.Class({
 
 	},
 
+	/**
+	 * Set Status
+	 */
+	_setStatus: function(msg) {
+		this.$status.html(msg);
+	},
+
+	/**
+	 * Update Selected Folders
+	 */
 	_updateSelectedFolders: function() {
 		// get the new list of selected folder IDs
-		this.selectedFolderIds = [];
+		this.selectedFolderPaths = [];
 
 		var $selected = this.folderSelect.getSelectedItems();
 
 		for (var i = 0; i < $selected.length; i++) {
-			this.selectedFolderIds.push($($selected[i]).attr('data-id'));
+			this.selectedFolderPaths.push($($selected[i]).attr('data-path'));
 		};
 
 		// clear the keyword search
@@ -507,14 +606,24 @@ Assets.FileManager = Assets.Class({
 
 		this._updateFiles();
 
-		if (this.selectedFolderIds.length == 1) {
-			this.uploader.enable();
+		// -------------------------------------------
+		//  Upload button state
+		// -------------------------------------------
+
+		if (this.selectedFolderPaths.length == 1) {
+			// enable the upload button
+			this.uploader._button._input.removeAttribute('disabled');
+			this.uploader._button._input.style.cursor = 'pointer';
+			Assets.qq.removeClass(this.uploader._button._element, 'assets-disabled');
 
 			this.uploader.setParams({
-				folder: this.selectedFolderIds[0]
+				folder: this.selectedFolderPaths[0]
 			});
 		} else {
-			this.uploader.disable();
+			// disable the upload button
+			this.uploader._button._input.setAttribute('disabled', 'disabled');
+			this.uploader._button._input.style.cursor = 'default';
+			Assets.qq.addClass(this.uploader._button._element, 'assets-disabled');
 		}
 	},
 
@@ -540,8 +649,8 @@ Assets.FileManager = Assets.Class({
 		clearTimeout(this.expandDropTargetFolderTimeout);
 
 		if (dropTarget) {
-			var folderId = dropTarget.attr('data-id');
-			this.dropTargetFolder = this.folders[folderId];
+			var folderPath = dropTarget.attr('data-path');
+			this.dropTargetFolder = this.folders[folderPath];
 
 			if (this.dropTargetFolder.hasSubfolders() && ! this.dropTargetFolder.expanded) {
 				this.expandDropTargetFolderTimeout = setTimeout($.proxy(this, '_expandDropTargetFolder'), 750);
@@ -554,7 +663,7 @@ Assets.FileManager = Assets.Class({
 	 */
 	_expandDropTargetFolder: function() {
 		// collapse any temp-expanded drop targets that aren't parents of this one
-		this._collapseExtraExpandedFolders(this.dropTargetFolder.id);
+		this._collapseExtraExpandedFolders(this.dropTargetFolder.path);
 
 		this.dropTargetFolder.expand();
 
@@ -574,13 +683,13 @@ Assets.FileManager = Assets.Class({
 	/**
 	 * Collapse Extra Expanded Folders
 	 */
-	_collapseExtraExpandedFolders: function(dropTargetFolderId) {
+	_collapseExtraExpandedFolders: function(dropTargetFolderPath) {
 		clearTimeout(this.expandDropTargetFolderTimeout);
 
 		for (var i = this.tempExpandedFolders.length-1; i >= 0; i--) {
 			var folder = this.tempExpandedFolders[i];
 
-			if (! dropTargetFolderId || dropTargetFolderId == folder.id || dropTargetFolderId.substr(0, folder.id.length) != folder.id) {
+			if (! dropTargetFolderPath || dropTargetFolderPath == folder.path || dropTargetFolderPath.substr(0, folder.path.length) != folder.path) {
 				folder.collapse();
 				this.tempExpandedFolders.splice(i, 1);
 			}
@@ -588,38 +697,138 @@ Assets.FileManager = Assets.Class({
 	},
 
 	// -------------------------------------------
+	//  Uploading
+	// -------------------------------------------
+
+	/**
+	 * Set Upload Status
+	 */
+	_setUploadStatus: function() {
+		this._setStatus(Assets.parseTags(Assets.lang.upload_status, {
+			count: this._uploadedFiles,
+			total: this._uploadTotalFiles
+		}));
+	},
+
+	/**
+	 * On Upload Submit
+	 */
+	_onUploadSubmit: function(id, fileName) {
+		// is this the first file?
+		if (! this.uploader.getInProgress()) {
+			this.$spinner.show();
+
+			// prepare the progress bar
+			this.$uploadProgress.show();
+			this.$uploadProgressBar.width('0%');
+			this._uploadFileProgress = {};
+
+			this._uploadTotalFiles = 1;
+			this._uploadedFiles = 0;
+		}
+		else {
+			this._uploadTotalFiles++;
+		}
+
+		// get ready to start recording the progress for this file
+		this._uploadFileProgress[id] = 0;
+
+		this._setUploadStatus();
+	},
+
+	/**
+	 * On Upload Progress
+	 */
+	_onUploadProgress: function(id, fileName, loaded, total) {
+		this._uploadFileProgress[id] = loaded / total;
+		this._updateProgressBar();
+	},
+
+	/**
+	 * On Upload Complete
+	 */
+	_onUploadComplete: function(id, fileName, response) {
+		this._uploadFileProgress[id] = 1;
+		this._updateProgressBar();
+
+		if (response.success) {
+			this._uploadedFiles++;
+
+			if (this.options.multiSelect || !this.selectedFilePaths.length) {
+				this.selectedFilePaths.push(response.path);
+			}
+
+			this._setUploadStatus();
+		}
+
+		// is this the last file?
+		if (! this.uploader.getInProgress()) {
+			if (this._uploadedFiles) {
+				this._updateFiles($.proxy(this, '_hideProgressBar'));
+			} else {
+				// just skip to hiding the progress bar
+				this._hideProgressBar();
+				this._setTotalFilesStatus();
+			}
+		}
+	},
+
+	/**
+	 * Update Progress Bar
+	 */
+	_updateProgressBar: function() {
+		var totalPercent = 0;
+
+		for (var id in this._uploadFileProgress) {
+			totalPercent += this._uploadFileProgress[id];
+		}
+
+		var width = Math.round(100 * totalPercent / this._uploadTotalFiles) + '%';
+		this.$uploadProgressBar.width(width);
+	},
+
+	/**
+	 * Hide Progress Bar
+	 */
+	_hideProgressBar: function() {
+		this.$uploadProgress.fadeOut($.proxy(function() {
+			this.$uploadProgress.hide();
+		}, this));
+	},
+
+	// -------------------------------------------
 	//  Files
 	// -------------------------------------------
 
 	/**
-	 * Update Total Files 
+	 * Set Total Files Status
 	 */
-	_updateTotalFiles: function() {
+	_setTotalFilesStatus: function() {
 		if (this.fileSelect && this.fileSelect.getTotalSelected()) {
-			html = Assets.fmtNum(this.fileSelect.getTotalSelected())+' '+Assets.lang.of+' '+Assets.fmtNum(this.totalFiles)+' '+Assets.lang.selected;
+			var msg = Assets.fmtNum(this.fileSelect.getTotalSelected())+' '+Assets.lang.of+' '+Assets.fmtNum(this.totalFiles)+' '+Assets.lang.selected;
 		} else if (this.showingFiles) {
-			html = Assets.lang.showing+' '+Assets.fmtNum(this.showingFiles)+' '+Assets.lang.of+' '+Assets.fmtNum(this.totalFiles)+' '+Assets.lang.files;
+			var msg = Assets.lang.showing+' '+Assets.fmtNum(this.showingFiles)+' '+Assets.lang.of+' '+Assets.fmtNum(this.totalFiles)+' '+Assets.lang.files;
 		} else {
-			html = Assets.fmtNum(this.totalFiles)+' '+(this.totalFiles == 1 ? Assets.lang.file : Assets.lang.files);
+			var msg = Assets.fmtNum(this.totalFiles)+' '+(this.totalFiles == 1 ? Assets.lang.file : Assets.lang.files);
 		}
 
-		this.$totalFiles.html(html);
+		this._setStatus(msg);
 	},
 
 	/**
 	 * Rename File
 	 */
 	_renameFile: function(event) {
-		var filePath = event.currentTarget.getAttribute('data-file-path'),
-			parts = filePath.split(/[\}\/]/),
+		var filePath = event.currentTarget.getAttribute('data-path'),
+			parts = Assets.getPathParts(filePath),
 			oldName = parts[parts.length-1],
 			newName = prompt(Assets.lang.rename, oldName);
 
-		if (newName !== null && newName != oldName) {
+		if (newName && newName != oldName) {
 			this.$spinner.show();
 
 			// assemble the complete new file ID
-			var newPath = parts[0]+'}';
+			var newPath = parts[0];
 
 			for (var i = 1; i < parts.length-1; i++) {
 				newPath += parts[i]+'/';
@@ -635,6 +844,7 @@ Assets.FileManager = Assets.Class({
 			$.post(Assets.actions.move_file, data, $.proxy(function(data, textStatus) {
 				if (textStatus == 'success') {
 					if (data[0][1] == 'success') {
+						this._updateFilePath(data[0][0], data[0][2]);
 						this._updateFiles();
 					} else if (data[0][1] == 'error') {
 						alert(data[0][2]);
@@ -646,18 +856,32 @@ Assets.FileManager = Assets.Class({
 	},
 
 	/**
+	 * Update File Path
+	 *
+	 * Keeps a selected file's name up-to-date through file refreshes
+	 */
+	_updateFilePath: function(oldPath, newPath) {
+		var selIndex = $.inArray(oldPath, this.selectedFilePaths);
+
+		if (selIndex != -1) {
+			this.selectedFilePaths[selIndex] = newPath;
+		}
+	},
+
+	/**
 	 * Delete File
 	 */
 	_deleteFile: function(event) {
-		var filePath = event.currentTarget.getAttribute('data-file-path');
+		var filePath = event.currentTarget.getAttribute('data-path'),
+			parts = Assets.getPathParts(filePath);
 
-		if (confirm(Assets.lang.confirm_delete_file.replace('{file}', filePath))) {
+		if (confirm(Assets.parseTag(Assets.lang.confirm_delete_file, 'file', parts[parts.length-1]))) {
 			this.$spinner.show();
 
 			$.post(Assets.actions.delete_file, { file: filePath }, $.proxy(function(data, textStatus) {
 				if (textStatus == 'success') {
-					if (data.error) {
-						alert(data.error);
+					if (data.result[0].error) {
+						alert(data.result[0].error);
 					} else {
 						this._updateFiles();
 					}
@@ -667,10 +891,44 @@ Assets.FileManager = Assets.Class({
 	},
 
 	/**
+	 * Delete Files
+	 */
+	_deleteFiles: function(event) {
+		if (confirm(Assets.parseTag(Assets.lang.confirm_delete_files, 'num', this.fileSelect.getTotalSelected()))) {
+			this.$spinner.show();
+
+			var data = {},
+				$selected = this.fileSelect.getSelectedItems();
+
+			for (var i = 0; i < $selected.length; i++) {
+				data['file['+i+']'] = $selected[i].getAttribute('data-path');
+			}
+
+			$.post(Assets.actions.delete_file, data, $.proxy(function(data, textStatus) {
+				if (textStatus == 'success') {
+					var errors = [];
+
+					for (var i = 0; i < data.result.length; i++) {
+						if (data.result[i].error) {
+							errors.push(data.result[i].file+': '+data.result[i].error);
+						}
+					}
+
+					if (errors.length) {
+						alert(Assets.lang.error_deleting_files+"\n\n"+errors.join("\n"));
+					}
+
+					this._updateFiles();
+				}
+			}, this), 'json');
+		}
+	},
+
+	/**
 	 * View File
 	 */
 	_viewFile: function(event) {
-		var filePath = event.currentTarget.getAttribute('data-file-path'),
+		var filePath = event.currentTarget.getAttribute('data-path'),
 			url = Assets.actions.view_file+'&file='+encodeURIComponent(filePath);
 
 		window.open(url);
@@ -691,8 +949,8 @@ Assets.FileManager = Assets.Class({
 	 * On Search Key Down
 	 */
 	_onSearchKeyDown: function(event) {
-		// ignore if meta key is down
-		if (event.metaKey) return;
+		// ignore if meta/ctrl key is down
+		if (event.metaKey || event.ctrlKey) return;
 
 		event.stopPropagation();
 
@@ -745,16 +1003,11 @@ Assets.FileManager = Assets.Class({
 	/**
 	 * Update Files
 	 */
-	_updateFiles: function() {
+	_updateFiles: function(callback) {
 		this.filesRequestId++;
 
 		// show the spinner
 		this.$spinner.show();
-
-		// destroy previous select & view
-		if (this.fileSelect) this.fileSelect.destroy();
-		if (this.filesView) this.filesView.destroy();
-		this.fileSelect = this.filesView = null;
 
 		if (this.options.mode == 'full') {
 			this.fileDrag.reset();
@@ -779,8 +1032,8 @@ Assets.FileManager = Assets.Class({
 		};
 
 		// pass the selected folder IDs
-		for (var i in this.selectedFolderIds) {
-			data['folders['+i+']'] = this.selectedFolderIds[i];
+		for (var i in this.selectedFolderPaths) {
+			data['folders['+i+']'] = this.selectedFolderPaths[i];
 		}
 
 		// pass the file kinds
@@ -797,6 +1050,16 @@ Assets.FileManager = Assets.Class({
 			data['disabled_files['+i+']'] = this.options.disabledFiles[i];
 		}
 
+		// pass the selected files
+		for (var i = 0; i < this.selectedFilePaths.length; i++) {
+			data['selected_files['+i+']'] = this.selectedFilePaths[i];
+		}
+
+		// destroy previous select & view
+		if (this.fileSelect) this.fileSelect.destroy();
+		if (this.filesView) this.filesView.destroy();
+		this.fileSelect = this.filesView = null;
+
 		// run the ajax post request
 		$.post(Assets.actions.get_files_view_by_folders, data, $.proxy(function(data, textStatus) {
 			if (textStatus == 'success') {
@@ -809,7 +1072,6 @@ Assets.FileManager = Assets.Class({
 				// update the total files record
 				this.totalFiles = data.total;
 				this.showingFiles = data.showing;
-				this._updateTotalFiles();
 
 				// initialize the files view
 				if (this.view == 'list') {
@@ -833,27 +1095,7 @@ Assets.FileManager = Assets.Class({
 				this.fileSelect = new Assets.Select(this.$files, {
 					multi:         this.options.multiSelect,
 					multiDblClick: (this.options.multiSelect && this.options.mode == 'select'),
-					onSelectionChange: $.proxy(function() {
-						this._updateTotalFiles();
-
-						if (this.options.mode == 'full') {
-							if (this.fileSelect.getTotalSelected() == 1) {
-								$(this.$buttons[0]).removeClass('assets-disabled');
-							} else {
-								$(this.$buttons[0]).addClass('assets-disabled');
-							}
-						}
-
-						// -------------------------------------------
-						//  onSelectionChange callback
-						//
-							if (typeof this.options.onSelectionChange == 'function') {
-								this.options.onSelectionChange();
-							}
-						//
-						// -------------------------------------------
-
-					}, this)
+					onSelectionChange: $.proxy(this, '_onFileSelectionChange')
 				});
 
 				this.fileSelect.addItems($files);
@@ -877,7 +1119,10 @@ Assets.FileManager = Assets.Class({
 					}
 				}, this));
 
-				// add the context menus
+				// -------------------------------------------
+				//  Context Menus
+				// -------------------------------------------
+
 				var menuOptions = [{ label: Assets.lang.view_file, onClick: $.proxy(this, '_viewFile') }];
 
 				if (this.options.mode == 'full') {
@@ -887,22 +1132,79 @@ Assets.FileManager = Assets.Class({
 					menuOptions.push({ label: Assets.lang._delete, onClick: $.proxy(this, '_deleteFile') });
 				}
 
-				new Assets.ContextMenu($files, menuOptions);
+				this._singleFileMenu = new Assets.ContextMenu($files, menuOptions);
+
+				if (this.options.mode == 'full') {
+					this._multiFileMenu = new Assets.ContextMenu($files, [
+						{ label: Assets.lang._delete, onClick: $.proxy(this, '_deleteFiles') }
+					]);
+
+					this._multiFileMenu.disable();
+				}
 
 				// hide the spinner
 				this.$spinner.hide();
 
+				// did this happen immediately after an upload?
+				this._onFileSelectionChange();
+
+				// scroll to the first selected file
+				if (this.selectedFilePaths.length) {
+					var $selected = this.fileSelect.getSelectedItems();
+					Assets.scrollContainerToElement(this.filesView.getScrollpane(), $selected);
+				}
+
 				// -------------------------------------------
-				//  onAfterUpdateFiles callback
+				//  callback
 				//
-					if (typeof this.options.onAfterUpdateFiles == 'function') {
-						this.options.onAfterUpdateFiles();
+					if (typeof callback == 'function') {
+						callback();
 					}
 				//
 				// -------------------------------------------
 
 			}
 		}, this), 'json');
+	},
+
+	/**
+	 * On Selection Change
+	 */
+	_onFileSelectionChange: function() {
+		this._setTotalFilesStatus();
+
+		if (this.options.mode == 'full') {
+			if (this.fileSelect.getTotalSelected() == 1) {
+				// enable the Edit File button
+				$(this.$buttons[0]).removeClass('assets-disabled');
+
+				this._singleFileMenu.enable();
+				this._multiFileMenu.disable();
+			} else {
+				// disable the Edit File button
+				$(this.$buttons[0]).addClass('assets-disabled');
+
+				this._singleFileMenu.disable();
+				this._multiFileMenu.enable();
+			}
+		}
+
+		// update our internal array of selected files
+		this.selectedFilePaths = [];
+		var $selected = this.fileSelect.getSelectedItems();
+
+		for (var i = 0; i < $selected.length; i++) {
+			this.selectedFilePaths.push($($selected[i]).attr('data-path'));
+		}
+
+		// -------------------------------------------
+		//  onSelectionChange callback
+		//
+			if (typeof this.options.onSelectionChange == 'function') {
+				this.options.onSelectionChange();
+			}
+		//
+		// -------------------------------------------
 	}
 });
 
@@ -934,7 +1236,8 @@ Assets.Sheet = Assets.Class({
 		this.$sheet = $('<div class="assets-sheet" />').appendTo(document.body);
 
 		var data = {
-			multi: this.options.multiSelect ? 'y' : 'n'
+			site_id: Assets.siteId,
+			multi:   this.options.multiSelect ? 'y' : 'n'
 		};
 
 		if (this.options.filedirs == 'all') {
@@ -1005,7 +1308,7 @@ Assets.Sheet = Assets.Class({
 		for (var i = 0; i < $files.length; i++) {
 			var $file = $($files[i]);
 			files.push({
-				path: $file.attr('data-file-path'),
+				path: $file.attr('data-path'),
 				url:  $file.attr('data-file-url')
 			});
 		}

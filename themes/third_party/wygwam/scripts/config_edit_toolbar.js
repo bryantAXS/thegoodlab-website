@@ -209,10 +209,11 @@ $.fn.ptDropPanes = function(settings){
 			},
 			drag: function(event, ui){
 
-				event.originalEvent.preventDefault();
+				var ev = event.originalEvent;
+				ev.preventDefault();
 
 				// cursor over selections?
-				var cursorOverSelections = isCursorOver(event, $selectionsContainer);
+				var cursorOverSelections = isCursorOver(ev, $selectionsContainer);
 				if (cursorOverSelections && !$selectionsContainer.hasClass('tb-hover')) {
 					$selectionsContainer.addClass('tb-hover');
 				}
@@ -223,7 +224,7 @@ $.fn.ptDropPanes = function(settings){
 
 				if (cursorOverSelections) {
 					// find and place the insertion point
-					var _closestSelection = getClosestElement(event, $selections);
+					var _closestSelection = getClosestElement(ev, $selections);
 					if (_closestSelection != closestSelection) {
 						closestSelection = _closestSelection;
 						$insertion.insertBefore(closestSelection);
@@ -232,7 +233,7 @@ $.fn.ptDropPanes = function(settings){
 				}
 
 				// cursor over options?
-				var cursorOverOptions = (!cursorOverSelections && isCursorOver(event, $optionsContainer));
+				var cursorOverOptions = (!cursorOverSelections && isCursorOver(ev, $optionsContainer));
 				if (cursorOverOptions && !$optionsContainer.hasClass('tb-hover')) {
 					$optionsContainer.addClass('tb-hover');
 				}

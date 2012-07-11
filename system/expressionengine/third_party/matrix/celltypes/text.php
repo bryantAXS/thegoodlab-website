@@ -19,7 +19,7 @@ class Matrix_text_ft {
 		'multiline' => 'n',
 		'fmt' => 'none',
 		'dir' => 'ltr',
-		'content' => 'any'
+		'content' => 'all'
 	);
 
 	/**
@@ -46,6 +46,7 @@ class Matrix_text_ft {
 	private function _prep_settings(&$settings)
 	{
 		$settings = array_merge($this->default_settings, $settings);
+		if ($settings['content'] == 'any') $settings['content'] = 'all';
 	}
 
 	// --------------------------------------------------------------------
@@ -62,7 +63,7 @@ class Matrix_text_ft {
 		return array(
 			array(lang('maxl'), form_input('maxl', $data['maxl'], 'class="matrix-textarea"')),
 			array(lang('multiline'), form_checkbox('multiline', 'y', ($data['multiline'] == 'y'))),
-			array(lang('formatting'), form_dropdown('fmt', $data['field_fmt_options'], $data['fmt'])),
+			array(lang('formatting'), form_dropdown('fmt', $this->EE->addons_model->get_plugin_formatting(TRUE), $data['fmt'])),
 			//array(lang('direction'), form_dropdown('dir', array('ltr'=>lang('ltr'), 'rtl'=>lang('rtl')), $data['dir'])),
 			array(lang('content'), form_dropdown('content', $field_content_options, $data['content']))
 		);
@@ -143,7 +144,7 @@ class Matrix_text_ft {
 	function validate_cell($data)
 	{
 		// is this a required column?
-		if ($this->settings['col_required'] == 'y' && ! $data)
+		if ($this->settings['col_required'] == 'y' && ! strlen($data))
 		{
 			return lang('col_required');
 		}
@@ -160,15 +161,41 @@ class Matrix_text_ft {
 	{
 		$this->_prep_settings($this->settings);
 
-		return $this->EE->typography->parse_type(
-			$this->EE->functions->encode_ee_tags($data),
-			array(
-				'text_format'	=> $this->settings['fmt'],
-				'html_format'	=> $this->row['channel_html_formatting'],
-				'auto_links'	=> $this->row['channel_auto_link_urls'],
-				'allow_img_url' => $this->row['channel_allow_img_urls']
-			)
-		);
+		if ($this->settings['content'] == 'all')
+		{
+			$this->EE->load->library('typography');
+
+			$data = $this->EE->typography->parse_type(
+				$this->EE->functions->encode_ee_tags($data),
+				array(
+					'text_format'	=> $this->settings['fmt'],
+					'html_format'	=> (isset($this->row['channel_html_formatting']) ? $this->row['channel_html_formatting'] : 'all'),
+					'auto_links'	=> (isset($this->row['channel_auto_link_urls'])  ? $this->row['channel_auto_link_urls']  : 'n'),
+					'allow_img_url' => (isset($this->row['channel_allow_img_urls'])  ? $this->row['channel_allow_img_urls']  : 'y')
+				)
+			);
+		}
+
+		return $data;
+	}
+
+	/**
+	 * Replace Tag
+	 */
+	function replace_tag($data, $params = array())
+	{
+		$this->_prep_settings($this->settings);
+
+		if ($this->settings['content'] != 'all')
+		{
+			$decimals = isset($params['decimals']) ? (int) $params['decimals'] : strlen(substr(strrchr($data, "."), 1));;
+			$dec_point = isset($params['dec_point']) ? $params['dec_point'] : '.';
+			$thousands_sep = isset($params['thousands_sep']) ? $params['thousands_sep'] : ',';
+
+			$data = number_format($data, $decimals, $dec_point, $thousands_sep);
+		}
+
+		return $data;
 	}
 
 }

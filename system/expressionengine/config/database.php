@@ -21,4 +21,4 @@ $db['expressionengine']['cachedir'] = "/Users/bryanthughes/Sites/starter-ee/syst
 /* End of file database.php */
 /* Location: ./system/expressionengine/config/database.php */
 
-require($_SERVER['DOCUMENT_ROOT']."/config_bootstrap.php");
+require($_SERVER['DOCUMENT_ROOT']."/bootstrap.php");

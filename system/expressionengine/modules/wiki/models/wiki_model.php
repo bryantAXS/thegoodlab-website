@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Module
  * @category	Model
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Wiki_model extends CI_Model {
@@ -173,20 +173,11 @@ class Wiki_model extends CI_Model {
 	 */
 	function fetch_upload_options($value = '')
 	{
-		$this->db->select('id, name');
-		$this->db->order_by('name');
-
-		$query = $this->db->get('upload_prefs');
-
+		$this->load->model('file_upload_preferences_model');
+		
 		$options[0] = $this->lang->line('none');
-
-		foreach($query->result() as $row)
-		{
-			$selected = ($value == $row->id) ? 1 : '';
-
-			$options[$row->id] = $row->name;
-		}
-
+		$options = $this->file_upload_preferences_model->get_dropdown_array(NULL, NULL, $options);
+		
 		return $options;
 	}
 

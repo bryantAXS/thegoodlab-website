@@ -1,5 +1,7 @@
 <?php if (! defined('BASEPATH')) die('No direct script access allowed');
 
+
+// load dependencies
 if (! defined('PATH_THIRD')) define('PATH_THIRD', EE_APPPATH.'third_party/');
 require_once PATH_THIRD.'assets/config.php';
 
@@ -20,7 +22,10 @@ class Assets_upd {
 	 */
 	function __construct($switch = TRUE)
 	{
-		// Make a local reference to the ExpressionEngine super object
+		// -------------------------------------------
+		//  Make a local reference to the EE super object
+		// -------------------------------------------
+
 		$this->EE =& get_instance();
 	}
 
@@ -31,7 +36,10 @@ class Assets_upd {
 	{
 		$this->EE->load->dbforge();
 
-		// add row to modules
+		// -------------------------------------------
+		//  Add row to exp_modules
+		// -------------------------------------------
+
 		$this->EE->db->insert('modules', array(
 			'module_name'        => ASSETS_NAME,
 			'module_version'     => ASSETS_VER,
@@ -39,7 +47,11 @@ class Assets_upd {
 			'has_publish_fields' => 'n'
 		));
 
-		// File Manager actions
+		// -------------------------------------------
+		//  Add rows to exp_actions
+		// -------------------------------------------
+
+		// file manager actions
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'get_subfolders'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'upload_file'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'get_files_view_by_folders'));
@@ -47,7 +59,7 @@ class Assets_upd {
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'save_props'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'get_ordered_files_view'));
 
-		// Folder/file CRUD actions
+		// folder/file CRUD actions
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'move_folder'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'create_folder'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'delete_folder'));
@@ -55,11 +67,13 @@ class Assets_upd {
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'move_file'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'delete_file'));
 
-		// Field actions
+		// field actions
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'build_sheet'));
 		$this->EE->db->insert('actions', array('class' => 'Assets_mcp', 'method' => 'get_selected_files'));
 
-		// create assets table
+		// -------------------------------------------
+		//  Create the exp_assets table
+		// -------------------------------------------
 
 		$fields = array(
 			'asset_id'   => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE, 'auto_increment' => TRUE),
@@ -69,17 +83,20 @@ class Assets_upd {
 			'alt_text'   => array('type' => 'tinytext'),
 			'caption'    => array('type' => 'tinytext'),
 			'author'     => array('type' => 'tinytext'),
-			'desc'       => array('type' => 'text'),
+			'`desc`'       => array('type' => 'text'),
 			'location'   => array('type' => 'tinytext'),
 			'keywords'   => array('type' => 'text')
 		);
 
 		$this->EE->dbforge->add_field($fields);
 		$this->EE->dbforge->add_key('asset_id', TRUE);
-		$this->EE->dbforge->add_key('file_path');
 		$this->EE->dbforge->create_table('assets');
 
-		// create assets_entries table
+		$this->EE->db->query('ALTER TABLE exp_assets ADD UNIQUE unq_file_path (file_path)');
+
+		// -------------------------------------------
+		//  Create the exp_assets_entries table
+		// -------------------------------------------
 
 		$fields = array(
 			'asset_id'    => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
@@ -87,6 +104,7 @@ class Assets_upd {
 			'field_id'    => array('type' => 'int', 'constraint' => 6, 'unsigned' => TRUE),
 			'col_id'      => array('type' => 'int', 'constraint' => 6, 'unsigned' => TRUE),
 			'row_id'      => array('type' => 'int', 'constraint' => 10, 'unsigned' => TRUE),
+			'var_id'      => array('type' => 'int', 'constraint' => 6, 'unsigned' => TRUE),
 			'asset_order' => array('type' => 'int', 'constraint' => 4, 'unsigned' => TRUE)
 		);
 
@@ -96,6 +114,7 @@ class Assets_upd {
 		$this->EE->dbforge->add_key('field_id');
 		$this->EE->dbforge->add_key('col_id');
 		$this->EE->dbforge->add_key('row_id');
+		$this->EE->dbforge->add_key('var_id');
 		$this->EE->dbforge->create_table('assets_entries');
 
 		return TRUE;
@@ -110,6 +129,10 @@ class Assets_upd {
 		{
 			return FALSE;
 		}
+
+		// -------------------------------------------
+		//  Schema changes
+		// -------------------------------------------
 
 		if (version_compare($current, '0.2', '<'))
 		{
@@ -174,6 +197,78 @@ class Assets_upd {
 			$this->EE->db->where('name', 'assets')
 			             ->update('fieldtypes', array('has_global_settings' => 'y'));
 		}
+
+		if (version_compare($current, '1.1.5', '<'))
+		{
+			$this->EE->load->dbforge();
+
+			// do we need to add the var_id column to exp_assets_entries?
+			//  - the 1.1 update might have added this but then failed on another step, so the version wouldn't be updated
+			$query = $this->EE->db->query('SHOW COLUMNS FROM `'.$this->EE->db->dbprefix.'assets_entries` LIKE "var_id"');
+			if (! $query->num_rows())
+			{
+				$this->EE->db->query('ALTER TABLE exp_assets_entries ADD var_id INT(6) UNSIGNED AFTER row_id, ADD INDEX (var_id)');
+			}
+			else
+			{
+				// do we need to add its index?
+				$query = $this->EE->db->query('SHOW INDEX FROM exp_assets_entries WHERE Key_name = "var_id"');
+				if (! $query->num_rows())
+				{
+					$this->EE->db->query('ALTER TABLE exp_assets_entries ADD INDEX (var_id)');
+				}
+			}
+
+			// do we need to add the unq_file_path index to exp_assets?
+			//  - the 1.1 update used to attempt to add this, but it would fail if there was a duplicate file_path
+			$query = $this->EE->db->query('SHOW INDEX FROM exp_assets WHERE Key_name = "unq_file_path"');
+			if (! $query->num_rows())
+			{
+				// are there any duplicate file_path's?
+				$query = $this->EE->db->query('
+					SELECT a.asset_id, a.file_path FROM exp_assets a
+					INNER JOIN (
+						SELECT file_path FROM exp_assets
+						GROUP BY file_path HAVING count(asset_id) > 1
+					) dup ON a.file_path = dup.file_path');
+
+				if ($query->num_rows())
+				{
+					$duplicates = array();
+					foreach ($query->result() as $asset)
+					{
+						$duplicates[$asset->file_path][] = $asset->asset_id;
+					}
+
+					foreach ($duplicates as $file_path => $asset_ids)
+					{
+						$first_asset_id = array_shift($asset_ids);
+
+						// point any entries that were using the duplicate IDs over to the first one
+						$this->EE->db->where_in('asset_id', $asset_ids)
+						             ->update('assets_entries', array('asset_id' => $first_asset_id));
+
+						// delete the duplicates in exp_assets
+						$this->EE->db->where_in('asset_id', $asset_ids)
+						             ->delete('assets');
+					}
+				}
+
+				// now that there are no more unique file_path's, add the unique index,
+				// and drop the old file_path index, since that would be redundant
+				$this->EE->db->query('ALTER TABLE exp_assets ADD UNIQUE unq_file_path (file_path), DROP INDEX file_path');
+			}
+		}
+
+		// -------------------------------------------
+		//  Update version number in exp_fieldtypes and exp_extensions
+		// -------------------------------------------
+
+		$this->EE->db->where('name', 'assets')
+		             ->update('fieldtypes', array('version' => ASSETS_VER));
+
+		$this->EE->db->where('class', 'Assets_ext')
+		             ->update('extensions', array('version' => ASSETS_VER));
 
 		return TRUE;
 	}

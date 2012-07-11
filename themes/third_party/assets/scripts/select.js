@@ -1,21 +1,6 @@
 /**
  * Assets Select
  *
- * Makes a set of items (multi-)selectable
- *
- * Accepted Settings:
- *
- *  • multi:             whether the user can select multiple items
- *  • multiDblClick:     whether the user should be able to double-click a set of multiple selected items
- *  • onSelectionChange: a function to be called when the selection has changed
- *
- * Public Methods:
- *
- *  • addItems( item ): makes additional items selectable
- *  • removeItems( item ): makes an item unselectable
- *  • getSelectedItems(): returns all currently selected items
- *  • destroy(): removes all event listeners created by this Select instance
- *
  * @package Assets
  * @author Brandon Kelly <brandon@pixelandtonic.com>
  * @copyright Copyright (c) 2011 Pixel & Tonic, Inc
@@ -44,243 +29,256 @@ var getDist = function(x1, y1, x2, y2) {
 /**
  * Select
  */
-Assets.Select = function($container, settings) {
+Assets.Select = Assets.Class({
 
-	var obj = this;
+	/**
+	 * Constructor
+	 */
+	__construct: function($container, settings) {
 
-	obj.settings = (settings || {});
+		this._$container = $container;
+		this._settings = (settings || {});
 
-	var $items = $(),
-		$scrollpane = $('.'+scrollpaneClass+':first', $container),
-		mouseUpTimeout,
-		mouseUpTimeoutDuration = (obj.settings.multiDblClick ? 300 : 0),
-		callbackTimeout,
+		this._$items = $();
+		this._$scrollpane = $('.'+scrollpaneClass+':first', this._$container);
+		this._mouseUpTimeout;
+		this._mouseUpTimeoutDuration = (this._settings.multiDblClick ? 300 : 0);
+		this._callbackTimeout;
 
-		totalSelected = 0,
+		this._totalSelected = 0;
 
-		$first = null,
-		$last = null,
-		first = null,
-		last = null,
+		this._$first = null;
+		this._$last = null;
+		this._first = null;
+		this._last = null;
 
-		ignoreClick;
+		this._ignoreClick;
+
+		this._mousedownX;
+		this._mousedownY;
+
+		// --------------------------------------------------------------------
+
+		this._$container.bind('click.'+NS, $.proxy(function(event) {
+			if (this._ignoreClick) {
+				this._ignoreClick = false;
+			} else {
+				// deselect all items on container click
+				this.deselectAll(true);
+			}
+		}, this));
+
+		// --------------------------------------------------------------------
+
+		this._$container.attr('tabindex', '0');
+
+		this._$container.bind('mousedown.'+NS, $.proxy(function() {
+			// since they're using the mouse, no need to show the outline
+			this._$container.addClass('assets-no-outline');
+		}, this));
+
+		this._$container.bind('blur.'+NS, $.proxy(function() {
+			this._$container.removeClass('assets-no-outline');
+		}, this));
+
+		this._$container.bind('keydown.'+NS, $.proxy(this, '_onKeyDown'));
+
+	},
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Get Item Index
 	 */
-	obj.getItemIndex = function($item) {
-		return $items.index($item[0]);
-	};
+	getItemIndex: function($item) {
+		return this._$items.index($item[0]);
+	},
 
 	/**
 	 * Is Selected?
 	 */
-	obj.isSelected = function($item) {
+	isSelected: function($item) {
 		return $item.hasClass(selectedClass);
-	};
+	},
 
 	/**
 	 * Select Item
 	 */
-	obj.selectItem = function($item) {
-		if (! obj.settings.multi) {
-			obj.deselectAll();
+	selectItem: function($item) {
+		if (! this._settings.multi) {
+			this.deselectAll();
 		}
 
 		$item.addClass(selectedClass);
 
-		$first = $last = $item;
-		first = last = obj.getItemIndex($item);
+		this._$first = this._$last = $item;
+		this._first = this._last = this.getItemIndex($item);
 
-		totalSelected++;
+		this._totalSelected++;
 
-		obj.setCallbackTimeout();
-	};
+		this.setCallbackTimeout();
+	},
 
 	/**
 	 * Select Range
 	 */
-	obj.selectRange = function($item) {
-		if (! obj.settings.multi) {
-			return obj.selectItem($item);
+	selectRange: function($item) {
+		if (! this._settings.multi) {
+			return this.selectItem($item);
 		}
 
-		obj.deselectAll();
+		this.deselectAll();
 
-		$last = $item;
-		last = obj.getItemIndex($item);
+		this._$last = $item;
+		this._last = this.getItemIndex($item);
 
 		// prepare params for $.slice()
-		if (first < last) {
-			var sliceFrom = first,
-				sliceTo = last + 1;
+		if (this._first < this._last) {
+			var sliceFrom = this._first,
+				sliceTo = this._last + 1;
 		} else { 
-			var sliceFrom = last,
-				sliceTo = first + 1;
+			var sliceFrom = this._last,
+				sliceTo = this._first + 1;
 		}
 
-		$items.slice(sliceFrom, sliceTo).addClass(selectedClass);
+		this._$items.slice(sliceFrom, sliceTo).addClass(selectedClass);
 
-		totalSelected = sliceTo - sliceFrom;
+		this._totalSelected = sliceTo - sliceFrom;
 
-		obj.setCallbackTimeout();
-	};
+		this.setCallbackTimeout();
+	},
 
 	/**
 	 * Deselect Item
 	 */
-	obj.deselectItem = function($item) {
+	deselectItem: function($item) {
 		$item.removeClass(selectedClass);
 
-		var index = obj.getItemIndex($item);
-		if (first === index) $first = first = null;
-		if (last === index) $last = last = null;
+		var index = this.getItemIndex($item);
+		if (this._first === index) this._$first = this._first = null;
+		if (this._last === index) this._$last = this._last = null;
 
-		totalSelected--;
+		this._totalSelected--;
 
-		obj.setCallbackTimeout();
-	};
+		this.setCallbackTimeout();
+	},
 
 	/**
 	 * Deselect All
 	 */
-	obj.deselectAll = function(clearFirst) {
-		$items.removeClass(selectedClass);
+	deselectAll: function(clearFirst) {
+		this._$items.removeClass(selectedClass);
 
 		if (clearFirst) {
-			$first = first = $last = last = null;
+			this._$first = this._first = this._$last = this._last = null;
 		}
 
-		totalSelected = 0;
+		this._totalSelected = 0;
 
-		obj.setCallbackTimeout();
-	};
+		this.setCallbackTimeout();
+	},
 
 	/**
 	 * Deselect Others
 	 */
-	obj.deselectOthers = function($item) {
-		obj.deselectAll();
-		obj.selectItem($item);
-	};
+	deselectOthers: function($item) {
+		this.deselectAll();
+		this.selectItem($item);
+	},
 
 	/**
 	 * Toggle Item
 	 */
-	obj.toggleItem = function($item) {
-		if (! obj.isSelected($item)) {
-			obj.selectItem($item);
+	toggleItem: function($item) {
+		if (! this.isSelected($item)) {
+			this.selectItem($item);
 		} else {
-			obj.deselectItem($item);
+			this.deselectItem($item);
 		}
-	}
+	},
 
 	// --------------------------------------------------------------------
 
-	obj.clearMouseUpTimeout = function() {
-		clearTimeout(mouseUpTimeout);
-	};
-
-	var mousedown_x, mousedown_y;
+	clearMouseUpTimeout: function() {
+		clearTimeout(this._mouseUpTimeout);
+	},
 
 	/**
 	 * On Mouse Down
 	 */
-	var onMouseDown = function(event) {
-		mousedown_x = event.pageX;
-		mousedown_y = event.pageY;
+	_onMouseDown: function(event) {
+		// ignore right clicks
+		if (event.button == 2) return;
 
-		var $item = $(this);
+		this._mousedownX = event.pageX;
+		this._mousedownY = event.pageY;
 
-		if (event.metaKey) {
-			obj.toggleItem($item);
+		var $item = $(event.currentTarget);
+
+		if (event.metaKey || event.ctrlKey) {
+			this.toggleItem($item);
 		}
-		else if (first !== null && event.shiftKey) {
-			obj.selectRange($item);
+		else if (this._first !== null && event.shiftKey) {
+			this.selectRange($item);
 		}
-		else if (! obj.isSelected($item)) {
-			obj.deselectAll();
-			obj.selectItem($item);
+		else if (! this.isSelected($item)) {
+			this.deselectAll();
+			this.selectItem($item);
 		}
 
-		$container.focus();
-	};
+		this._$container.focus();
+	},
 
 	/**
 	 * On Mouse Up
 	 */
-	var onMouseUp = function(event) {
-		var $item = $(this);
+	_onMouseUp: function(event) {
+		// ignore right clicks
+		if (event.button == 2) return;
+
+		var $item = $(event.currentTarget);
 
 		// was this a click?
-		if (! event.metaKey && ! event.shiftKey && getDist(mousedown_x, mousedown_y, event.pageX, event.pageY) < 1) {
-			obj.selectItem($item);
+		if (! event.metaKey && ! event.ctrlKey && ! event.shiftKey && getDist(this._mousedownX, this._mousedownY, event.pageX, event.pageY) < 1) {
+			this.selectItem($item);
 
 			// wait a moment before deselecting others
 			// to give the user a chance to double-click
-			obj.clearMouseUpTimeout()
-			mouseUpTimeout = setTimeout(function() {
-				obj.deselectOthers($item);
-			}, mouseUpTimeoutDuration);
+			this.clearMouseUpTimeout()
+			this._mouseUpTimeout = setTimeout($.proxy(function() {
+				this.deselectOthers($item);
+			}, this), this._mouseUpTimeoutDuration);
 		}
-	};
-
-	// --------------------------------------------------------------------
-
-	var clickedInto = null;
-
-	$container.bind('click.'+NS, function(event) {
-		if (ignoreClick) {
-			ignoreClick = false;
-		} else {
-			// deselect all items on container click
-			obj.deselectAll(true);
-		}
-	});
-
-	// --------------------------------------------------------------------
-
-	$container.attr('tabindex', '0');
-
-	$container.bind('mousedown.'+NS, function() {
-		// since they're using the mouse, no need to show the outline
-		$container.addClass('assets-no-outline');
-	});
-
-	$container.bind('blur.'+NS, function() {
-		$container.removeClass('assets-no-outline');
-	});
+	},
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * On Key Down
 	 */
-	$container.bind('keydown.'+NS, function(event) {
-		// ignore if meta key is down
-		if (event.metaKey) return;
+	_onKeyDown: function(event) {
+		// ignore if meta/ctrl key is down
+		if (event.metaKey || event.ctrlKey) return;
 
 		// ignore if this pane doesn't have focus
-		if (event.target != $container[0]) return;
+		if (event.target != this._$container[0]) return;
 
 		// ignore if there are no items
-		if (! $items.length) return;
+		if (! this._$items.length) return;
 
-		var anchor = event.shiftKey ? last : first;
+		var anchor = event.shiftKey ? this._last : this._first;
 
 		switch (event.keyCode) {
 			case 40: // Down
 				event.preventDefault();
 
-				if (first === null) {
+				if (this._first === null) {
 					// select the first item
-					$item = $($items[0]);
+					$item = $(this._$items[0]);
 				}
-				else if ($items.length >= anchor + 2) {
+				else if (this._$items.length >= anchor + 2) {
 					// select the item after the last selected item
-					$item = $($items[anchor+1]);
+					$item = $(this._$items[anchor+1]);
 				}
 
 				break;
@@ -288,18 +286,18 @@ Assets.Select = function($container, settings) {
 			case 38: // up
 				event.preventDefault();
 
-				if (first === null) {
+				if (this._first === null) {
 					// select the last item
-					$item = $($items[$items.length-1]);
+					$item = $(this._$items[this._$items.length-1]);
 				}
 				else if (anchor > 0) {
-					$item = $($items[anchor-1]);
+					$item = $(this._$items[anchor-1]);
 				}
 
 				break;
 
 			case 27: // esc
-				obj.deselectAll(true);
+				this.deselectAll(true);
 
 			default: return;
 		};
@@ -310,162 +308,144 @@ Assets.Select = function($container, settings) {
 		//  Scroll to the item
 		// -------------------------------------------
 
-		var scrollTop = $scrollpane.scrollTop(),
-			itemOffset = $item.offset().top,
-			scrollpaneOffset = $scrollpane.offset().top,
-			offsetDiff = itemOffset - scrollpaneOffset;
-
-		if (offsetDiff < 0) {
-			$scrollpane.scrollTop(scrollTop + offsetDiff);
-		}
-		else {
-			var itemHeight = $item.outerHeight(),
-				scrollpaneHeight = $scrollpane[0].clientHeight;
-
-			if (offsetDiff + itemHeight > scrollpaneHeight) {
-				$scrollpane.scrollTop(scrollTop + (offsetDiff - (scrollpaneHeight - itemHeight)));
-			}
-		}
+		Assets.scrollContainerToElement(this._$scrollpane, $item);
 
 		// -------------------------------------------
 		//  Select the item
 		// -------------------------------------------
 
-		if (first !== null && event.shiftKey) {
-			obj.selectRange($item);
+		if (this._first !== null && event.shiftKey) {
+			this.selectRange($item);
 		}
 		else {
-			obj.deselectAll();
-			obj.selectItem($item);
+			this.deselectAll();
+			this.selectItem($item);
 		}
-	});
+	},
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Get Total Selected
 	 */
-	obj.getTotalSelected = function() {
-		return totalSelected;
-	};
+	getTotalSelected: function() {
+		return this._totalSelected;
+	},
 
 	/**
 	 * Add Items
 	 */
-	obj.addItems = function($_items) {
+	addItems: function($items) {
 		// make a record of it
-		$items = $items.add($_items);
+		this._$items = this._$items.add($items);
 
 		// bind listeners
-		$_items.bind('mousedown.'+NS, onMouseDown);
-		$_items.bind('mouseup.'+NS, onMouseUp);
+		$items.bind('mousedown.'+NS, $.proxy(this, '_onMouseDown'));
+		$items.bind('mouseup.'+NS, $.proxy(this, '_onMouseUp'));
 
-		$_items.bind('click.'+NS, function(event) {
-			ignoreClick = true;
-		});
+		$items.bind('click.'+NS, $.proxy(function(event) {
+			this._ignoreClick = true;
+		}, this));
 
-		totalSelected += $_items.filter('.'+selectedClass).length;
+		this._totalSelected += $items.filter('.'+selectedClass).length;
 
-		obj.updateIndexes();
-	};
+		this.updateIndexes();
+	},
 
 	/**
 	 * Remove Items
 	 */
-	obj.removeItems = function($_items) {
-		$_items.each(function() {
-			var $item = $(this);
+	removeItems: function($items) {
+		for (var i = 0; i < $items.length; i++) {
+			var $item = $($items[i]);
 
 			// deselect it first
-			if (obj.isSelected($item)) {
-				obj.deselectItem($item);
+			if (this.isSelected($item)) {
+				this.deselectItem($item);
 			}
-		});
+		};
 
 		// unbind all events
-		$_items.unbind('.'+NS);
+		$items.unbind('.'+NS);
 
 		// remove the record of it
-		$items = $items.not($_items);
+		this._$items = this._$items.not($items);
 
-		obj.updateIndexes();
-	};
+		this.updateIndexes();
+	},
 
 	/**
 	 * Reset
 	 */
-	obj.reset = function() {
+	reset: function() {
 		// unbind the events
-		$items.unbind('.'+NS);
+		this._$items.unbind('.'+NS);
 
 		// reset local vars
-		$items = $();
-		totalSelected = 0;
-		$first = first = $last = last = null;
+		this._$items = $();
+		this._totalSelected = 0;
+		this._$first = this._first = this._$last = this._last = null;
 
 		// clear timeout
-		obj.clearCallbackTimeout();
-	};
+		this.clearCallbackTimeout();
+	},
 
 	/**
 	 * Destroy
 	 */
-	obj.destroy = function() {
+	destroy: function() {
 		// unbind events
-		$container.unbind('.'+NS);
-		$items.unbind('.'+NS);
+		this._$container.unbind('.'+NS);
+		this._$items.unbind('.'+NS);
 
 		// clear timeout
-		obj.clearCallbackTimeout();
-
-		// delete this object
-		delete obj;
-	};
+		this.clearCallbackTimeout();
+	},
 
 	/**
 	 * Update First/Last indexes
 	 */
-	obj.updateIndexes = function() {
-		if (first !== null) {
-			first = obj.getItemIndex($first);
-			last = obj.getItemIndex($last);
+	updateIndexes: function() {
+		if (this._first !== null) {
+			this._first = this.getItemIndex(this._$first);
+			this._last = this.getItemIndex(this._$last);
 		}
-	};
+	},
 
 	// --------------------------------------------------------------------
 
 	/**
 	 * Clear Callback Timeout
 	 */
-	obj.clearCallbackTimeout = function() {
-		if (obj.settings.onSelectionChange) {
-			clearTimeout(callbackTimeout);
+	clearCallbackTimeout: function() {
+		if (this._settings.onSelectionChange) {
+			clearTimeout(this._callbackTimeout);
 		}
-	};
+	},
 
 	/**
 	 * Set Callback Timeout
 	 */
-	obj.setCallbackTimeout = function() {
-		if (obj.settings.onSelectionChange) {
+	setCallbackTimeout: function() {
+		if (this._settings.onSelectionChange) {
 			// clear the last one
-			obj.clearCallbackTimeout();
+			this.clearCallbackTimeout();
 
-			callbackTimeout = setTimeout(function() {
-				callbackTimeout = null;
-				obj.settings.onSelectionChange.call();
-			}, 300);
+			this._callbackTimeout = setTimeout($.proxy(function() {
+				this._callbackTimeout = null;
+				this._settings.onSelectionChange.call();
+			}, this), 300);
 		}
-	};
+	},
 
 	/**
 	 * Get Selected Items
 	 */
-	obj.getSelectedItems = function() {
-		return $items.filter('.'+selectedClass);
-	};
+	getSelectedItems: function() {
+		return this._$items.filter('.'+selectedClass);
+	}
 
-};
+});
 
 
 })(jQuery);

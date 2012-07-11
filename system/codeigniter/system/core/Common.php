@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -23,7 +23,7 @@
  * @package		CodeIgniter
  * @subpackage	codeigniter
  * @category	Common Functions
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/
  */
 
@@ -157,6 +157,7 @@
 		{
 			// Note: We use exit() rather then show_error() in order to avoid a
 			// self-referencing loop with the Excptions class
+			set_status_header(503);
 			exit('Unable to locate the specified class: '.$class.'.php');
 		}
 
@@ -211,6 +212,7 @@
 		// Fetch the config file
 		if ( ! file_exists(APPPATH.'config/config.php'))
 		{
+			set_status_header(503);
 			exit('The configuration file does not exist.');
 		}
 		else
@@ -221,6 +223,7 @@
 		// Does the $config array exist in the file?
 		if ( ! isset($config) OR ! is_array($config))
 		{
+			set_status_header(503);
 			exit('Your config file does not appear to be formatted correctly.');
 		}
 

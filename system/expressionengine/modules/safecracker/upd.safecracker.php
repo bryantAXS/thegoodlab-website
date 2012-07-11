@@ -4,9 +4,9 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team, 
+ * @author		EllisLab Dev Team, 
  * 		- Original Development by Barrett Newton -- http://barrettnewton.com
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -21,7 +21,7 @@
  * @package		ExpressionEngine
  * @subpackage	Modules
  * @category	Modules
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 
@@ -104,7 +104,7 @@ class Safecracker_upd
 		
 		if ($this->EE->config->item('allow_extensions') != 'y')
 		{
-			//$this->EE->output->show_user_error('general', $this->EE->lang->line('safecracker_extensions_disabled'));
+			//$this->EE->output->show_user_error('general', lang('safecracker_extensions_disabled'));
 		}
 		
 		//  Added to core with 2.1.5

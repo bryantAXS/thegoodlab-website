@@ -26,13 +26,13 @@ $.fn.ffMatrix = {
 /**
  * Matrix
  */
-Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
+Matrix = function(field, inputName, label, cols, rowInfo, minRows, maxRows) {
 
 	// keep a record of this object
 	Matrix.instances.push(this);
 
 	var obj = this;
-	obj.id = id;
+	obj.id = inputName;
 	obj.label = label;
 	obj.cols = cols;
 	obj.rows = [];
@@ -43,10 +43,10 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 	obj.dragging = false;
 
 	obj.dom = {};
-	obj.dom.$field = $('#'+obj.id);
-	obj.dom.$table = $('> table', obj.dom.$field);
-	obj.dom.$tbody = $('> tbody', obj.dom.$table);
-	obj.dom.$addBtn = $('> a.matrix-add', obj.dom.$field);
+	obj.dom.$field = $(field);
+	obj.dom.$table = $('> table:first', obj.dom.$field);
+	obj.dom.$tbody = $('> tbody:first', obj.dom.$table);
+	obj.dom.$addBtn = $('> a.matrix-add:first', obj.dom.$field);
 
 	// -------------------------------------------
 	//  Menu
@@ -77,7 +77,14 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 	//  Initialize the original rows
 	// -------------------------------------------
 
-	$('> tr', obj.dom.$tbody).each(function(index){
+	// get the "No rows yet" row if it's there
+	obj.dom.$norows = $('> tr.matrix-norows:first-child', obj.dom.$tbody);
+	obj.dom.$norows.children().click(function(){
+		obj.addRow();
+	});
+
+	// initialize any remaining rows
+	$('> tr', obj.dom.$tbody).not(obj.dom.$norows).each(function(index){
 		var row = new Matrix.Row(obj, index, rowInfo[index].id, rowInfo[index].cellSettings, this);
 		obj.rows.push(row);
 	});
@@ -109,6 +116,11 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 		// deny if we're already at the maximum rows
 		if (obj.maxRows && obj.totalRows == obj.maxRows) return;
 
+		// is this the first row?
+		if (obj.totalRows == 0) {
+			obj.dom.$norows.hide();
+		}
+
 		if (typeof index != 'number' || index > obj.totalRows) {
 			index = obj.totalRows;
 		}
@@ -131,7 +143,7 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 		          +   '</th>'
 		          + '</tr>');
 
-		for (colIndex in obj.cols) {
+		for (var colIndex = 0; colIndex < obj.cols.length; colIndex++) {
 			var col = obj.cols[colIndex],
 				colId = col.id,
 				colCount = parseInt(colIndex) + 1;
@@ -165,8 +177,6 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 			// was there a previous last row?
 			if (obj.totalRows > 1) {
 				obj.rows[obj.totalRows-1].dom.$tr.removeClass('matrix-last');
-			} else {
-				obj.dom.$table.removeClass('matrix-nodata');
 			}
 		} else {
 			$tr.insertBefore(obj.rows[index].dom.$tr);
@@ -227,7 +237,7 @@ Matrix = function(id, label, cols, rowInfo, minRows, maxRows) {
 
 		// are there no rows left?
 		if (!obj.totalRows) {
-			obj.dom.$table.addClass('matrix-nodata');
+			obj.dom.$norows.show();
 		} else {
 			// was this the first row?
 			if (index == 0) {
@@ -288,7 +298,7 @@ Matrix.Row = function(field, index, id, cellSettings, tr){
 	 * Callback
 	 */
 	obj.callback = function(callback, oldCallback) {
-		for (var i in obj.cells) {
+		for (var i = 0; i < obj.cells.length; i++) {
 			obj.cells[i].callback(callback, oldCallback);
 		}
 	};
@@ -478,7 +488,7 @@ Matrix.Row = function(field, index, id, cellSettings, tr){
 	var getRowAttributes = function(){
 		rowAttr = [];
 
-		for (i in obj.field.rows) {
+		for (var i = 0; i < obj.field.rows.length; i++) {
 			var row = obj.field.rows[i],
 				$tr = (row == obj && !! $placeholder ? $placeholder : row.dom.$tr);
 
@@ -515,7 +525,7 @@ Matrix.Row = function(field, index, id, cellSettings, tr){
 				               + '</tr>');
 
 				// hardcode the cell widths
-				for (var i in obj.cells) {
+				for (var i = 0; i < obj.cells.length; i++) {
 					obj.cells[i].saveWidth();
 				}
 
@@ -607,7 +617,7 @@ Matrix.Row = function(field, index, id, cellSettings, tr){
 				$helper.remove();
 
 				// clear the cell widths
-				for (var i in obj.cells) {
+				for (var i = 0; i < obj.cells.length; i++) {
 					obj.cells[i].clearWidth();
 				}
 

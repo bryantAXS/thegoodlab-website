@@ -27,13 +27,47 @@ Assets.Field = Assets.Class({
 		this.fieldName = fieldName;
 		this.settings = settings;
 
+		// only initialize if it's already visible
+		if (this.$field.height())
+			this._init();
+		else {
+			this.initialized = false;
+
+			// wait for its tab/label to be clicked on
+			var $tabDiv = this.$field.closest('.main_tab'),
+				tabId = 'menu_'+$tabDiv.attr('id');
+			this.$tab = $('#'+tabId+' a');
+			this.$label = this.$field.closest('.publish_field').find('label.hide_field span');
+
+			this.namespace = '.assets-'+this.$field.attr('id');
+			this.$tab.bind('click'+this.namespace, $.proxy(this, '_initIfVisible'))
+			this.$label.bind('click'+this.namespace, $.proxy(this, '_initIfVisible'))
+		}
+	},
+
+	/**
+	 * Initialize if visible
+	 */
+	_initIfVisible: function() {
+		setTimeout($.proxy(function() {
+			if (! this.initialized && this.$field.height()) {
+				// stop listening for tab/label clicks
+				this.$tab.unbind('click'+this.namespace);
+				this.$label.unbind('click'+this.namespace);
+
+				this._init();
+			}
+		}, this), 100);
+	},
+
+	/**
+	 * Initialize
+	 */
+	_init: function() {
+		this.initialized = true;
 		var $btns = this.$field.next();
 		this.$addBtn = $('.assets-add', $btns);
 		this.$removeBtn = $('.assets-remove', $btns);
-
-		this.$container = $('#mainContent');
-		this.originalContainerWidth = this.$container.width();
-		this.originalFieldWidth = this.$field.width();
 
 		this.filesView;
 		this.fileSelect;
@@ -56,17 +90,14 @@ Assets.Field = Assets.Class({
 			this._removeFiles($files);
 		}, this));
 
-		if (this.settings.view == 'list') {
-			// keep the field width in sync with its container width
-			$(window).resize($.proxy(function() {
-				var containerWidth = this.$container.width(),
-					fieldWidth = this.originalFieldWidth + (containerWidth - this.originalContainerWidth);
-
-				this.$field.width(fieldWidth);
-			}, this));
-		}
-
 		this._initFilesView();
+
+		if (this.settings.view == 'list') {
+			this._setListViewWidth();
+
+			// keep the field width in sync with its container width
+			$(window).resize($.proxy(this, '_setListViewWidth'));
+		}
 	},
 
 	/**
@@ -99,7 +130,7 @@ Assets.Field = Assets.Class({
 					}
 
 					this.filesView.getItems().each(function(i) {
-						data['files['+i+']'] = $(this).attr('data-file-path');
+						data['files['+i+']'] = $(this).attr('data-path');
 					});
 
 					this.fileSelect.destroy();
@@ -125,11 +156,27 @@ Assets.Field = Assets.Class({
 			multi: true,
 			onSelectionChange: $.proxy(function() {
 				if (this.settings.multi) {
+					var totalSelected = this.fileSelect.getTotalSelected();
+
 					// enable/disable buttons based on selection
-					if (this.fileSelect.getTotalSelected()) {
+					if (totalSelected) {
 						this.$removeBtn.removeClass('assets-disabled');
 					} else {
 						this.$removeBtn.addClass('assets-disabled');
+					}
+
+					if (totalSelected == 1) {
+						this._singleFileMenu.enable();
+
+						if (this.settings.multi) {
+							this._multiFileMenu.disable();
+						}
+					} else {
+						this._singleFileMenu.disable();
+
+						if (this.settings.multi) {
+							this._multiFileMenu.enable();
+						}
 					}
 				}
 			}, this)
@@ -178,12 +225,30 @@ Assets.Field = Assets.Class({
 		$files.dblclick($.proxy(this, '_showProperties'));
 
 		// add the context menus
-		new Assets.ContextMenu($files, [
+		this._singleFileMenu = new Assets.ContextMenu($files, [
 			{ label: Assets.lang.view_file, onClick: $.proxy(this, '_viewFile') },
 			{ label: Assets.lang.edit_file, onClick: $.proxy(this, '_showProperties') },
 			'-',
 			{ label: Assets.lang.remove_file, onClick: $.proxy(this, '_removeFiles') }
 		]);
+
+		if (this.settings.multi) {
+			this._multiFileMenu = new Assets.ContextMenu($files, [
+				{ label: Assets.lang.remove_files, onClick: $.proxy(this, '_removeFiles') }
+			]);
+
+			this._multiFileMenu.disable();
+		}
+	},
+
+	/**
+	 * Set List View Width
+	 */
+	_setListViewWidth: function() {
+		this.filesView.$container.hide();
+		var width = this.$field.width('auto').width();
+		this.filesView.$container.show();
+		this.$field.width(width);
 	},
 
 	/**
@@ -203,7 +268,7 @@ Assets.Field = Assets.Class({
 			$selectedFiles = this.filesView.getItems();
 
 		for (var i = 0; i < $selectedFiles.length; i++) {
-			var filePath = $selectedFiles[i].getAttribute('data-file-path');
+			var filePath = $selectedFiles[i].getAttribute('data-path');
 			selectedFiles.push(filePath);
 		};
 
@@ -216,7 +281,7 @@ Assets.Field = Assets.Class({
 	 * View File
 	 */
 	_viewFile: function(event) {
-		var filePath = event.currentTarget.getAttribute('data-file-path'),
+		var filePath = event.currentTarget.getAttribute('data-path'),
 			url = Assets.actions.view_file+'&file='+encodeURIComponent(filePath);
 
 		window.open(url);
@@ -233,7 +298,7 @@ Assets.Field = Assets.Class({
 	 * Remove Files 
 	 */
 	_removeFiles: function($files) {
-		if ($files.currentTarget) $files = $($files.currentTarget);
+		if ($files.currentTarget) $files = this.fileSelect.getSelectedItems();
 
 		this.fileSelect.removeItems($files);
 		this.filesSort.removeItems($files);

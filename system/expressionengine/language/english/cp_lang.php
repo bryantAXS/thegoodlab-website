@@ -14,6 +14,7 @@ $lang = array(
 'nav_content'	   				=> 'Content',
 'nav_publish'	   				=> 'Publish',
 'nav_edit'						=> 'Edit',
+'nav_edit_all'					=> 'All Channels',
 'nav_files'	   					=> 'Files',
 	'nav_file_manager'				=> 'File Manager',
 	'nav_batch_upload'				=> 'Batch Upload',
@@ -177,6 +178,8 @@ $lang = array(
 	'nav_view_throttle_log_short_desc'	=> 'View and clear the Throttle Log',
 	'nav_view_email_log'			=> 'Email Console Log',
 	'nav_view_email_log_short_desc'	=> 'View and clear the Email Log',
+	'nav_view_developer_log'		=> 'Developer Log',
+	'nav_view_developer_log_short_desc'	=> 'View and manage the Developer Log',
 
 'nav_help'			   			=> 'Help',
 'nav_overview'					=> 'Overview',
@@ -188,7 +191,7 @@ $lang = array(
 //----------------------------
 
 'session_expiring' =>
-'Your Session has expired.  Please log back in to avoid data loss',
+'Your session has expired. Please log back in to avoid data loss.',
 
 'loading' =>
 'Loading',
@@ -260,7 +263,7 @@ $lang = array(
 '%x SQL queries used',
 
 'build' =>
-'Build:',
+'Build Date:',
 
 'forgot_password' =>
 'Forgot your password?',
@@ -278,7 +281,7 @@ $lang = array(
 'BE CAREFUL!',
 
 'action_can_not_be_undone' =>
-'THIS ACTION CAN NOT BE UNDONE',
+'THIS ACTION CANNOT BE UNDONE',
 
 'captcha_explanation' =>
 'A CAPTCHA is an image containing a security code that users have to submit.  Please consult the user guide for more info.',
@@ -335,7 +338,7 @@ $lang = array(
 'hide sidebar',
 
 'reveal_sidebar' =>
-'reveal sidebar',
+'show sidebar',
 
 //----------------------------
 // Buttons
@@ -431,6 +434,8 @@ $lang = array(
 'status'						=> 'Status',
 'select_all'					=> 'Select All',
 
+'name'							=> 'Name',
+
 //----------------------------
 // Sites and Channels
 //----------------------------
@@ -479,7 +484,6 @@ $lang = array(
 'ee_insider'					=> 'EE Insider',
 'devot_ee'						=> 'Devot-EE',
 'ee_podcast'					=> 'EE Podcast',
-
 
 ''=>''
 );

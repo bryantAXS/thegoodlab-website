@@ -12,7 +12,7 @@ Matrix.bind('assets', 'display', function(cell){
 
 	var fieldName = cell.field.id+'['+cell.row.id+']['+cell.col.id+']';
 
-	new Assets.Field($field, fieldName, Assets.Field.matrixConfs[cell.col.id]);
+	cell.assetsField = new Assets.Field($field, fieldName, Assets.Field.matrixConfs[cell.col.id]);
 });
 
 

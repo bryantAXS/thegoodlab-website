@@ -3,7 +3,7 @@
 if (! defined('ASSETS_NAME'))
 {
 	define('ASSETS_NAME', 'Assets');
-	define('ASSETS_VER',  '1.0.2');
+	define('ASSETS_VER',  '1.2');
 	define('ASSETS_DESC', 'Heavy duty asset management');
 	define('ASSETS_DOCS', 'http://pixelandtonic.com/assets/docs');
 }

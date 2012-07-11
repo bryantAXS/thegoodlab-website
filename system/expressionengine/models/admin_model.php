@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Model
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Admin_model extends CI_Model {
@@ -69,7 +69,7 @@ class Admin_model extends CI_Model {
 				'db_debug'					=> array('r', array('y' => 'yes', 'n' => 'no')),
 				'pconnect'					=> array('r', array('y' => 'yes', 'n' => 'no')),
 				// 'cache_on'					=> array('r', array('y' => 'yes', 'n' => 'no')),
-				'enable_db_caching'			=> array('r', array('y' => 'yes', 'n' => 'no')),
+				// 'enable_db_caching'			=> array('r', array('y' => 'yes', 'n' => 'no')),
 			),
 											
 			'output_cfg'		=>	array(

@@ -9,7 +9,7 @@
 
 		<div id="add_member">
 		<p>
-			<?=lang('Member Screen Name', 'name')?>
+			<?=lang('member_usernames', 'name')?>
 			<?=form_input(array('id'=>'name','name'=>'name','class'=>'field','value'=>'','maxlength'=>50))?>
 		</p>
 		<p class="submit">
@@ -20,7 +20,6 @@
 		<br class="clear_left" />
 
 		<?php
-			$this->table->set_template($cp_table_template);
 			$this->table->set_heading(
 				lang('mbr_screen_name'), 
 				array('style'=>'width:2%','data'=>form_checkbox('select_all', 'true', FALSE, 'class="toggle_all"'))

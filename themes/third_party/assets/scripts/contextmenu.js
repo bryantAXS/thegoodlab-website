@@ -22,9 +22,14 @@ Assets.ContextMenu = Assets.Class({
 		this.$target = $(target);
 		this.options = options;
 
+		Assets.ContextMenu.counter++;
+		this.NS = 'assets-contextmenu'+Assets.ContextMenu.counter;
+
 		this.showing = false;
 
-		this.$target.bind('contextmenu mousedown', $.proxy(this, '_showMenu'));
+		this.$target.unbind('.'+this.NS);
+
+		this.enable();
 	},
 
 	/**
@@ -87,20 +92,36 @@ Assets.ContextMenu = Assets.Class({
 		this.showing = true;
 
 		setTimeout($.proxy(function() {
-			$(document).bind('mousedown.assets-contextmenu', $.proxy(this, '_hideMenu'));
-		}, this));
+			$(document).bind('mousedown.'+this.NS, $.proxy(this, '_hideMenu'));
+		}, this), 0);
 	},
 
 	/**
 	 * Hide Menu
 	 */
 	_hideMenu: function() {
-		$(document).unbind('.assets-contextmenu');
+		$(document).unbind('.'+this.NS);
 		this.$menu.hide();
 		this.showing = false;
+	},
+
+	/**
+	 * Enable
+	 */
+	enable: function() {
+		this.$target.bind('contextmenu.'+this.NS+' mousedown.'+this.NS, $.proxy(this, '_showMenu'));
+	},
+
+	/**
+	 * Disable
+	 */
+	disable: function() {
+		this.$target.unbind('.'+this.NS);
 	}
 
 });
+
+Assets.ContextMenu.counter = 0;
 
 
 })(jQuery);

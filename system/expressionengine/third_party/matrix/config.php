@@ -3,7 +3,7 @@
 if (! defined('MATRIX_VER'))
 {
 	define('MATRIX_NAME', 'Matrix');
-	define('MATRIX_VER',  '2.2.2.1');
+	define('MATRIX_VER',  '2.4.1');
 }
 
 $config['name']    = MATRIX_NAME;

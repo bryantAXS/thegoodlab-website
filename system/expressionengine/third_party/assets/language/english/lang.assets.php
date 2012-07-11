@@ -1,6 +1,7 @@
 <?php
 
 
+// load dependencies
 require_once PATH_THIRD.'assets/config.php';
 
 
@@ -36,6 +37,7 @@ $lang = array(
 'folder' => 'Folder',
 
 'upload_a_file' => 'Upload a file',
+'upload_status' => '{count} of {total} files uploaded',
 
 'showing' => 'Showing',
 'of' => 'of',
@@ -49,8 +51,9 @@ $lang = array(
 'view_file' => 'View file',
 'edit_file' => 'Edit file',
 
-'confirm_delete_folder' => "Are you sure you want to delete the folder\n“{folder}” and all its contents?",
-'confirm_delete_file' => "Are you sure you want to delete the file \n“{file}”?",
+'confirm_delete_folder' => 'Are you sure you want to delete the folder “{folder}” and all its contents?',
+'confirm_delete_file' => 'Are you sure you want to delete the file “{file}”?',
+'confirm_delete_files' => 'Are you sure you want to delete the {num} selected files?',
 
 'error_updating_table' => 'There was an error updating your exp_assets table.',
 'error_moving_folder' => 'There was an error moving your folder',
@@ -61,11 +64,20 @@ $lang = array(
 'error_invalid_file_path' => 'That wasn’t a valid file path',
 'error_deleting_folder' => 'There was an error deleting your folder',
 'error_deleting_file' => 'There was an error deleting your file',
+'error_deleting_files' => 'There was an error deleting your files:',
 'error_folder_doesnt_exist' => 'That folder doesn’t exist',
 'error_file_doesnt_exist' => 'That file doesn’t exist',
 'error_moving_file' => 'There was an error moving your file',
 'notice_same_folder_name' => 'The folder name hasn’t changed',
 'notice_same_file_name' => 'The file name hasn’t changed',
+
+'error_filedir_not_writable' => 'Your upload directory isn’t writable',
+'error_no_files' => 'No files were uploaded',
+'error_empty_file' => 'The uploaded file was empty',
+'error_file_too_large' => 'Your upload directory only accepts files under {max_size}',
+'error_images_only' => 'Your upload directory only accepts images',
+'error_filetype_not_allowed' => 'This file type is disallowed by your EE configuration.',
+'error_couldnt_save' => 'Your file could not be saved. Either the upload was cancelled, or there was a server error.',
 
 // -------------------------------------------
 //  Properties

@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -21,7 +21,7 @@
  * @package		CodeIgniter
  * @subpackage	Libraries
  * @category	Security
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/libraries/security.html
  */
 class CI_Security {
@@ -34,23 +34,25 @@ class CI_Security {
 
 	/* never allowed, string replacement */
 	protected $_never_allowed_str = array(
-					'document.cookie'	=> '[removed]',
-					'document.write'	=> '[removed]',
-					'.parentNode'		=> '[removed]',
-					'.innerHTML'		=> '[removed]',
-					'window.location'	=> '[removed]',
-					'-moz-binding'		=> '[removed]',
-					'<!--'				=> '&lt;!--',
-					'-->'				=> '--&gt;',
-					'<![CDATA['			=> '&lt;![CDATA['
+		'document.cookie'	=> '[removed]',
+		'document.write'	=> '[removed]',
+		'.parentNode'		=> '[removed]',
+		'.innerHTML'		=> '[removed]',
+		'window.location'	=> '[removed]',
+		'-moz-binding'		=> '[removed]',
+		'<!--'				=> '&lt;!--',
+		'-->'				=> '--&gt;',
+		'<![CDATA['			=> '&lt;![CDATA['
 	);
 
 	/* never allowed, regex replacement */
 	protected $_never_allowed_regex = array(
-					"javascript\s*:"			=> '[removed]',
-					"expression\s*(\(|&\#40;)"	=> '[removed]', // CSS and IE
-					"vbscript\s*:"				=> '[removed]', // IE, surprise!
-					"Redirect\s+302"			=> '[removed]'
+		"javascript\s*:"				=> '[removed]',
+		"expression\s*(\(|&\#40;)"		=> '[removed]', // CSS and IE
+		"vbscript\s*:"					=> '[removed]', // IE, surprise!
+		"Redirect\s+302"				=> '[removed]',
+		"([\"'])?data\s*:[^\\1]*?base64[^\\1]*?,[^\\1]*?\\1?"
+			=> '[removed]'
 	);
 	
 	/**
@@ -312,7 +314,7 @@ class CI_Security {
 		 * These words are compacted back to their correct state.
 		 */
 		$words = array(
-				'javascript', 'expression', 'vbscript', 'script', 
+				'javascript', 'expression', 'vbscript', 'script', 'base64',
 				'applet', 'alert', 'document', 'write', 'cookie', 'window'
 			);
 			
@@ -580,38 +582,46 @@ class CI_Security {
 	protected function _remove_evil_attributes($str, $is_image)
 	{
 		// All javascript event handlers (e.g. onload, onclick, onmouseover), style, and xmlns
-		$evil_attributes = array('on\w*', 'style', 'xmlns');
+		$evil_attributes = array('on\w*', 'style', 'xmlns', 'formaction');
 
 		if ($is_image === TRUE)
 		{
 			/*
-			 * Adobe Photoshop puts XML metadata into JFIF images, 
+			 * Adobe Photoshop puts XML metadata into JFIF images,
 			 * including namespacing, so we have to allow this for images.
 			 */
 			unset($evil_attributes[array_search('xmlns', $evil_attributes)]);
 		}
-		
+
 		do {
-			// find occurrences that look like illegal attribute strings (042 and 047 are octal quotes)
-			preg_match_all("/(".implode('|', $evil_attributes).")\s*=\s*(\042|\047)([^\\2]*?)\\2/is",  $str, $matches, PREG_SET_ORDER);
-
 			$count = 0;
+			$attribs = array();
 
-			if (count($matches) > 0)
+			// find occurrences of illegal attribute strings without quotes
+			preg_match_all('/('.implode('|', $evil_attributes).')\s*=\s*([^\s>]*)/is', $str, $matches, PREG_SET_ORDER);
+
+			foreach ($matches as $attr)
 			{
-				$attribs = array();
-			
-				foreach ($matches as $attr)
-				{
-					$attribs[] = preg_quote($attr[0]);
-				}
-				
-				// replace illegal attribute strings that are inside an html tag
-				$str = preg_replace("/<(\/?[^><]+?)([^A-Za-z\-])(".implode('|', $attribs).")([\s><])([><]*)/i", '<$1$2$4$5', $str, -1, $count);
+
+				$attribs[] = preg_quote($attr[0], '/');
 			}
-			
+
+			// find occurrences of illegal attribute strings with quotes (042 and 047 are octal quotes)
+			preg_match_all('/('.implode('|', $evil_attributes).')\s*=\s*(\042|\047)([^\\2]*?)(\\2)/is', $str, $matches, PREG_SET_ORDER);
+
+			foreach ($matches as $attr)
+			{
+				$attribs[] = preg_quote($attr[0], '/');
+			}
+
+			// replace illegal attribute strings that are inside an html tag
+			if (count($attribs) > 0)
+			{
+				$str = preg_replace("/<(\/?[^><]+?)([^A-Za-z<>\-])(.*?)(".implode('|', $attribs).")(.*?)([\s><])([><]*)/i", '<$1 $3$5$6$7', $str, -1, $count);
+			}
+
 		} while ($count);
-		
+
 		return $str;
 	}
 	
@@ -654,7 +664,7 @@ class CI_Security {
 	{
 		$attributes = $this->_filter_attributes(str_replace(array('<', '>'), '', $match[1]));
 		
-		return str_replace($match[1], preg_replace("#href=.*?(alert\(|alert&\#40;|javascript\:|livescript\:|mocha\:|charset\=|window\.|document\.|\.cookie|<script|<xss|base64\s*,)#si", "", $attributes), $match[0]);
+		return str_replace($match[1], preg_replace("#href=.*?(alert\(|alert&\#40;|javascript\:|livescript\:|mocha\:|charset\=|window\.|document\.|\.cookie|<script|<xss|data\s*:)#si", "", $attributes), $match[0]);
 	}
 
 	// --------------------------------------------------------------------
@@ -796,7 +806,7 @@ class CI_Security {
 
 		foreach ($this->_never_allowed_regex as $key => $val)
 		{
-			$str = preg_replace("#".$key."#i", $val, $str);
+			$str = preg_replace("#".$key."#si", $val, $str);
 		}
 		
 		return $str;

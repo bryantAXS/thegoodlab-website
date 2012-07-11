@@ -15,7 +15,7 @@
 		<div class="markItUpHeader">
 		<ul class="markItUp">
 			<?php foreach($predefined_buttons as $key=>$button):?>
-			<li class="<?=$button['classname']?>"><a href="<?=BASE.AMP."C=myaccount".AMP."M=html_buttons".AMP.'button='.$key?>"><?=$button['tag_name']?></a></li>
+			<li class="<?=$button['classname']?>"><a href="<?=BASE.AMP."C=myaccount".AMP."M=html_buttons".AMP.'button='.$key.AMP.'id='.$member_id?>"><?=$button['tag_name']?></a></li>
 			<?php endforeach;?>
 		</ul>
 		</div>
@@ -48,7 +48,6 @@
 		<h3><?=lang('edit').' '.lang('define_html_buttons')?></h3>
 
 		<?php 
-		$this->table->set_template($cp_table_template);
 		$this->table->set_heading(
 								'',
 								lang('tag_name'),

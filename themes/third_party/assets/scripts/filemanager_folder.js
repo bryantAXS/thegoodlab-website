@@ -9,6 +9,7 @@
 
 (function($) {
 
+
 /**
  * File Manager Folder
  */
@@ -28,14 +29,15 @@ Assets.FileManager.Folder = Assets.Class({
 		this.$a = $('> a', this.$li);
 		this.$toggle;
 		this.$ul;
-		this.id = this.$a.attr('data-id');
+
+		this.path = this.$a.attr('data-path');
 
 		this.visible = false;
 		this.visibleBefore = false;
 		this.expanded = false;
 		this.subfolders = [];
 
-		this.fm.folders[this.id] = this;
+		this.fm.folders[this.path] = this;
 
 		// -------------------------------------------
 		//  Make top-level folders visible
@@ -49,24 +51,21 @@ Assets.FileManager.Folder = Assets.Class({
 		//  Create the context menu
 		// -------------------------------------------
 
-		if (this.fm.options.mode == 'full') {
-			// create the context menu
-			var menuOptions = [];
+		var menuOptions = [];
 
-			if (this.depth > 1) {
-				menuOptions.push({ label: Assets.lang.rename, onClick: $.proxy(this, '_rename') });
-				menuOptions.push('-');
-			}
-
-			menuOptions.push({ label: Assets.lang.new_subfolder, onClick: $.proxy(this, '_createSubfolder') });
-
-			if (this.depth > 1) {
-				menuOptions.push('-');
-				menuOptions.push({ label: Assets.lang._delete, onClick: $.proxy(this, '_delete') });
-			}
-
-			new Assets.ContextMenu(this.$a, menuOptions);
+		if (this.fm.options.mode == 'full' && this.depth > 1) {
+			menuOptions.push({ label: Assets.lang.rename, onClick: $.proxy(this, '_rename') });
+			menuOptions.push('-');
 		}
+
+		menuOptions.push({ label: Assets.lang.new_subfolder, onClick: $.proxy(this, '_createSubfolder') });
+
+		if (this.fm.options.mode == 'full' && this.depth > 1) {
+			menuOptions.push('-');
+			menuOptions.push({ label: Assets.lang._delete, onClick: $.proxy(this, '_delete') });
+		}
+
+		new Assets.ContextMenu(this.$a, menuOptions);
 	},
 
 	// -------------------------------------------
@@ -126,22 +125,22 @@ Assets.FileManager.Folder = Assets.Class({
 
 			var pos = 0;
 		} else {
-			var ids = [ subfolder.id ];
+			var paths = [ subfolder.path ];
 
 			for (var i = 0; i < this.subfolders.length; i++) {
-				var id = this.subfolders[i].id;
-				ids.push(id);
+				var path = this.subfolders[i].path;
+				paths.push(path);
 			}
 
-			ids.sort(Assets.caseInsensativeSort);
-			var pos = ids.indexOf(subfolder.id);
+			paths.sort(Assets.caseInsensativeSort);
+			var pos = $.inArray(subfolder.path, paths);
 		}
 
 		if (pos == 0) {
 			subfolder.$li.prependTo(this.$ul);
 			this.$ul.prepend(subfolder.$li);
 		} else {
-			var prevSibling = this.fm.folders[ids[pos-1]];
+			var prevSibling = this.fm.folders[paths[pos-1]];
 			subfolder.$li.insertAfter(prevSibling.$li);
 		}
 
@@ -152,7 +151,7 @@ Assets.FileManager.Folder = Assets.Class({
 	 * Remove Subfolder
 	 */
 	removeSubfolder: function(subfolder) {
-		this.subfolders.splice(this.subfolders.indexOf(subfolder), 1);
+		this.subfolders.splice($.inArray(subfolder, this.subfolders), 1);
 
 		// was this the only subfolder?
 		if (! this.hasSubfolders()) {
@@ -220,7 +219,7 @@ Assets.FileManager.Folder = Assets.Class({
 
 			// check to see if there are any subfolders
 			var data = {
-				folder: this.id,
+				folder: this.path,
 				depth: this.depth
 			};
 
@@ -283,7 +282,7 @@ Assets.FileManager.Folder = Assets.Class({
 	 */
 	onDelete: function(topDeletedFolder) {
 		// remove the master record of this folder
-		delete this.fm.folders[this.id];
+		delete this.fm.folders[this.path];
 
 		if (topDeletedFolder) {
 			// remove the parent folder's record of this folder
@@ -296,8 +295,6 @@ Assets.FileManager.Folder = Assets.Class({
 		for (var i = 0; i < this.subfolders.length; i++) {
 			this.subfolders[i].onDelete();
 		}
-
-		delete this;
 	},
 
 	// -------------------------------------------
@@ -307,16 +304,16 @@ Assets.FileManager.Folder = Assets.Class({
 	/**
 	 * Move to...
 	 */
-	moveTo: function(newId) {
+	moveTo: function(newPath) {
 		// find the parent folder
-		var parts = newId.split(/[\}\/]/),
-			newParentId = parts[0]+'}';
+		var parts = Assets.getPathParts(newPath),
+			newParentPath = parts[0];
 
-		for (var i = 1; i < parts.length-2; i++) {
-			newParentId += parts[i]+'/';
+		for (var i = 1; i < parts.length-1; i++) {
+			newParentPath += parts[i]+'/';
 		}
 
-		var newParent = this.fm.folders[newParentId];
+		var newParent = this.fm.folders[newParentPath];
 
 		// is the old boss the same as the new boss?
 		if (newParent == this.parent) return;
@@ -336,27 +333,27 @@ Assets.FileManager.Folder = Assets.Class({
 
 		this.parent = newParent;
 
-		this.updateId(newId);
-		this.updateName(parts[parts.length-2]);
+		this.updatePath(newPath);
+		this.updateName(parts[parts.length-1]);
 	},
 
 	/**
-	 * Update ID
+	 * Update Path
 	 */
-	updateId: function(id) {
-		delete this.fm.folders[this.id];
+	updatePath: function(path) {
+		delete this.fm.folders[this.path];
 
-		this.id = id;
-		this.$a.attr('data-id', id);
-		this.fm.folders[this.id] = this;
+		this.path = path;
+		this.$a.attr('data-path', this.path);
+		this.fm.folders[this.path] = this;
 
 		// update subfolders
 		for (var i = 0; i < this.subfolders.length; i++) {
 			var subfolder = this.subfolders[i],
-			 	parts = subfolder.id.split(/[\}\/]/),
-				newId = id + parts[parts.length-2]+'/';
+			 	parts = Assets.getPathParts(subfolder.path),
+				newPath = this.path + parts[parts.length-1]+'/';
 
-			subfolder.updateId(newId);
+			subfolder.updatePath(newPath);
 		}
 	},
 
@@ -370,20 +367,20 @@ Assets.FileManager.Folder = Assets.Class({
 		//  Re-sort this folder among its siblings
 		// -------------------------------------------
 
-		var ids = [];
+		var paths = [];
 
 		for (var i = 0; i < this.parent.subfolders.length; i++) {
-			var id = this.parent.subfolders[i].id;
-			ids.push(id);
+			var path = this.parent.subfolders[i].path;
+			paths.push(path);
 		}
 
-		ids.sort(Assets.caseInsensativeSort);
-		var pos = ids.indexOf(this.id);
+		paths.sort(Assets.caseInsensativeSort);
+		var pos = $.inArray(this.path, paths);
 
 		if (pos == 0) {
 			this.$li.prependTo(this.parent.$ul);
 		} else {
-			var prevSibling = this.fm.folders[ids[pos-1]];
+			var prevSibling = this.fm.folders[paths[pos-1]];
 			this.$li.insertAfter(prevSibling.$li);
 		}
 	},
@@ -408,36 +405,36 @@ Assets.FileManager.Folder = Assets.Class({
 	 * Rename
 	 */
 	_rename: function() {
-		var parts = this.id.split(/[\}\/]/),
-			oldName = parts[parts.length-2],
+		var parts = Assets.getPathParts(this.path),
+			oldName = parts[parts.length-1],
 			newName = prompt(Assets.lang.rename, oldName);
 
-		if (newName !== null && newName != oldName) {
+		if (newName && newName != oldName) {
 			this.fm.$spinner.show();
 
 			// assemble the complete new folder ID
-			var newId = parts[0]+'}';
+			var newPath = parts[0];
 
-			for (var i = 1; i < parts.length-2; i++) {
-				newId += parts[i]+'/';
+			for (var i = 1; i < parts.length-1; i++) {
+				newPath += parts[i]+'/';
 			}
 
-			newId += newName+'/';
+			newPath += newName+'/';
 
 			var data = {
-				old_folder: this.id,
-				new_folder: newId
+				old_folder: this.path,
+				new_folder: newPath
 			};
 
 			$.post(Assets.actions.move_folder, data, $.proxy(function(data, textStatus) {
 				if (textStatus == 'success') {
 					if (data[0][1] == 'success') {
 						// get the new name (might have changed if there was a conflict)
-						var newId = data[0][2],
-							parts = newId.split(/[\}\/]/),
-							newName = parts[parts.length-2];
+						var newPath = data[0][2],
+							parts = Assets.getPathParts(newPath),
+							newName = parts[parts.length-1];
 
-						this.updateId(newId);
+						this.updatePath(newPath);
 						this.updateName(newName);
 					}
 				}
@@ -453,12 +450,12 @@ Assets.FileManager.Folder = Assets.Class({
 	_createSubfolder: function() {
 		var subfolderName = prompt(Assets.lang.new_subfolder);
 
-		if (subfolderName !== null && subfolderName) {
+		if (subfolderName) {
 			this.fm.$spinner.show();
 
-			var subfolderId = this.id+subfolderName+'/';
+			var subfolderPath = this.path+subfolderName+'/';
 
-			$.post(Assets.actions.create_folder, { folder: subfolderId }, $.proxy(function(data, textStatus) {
+			$.post(Assets.actions.create_folder, { folder: subfolderPath }, $.proxy(function(data, textStatus) {
 				if (textStatus == 'success') {
 					if (data.error) {
 						alert(data.error);
@@ -469,7 +466,7 @@ Assets.FileManager.Folder = Assets.Class({
 						var subfolderDepth = this.depth + 1,
 							padding = 20 + (18 * subfolderDepth),
 							$li = $('<li class="assets-fm-folder">'
-						          +   '<a data-id="'+subfolderId+'" style="padding-left: '+padding+'px;">'
+						          +   '<a data-path="'+subfolderPath+'" style="padding-left: '+padding+'px;">'
 						          +     '<span class="assets-fm-icon" />' + subfolderName
 						          +   '</a>'
 						          + '</li>'),
@@ -488,10 +485,12 @@ Assets.FileManager.Folder = Assets.Class({
 	 * Delete
 	 */
 	_delete: function() {
-		if (confirm(Assets.lang.confirm_delete_folder.replace('{folder}', this.id))) {
+		var parts = Assets.getPathParts(this.path);
+
+		if (confirm(Assets.parseTag(Assets.lang.confirm_delete_folder, 'folder', parts[parts.length-1]))) {
 			this.fm.$spinner.show();
 
-			$.post(Assets.actions.delete_folder, { folder: this.id }, $.proxy(function(data, textStatus) {
+			$.post(Assets.actions.delete_folder, { folder: this.path }, $.proxy(function(data, textStatus) {
 				if (textStatus == 'success') {
 					if (data.error) {
 						alert(data.error);

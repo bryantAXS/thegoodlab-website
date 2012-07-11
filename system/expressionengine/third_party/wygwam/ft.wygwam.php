@@ -18,10 +18,12 @@ class Wygwam_ft extends EE_Fieldtype {
 		'version' => WYGWAM_VER
 	);
 
+	var $has_array_data = TRUE;
+
 	/**
 	 * Fieldtype Constructor
 	 */
-	function Wygwam_ft()
+	function __construct()
 	{
 		parent::__construct();
 
@@ -254,7 +256,7 @@ class Wygwam_ft extends EE_Fieldtype {
 					foreach ($query->result_array() as $row)
 					{
 						$data = $row['data'];
-						$data = $this->_replace_file_tags($data);
+						$this->_replace_file_tags($data);
 
 						$convert = FALSE;
 
@@ -275,7 +277,7 @@ class Wygwam_ft extends EE_Fieldtype {
 						// Save the new field data
 						if ($convert)
 						{
-							$data = $this->_replace_file_urls($data);
+							$this->_replace_file_urls($data);
 
 							$this->EE->db->query($this->EE->db->update_string('exp_channel_data',
 								array(
@@ -340,6 +342,9 @@ class Wygwam_ft extends EE_Fieldtype {
 
 				foreach ($file_paths as $id => $url)
 				{
+					// ignore "/" URLs
+					if ($url == '/') continue;
+
 					$tags[] = LD.'filedir_'.$id.RD;
 					$urls[] = $url;
 				}
@@ -354,19 +359,19 @@ class Wygwam_ft extends EE_Fieldtype {
 	/**
 	 * Replace File Tags
 	 */
-	private function _replace_file_tags($data)
+	private function _replace_file_tags(&$data)
 	{
 		$tags = $this->_fetch_file_tags();
-		return str_replace($tags[0], $tags[1], $data);
+		$data = str_replace($tags[0], $tags[1], $data);
 	}
 
 	/**
 	 * Replace File Paths
 	 */
-	private function _replace_file_urls($data)
+	private function _replace_file_urls(&$data)
 	{
 		$tags = $this->_fetch_file_tags();
-		return str_replace($tags[1], $tags[0], $data);
+		$data = str_replace($tags[1], $tags[0], $data);
 	}
 
 	// --------------------------------------------------------------------
@@ -406,19 +411,22 @@ class Wygwam_ft extends EE_Fieldtype {
 	/**
 	 * Replace Page Tags
 	 */
-	private function _replace_page_tags($data)
+	private function _replace_page_tags(&$data)
 	{
-		$tags = $this->_fetch_page_tags();
-		return str_replace($tags[0], $tags[1], $data);
+		if (strpos($data, LD.'page_') !== FALSE)
+		{
+			$tags = $this->_fetch_page_tags();
+			$data = str_replace($tags[0], $tags[1], $data);
+		}
 	}
 
 	/**
 	 * Replace Page URLs
 	 */
-	private function _replace_page_urls($data)
+	private function _replace_page_urls(&$data)
 	{
 		$tags = $this->_fetch_page_tags(TRUE);
-		return str_replace($tags[1], $tags[0], $data);
+		$data = str_replace($tags[1], $tags[0], $data);
 	}
 
 	// --------------------------------------------------------------------
@@ -485,11 +493,11 @@ class Wygwam_ft extends EE_Fieldtype {
 
 		$user_group = $this->EE->session->userdata('group_id');
 		$upload_dir = isset($config['upload_dir']) ? $config['upload_dir'] : NULL;
-		$upload_prefs = $this->EE->tools_model->get_upload_preferences($user_group, $upload_dir);
+		$upload_prefs = $this->helper->get_upload_preferences($user_group, $upload_dir);
 
 		// before doing anything, make sure that the user has access to any upload directories
 		// (taking into account the upload directory setting)
-		if ($upload_prefs->num_rows())
+		if ($upload_prefs)
 		{
 			$file_browser = isset($this->settings['file_browser']) ? $this->settings['file_browser'] : 'ee';
 
@@ -499,8 +507,6 @@ class Wygwam_ft extends EE_Fieldtype {
 
 					// CKFinder can only pull files from a single upload directory, so make sure it's set
 					if (! $upload_dir) break;
-
-					$upload_prefs = $upload_prefs->row_array();
 
 					if (! isset($_SESSION)) @session_start();
 					if (! isset($_SESSION['wygwam_'.$config['upload_dir']])) $_SESSION['wygwam_'.$config['upload_dir']] = array();
@@ -615,6 +621,13 @@ class Wygwam_ft extends EE_Fieldtype {
 				}
 
 				$value = $this->EE->javascript->generate_json($value, TRUE);
+
+				// Firefox gets an "Unterminated string literal" error if this line gets too long,
+				// so let's put each new value on its own line
+				if ($setting == 'link_types')
+				{
+					$value = str_replace('","', "\",\n\t\t\t\"", $value);
+				}
 			}
 
 			$js .= ($js ? ','.NL : '')
@@ -639,14 +652,13 @@ class Wygwam_ft extends EE_Fieldtype {
 			$js = 'Wygwam.themeUrl = "'.$this->helper->theme_url().'";'
 			    . 'Wygwam.ee2plus = '.(version_compare(APP_VER, '2.2', '>=') ? 'true' : 'false').';';
 
-			// Save the upload directory URLs
-			$filedirs = $this->EE->tools_model->get_upload_preferences(1);
+			$filedirs = $this->helper->get_upload_preferences(1);
 
-			if ($filedirs->num_rows())
+			if ($filedirs)
 			{
-				foreach ($filedirs->result() as $filedir)
+				foreach ($filedirs as $filedir)
 				{
-					$filedir_urls[$filedir->id] = $filedir->url;
+					$filedir_urls[$filedir['id']] = $filedir['url'];
 				}
 
 				$js .= 'Wygwam.filedirUrls = '.$this->EE->javascript->generate_json($filedir_urls, TRUE).';';
@@ -671,11 +683,17 @@ class Wygwam_ft extends EE_Fieldtype {
 
 		$this->helper->insert_js('new Wygwam("'.$id.'", "'.$this->settings['config'].'", '.$defer.');');
 
+		// pass the data through form_prep() if this is SafeCracker
+		if (REQ == 'PAGE')
+		{
+			$data = form_prep($data, $this->field_name);
+		}
+
 		// convert file tags to URLs
-		$data = $this->_replace_file_tags($data);
+		$this->_replace_file_tags($data);
 
 		// convert site page tags to URLs
-		$data = $this->_replace_page_tags($data);
+		$this->_replace_page_tags($data);
 
 		return '<div class="wygwam"><textarea id="'.$id.'" name="'.$this->field_name.'" rows="10">'.$data.'</textarea></div>';
 	}
@@ -704,10 +722,10 @@ class Wygwam_ft extends EE_Fieldtype {
 		}
 
 		// convert file tags to URLs
-		$data = $this->_replace_file_tags($data);
+		$this->_replace_file_tags($data);
 
 		// convert site page tags to URLs
-		$data = $this->_replace_page_tags($data);
+		$this->_replace_page_tags($data);
 
 		return '<textarea name="'.$this->cell_name.'" rows="10">'.$data.'</textarea>';
 	}
@@ -717,6 +735,17 @@ class Wygwam_ft extends EE_Fieldtype {
 	 */
 	function display_var_field($data)
 	{
+		// Low Variables doesn't mix in the fieldtype's global settings,
+		// so we'll do it manually here
+		$this->settings = array_merge($this->settings, $this->helper->get_global_settings());
+
+		// for now, it's way too complicated to get EE's file browser
+		// loaded on non-Publish pages, so we'll fallback to CKFinder
+		if ($this->settings['file_browser'] == 'ee')
+		{
+			$this->settings['file_browser'] = 'ckfinder';
+		}
+
 		return $this->display_field($data);
 	}
 
@@ -780,10 +809,14 @@ class Wygwam_ft extends EE_Fieldtype {
 		$data = str_replace('&quot;', '"', $data);
 
 		// Convert file URLs to tags
-		$data = $this->_replace_file_urls($data);
+		$this->_replace_file_urls($data);
 
 		// Convert page URLs to tags
-		$data = $this->_replace_page_urls($data);
+		$this->_replace_page_urls($data);
+
+		// Preserve Read More comments
+		//  - For whatever reason, SafeCracker is converting HTML comment brackets into entities
+		$data = str_replace('&lt;!--read_more--&gt;', '<!--read_more-->', $data);
 
 		return $data;
 	}
@@ -811,11 +844,16 @@ class Wygwam_ft extends EE_Fieldtype {
 	 */
 	function pre_process($data)
 	{
-		$data = $this->_replace_page_tags($data);
+		$this->helper->entry_site_id = (isset($this->row['entry_site_id']) ? $this->row['entry_site_id'] : null);
+		$this->_replace_page_tags($data);
 
 		$this->EE->load->library('typography');
+
 		$tmp_encode_email = $this->EE->typography->encode_email;
 		$this->EE->typography->encode_email = FALSE;
+
+		$tmp_convert_curly = $this->EE->typography->convert_curly;
+		$this->EE->typography->convert_curly = FALSE;
 
 		$data = $this->EE->typography->parse_type($data, array(
 			'text_format'   => 'none',
@@ -825,6 +863,7 @@ class Wygwam_ft extends EE_Fieldtype {
 		));
 
 		$this->EE->typography->encode_email = $tmp_encode_email;
+		$this->EE->typography->convert_curly = $tmp_convert_curly;
 
 		// use normal quotes
 		$data = str_replace('&quot;', '"', $data);
@@ -835,10 +874,25 @@ class Wygwam_ft extends EE_Fieldtype {
 	/**
 	 * Replace Tag
 	 */
-	function replace_tag($data)
+	function replace_tag($data, $params = array(), $tagdata = FALSE)
 	{
-		// strip out the {read_more} tag
-		$data = str_replace('<!--read_more-->', '', $data);
+		// return images only?
+		if (isset($params['images_only']) && $params['images_only'] == 'yes')
+		{
+			return $this->_parse_images($data, $params, $tagdata);
+		}
+
+		// Text only?
+		if (isset($params['text_only']) && $params['text_only'] == 'yes')
+		{
+			// Strip out the HTML tags
+			$data = preg_replace('/<[^<]+?>/', '', $data);
+		}
+		else
+		{
+			// strip out the {read_more} tag
+			$data = str_replace('<!--read_more-->', '', $data);
+		}
 
 		return $data;
 	}
@@ -856,20 +910,20 @@ class Wygwam_ft extends EE_Fieldtype {
 	/**
 	 * Replace Excerpt Tag
 	 */
-	function replace_excerpt($data)
+	function replace_excerpt($data, $params)
 	{
 		if (($read_more_tag_pos = strpos($data, '<!--read_more-->')) !== FALSE)
 		{
 			$data = substr($data, 0, $read_more_tag_pos);
 		}
 
-		return $data;
+		return $this->replace_tag($data, $params);
 	}
 
 	/**
 	 * Replace Extended Tag
 	 */
-	function replace_extended($data)
+	function replace_extended($data, $params)
 	{
 		if (($read_more_tag_pos = strpos($data, '<!--read_more-->')) !== FALSE)
 		{
@@ -880,7 +934,122 @@ class Wygwam_ft extends EE_Fieldtype {
 			$data = '';
 		}
 
-		return $data;
+		return $this->replace_tag($data, $params);
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Parse Images
+	 */
+	private function _parse_images($data, $params, $tagdata)
+	{
+		$images = array();
+
+		if ($tagdata)
+		{
+			$p = !empty($params['var_prefix']) ? rtrim($params['var_prefix'], ':').':' : '';
+		}
+
+		// find all the image tags
+		preg_match_all('/<img(.*)>/Ums', $data, $img_matches, PREG_SET_ORDER);
+
+		foreach ($img_matches as $i => $img_match)
+		{
+			if ($tagdata)
+			{
+				$img = array();
+
+				// find all the attributes
+				preg_match_all('/\s([\w-]+)=([\'"])([^\2]*?)\2/', $img_match[1], $attr_matches, PREG_SET_ORDER);
+
+				foreach ($attr_matches as $attr_match)
+				{
+					$img[$p.$attr_match[1]] = $attr_match[3];
+				}
+
+				// ignore image if it doesn't have a source
+				if (empty($img[$p.'src'])) continue;
+
+				// find all the styles
+				if (! empty($img[$p.'style']))
+				{
+					$styles = array_filter(explode(';', trim($img[$p.'style'])));
+
+					foreach ($styles as $style)
+					{
+						$style = explode(':', $style, 2);
+						$img[$p.'style:'.trim($style[0])] = trim($style[1]);
+					}
+				}
+
+				// use the width and height styles if they're set
+				if (! empty($img[$p.'style:width']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p.'style:width'], $width_match))
+				{
+					$img[$p.'width'] = $width_match[1];
+					if ($width_match[2] == '%') $img[$p.'width'] .= '%';
+				}
+
+				if (! empty($img[$p.'style:height']) && preg_match('/(\d+?\.?\d+)(px|%)/', $img[$p.'style:height'], $height_match))
+				{
+					$img[$p.'height'] = $height_match[1];
+					if ($height_match[2] == '%') $img[$p.'height'] .= '%';
+				}
+
+				$images[] = $img;
+			}
+			else
+			{
+				$images[] = $img_match[0];
+			}
+		}
+
+		// ignore if there were no valid images
+		if (! $images) return;
+
+		if ($tagdata)
+		{
+			// get the absolute number of files before we run the filters
+			$constants[$p.'absolute_total_images'] = count($images);
+		}
+
+		// offset and limit params
+		if (isset($params['offset']) || isset($params['limit']))
+		{
+			$offset = isset($params['offset']) ? (int) $params['offset'] : 0;
+			$limit  = isset($params['limit'])  ? (int) $params['limit']  : count($images);
+
+			$images = array_splice($images, $offset, $limit);
+		}
+
+		// ignore if there are no post-filter images
+		if (! $images) return;
+
+		if ($tagdata)
+		{
+			// get the filtered number of files
+			$constants[$p.'total_images'] = count($images);
+
+			// parse {total_images} and {absolute_total_images} first, since they'll never change
+			$tagdata = $this->EE->TMPL->parse_variables_row($tagdata, $constants);
+
+			// now parse all
+			$r = $this->EE->TMPL->parse_variables($tagdata, $images);
+		}
+		else
+		{
+			$delimiter = isset($params['delimiter']) ? $params['delimiter'] : '<br />';
+			$r = implode($delimiter, $images);
+		}
+
+		// backspace param
+		if (!empty($params['backspace']))
+		{
+			$chop = strlen($r) - $params['backspace'];
+			$r = substr($r, 0, $chop);
+		}
+
+		return $r;
 	}
 
 	// --------------------------------------------------------------------

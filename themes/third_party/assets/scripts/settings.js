@@ -7,11 +7,12 @@ if (typeof window.Assets == 'undefined') window.Assets = {};
 
 Assets.onAllFiledirsChange = function(all) {
 	var $all = $(all),
+		allChecked = !!$all.attr('checked'),
 		$others = $('input', $all.parent().parent().next());
 
 	$others.attr({
-		checked:  true,
-		disabled: !!$all.attr('checked')
+		checked:  allChecked,
+		disabled: allChecked
 	});
 };
 

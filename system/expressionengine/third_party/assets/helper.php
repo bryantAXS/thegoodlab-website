@@ -15,7 +15,10 @@ class Assets_helper {
 	 */
 	function __construct()
 	{
-		// Make a local reference to the ExpressionEngine super object
+		// -------------------------------------------
+		//  Make a local reference to the EE super object
+		// -------------------------------------------
+
 		$this->EE =& get_instance();
 
 		// -------------------------------------------
@@ -39,9 +42,8 @@ class Assets_helper {
 	{
 		if (! isset($this->cache['theme_url']))
 		{
-			$theme_folder_url = $this->EE->config->item('theme_folder_url');
-			if (substr($theme_folder_url, -1) != '/') $theme_folder_url .= '/';
-			$this->cache['theme_url'] = $theme_folder_url.'third_party/assets/';
+			$theme_folder_url = defined('URL_THIRD_THEMES') ? URL_THIRD_THEMES : $this->EE->config->slash_item('theme_folder_url').'third_party/';
+			$this->cache['theme_url'] = $theme_folder_url.'assets/';
 		}
 
 		return $this->cache['theme_url'];
@@ -69,25 +71,6 @@ class Assets_helper {
 		}
 	}
 
-	/**
-	 * Include Sheet Resources
-	 */
-	function include_sheet_resources()
-	{
-		if (! isset($this->cache['included_sheet_resources']))
-		{
-			$this->EE->lang->loadfile('assets');
-
-			$this->include_css('shared.css', 'field.css', 'filemanager.css');
-			$this->include_js('filemanager.js', 'filemanager_folder.js', 'field.js', 'select.js', 'drag.js', 'thumbview.js', 'listview.js', 'properties.js', 'fileuploader.js', 'contextmenu.js');
-
-			$this->insert_actions_js();
-			$this->insert_lang_js('upload_a_file', 'showing', 'of', 'file', 'files', 'selected', 'cancel', 'save_changes', 'new_subfolder', 'rename', '_delete', 'view_file', 'edit_file', 'remove_file');
-
-			$this->cache['included_sheet_resources'] = TRUE;
-		}
-	}
-
 	// --------------------------------------------------------------------
 
 	/**
@@ -109,15 +92,60 @@ class Assets_helper {
 	// --------------------------------------------------------------------
 
 	/**
+	 * Include Sheet Resources
+	 */
+	function include_sheet_resources()
+	{
+		if (! isset($this->cache['included_sheet_resources']))
+		{
+			$this->EE->lang->loadfile('assets');
+
+			$this->include_css('shared.css', 'field.css', 'filemanager.css');
+			$this->include_js('filemanager.js', 'filemanager_folder.js', 'field.js', 'select.js', 'drag.js', 'thumbview.js', 'listview.js', 'properties.js', 'fileuploader.js', 'contextmenu.js');
+
+			$this->insert_actions_js();
+			$this->insert_lang_js('upload_a_file', 'upload_status', 'showing', 'of', 'file', 'files', 'selected', 'cancel', 'save_changes', 'new_subfolder', 'rename', '_delete', 'view_file', 'edit_file', 'remove_file', 'remove_files');
+
+			$this->insert_js('Assets.siteId = '.$this->EE->config->item('site_id'));
+
+			$this->cache['included_sheet_resources'] = TRUE;
+		}
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Add Package Path
+	 */
+	function add_package_path()
+	{
+		$this->EE->load->add_package_path(PATH_THIRD.'assets/');
+
+		// manually add the view path if this is less than EE 2.1.5
+		if (version_compare(APP_VER, '2.1.5', '<'))
+		{
+			$this->EE->load->_ci_view_path = PATH_THIRD.'assets/views/';
+		}
+	}
+
+	/**
 	 * Site URL
 	 */
 	private function _site_url()
 	{
 		if (! isset($this->cache['site_url']))
 		{
-			// get the site URL, allowing for an override in config.php
-			$this->cache['site_url'] = $this->EE->config->item('assets_site_url');
-			if (! $this->cache['site_url']) $this->cache['site_url'] = $this->EE->functions->fetch_site_index(0, 0);
+			if (! ($site_url = $this->EE->config->item('assets_site_url')))
+			{
+				$site_url = $this->EE->functions->fetch_site_index(0, 0);
+
+				if (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] == 'on')
+				{
+					$site_url = str_replace('http://', 'https://', $site_url);
+				}
+			}
+
+			$this->cache['site_url'] = $site_url;
 		}
 
 		return $this->cache['site_url'];
@@ -167,82 +195,209 @@ class Assets_helper {
 	// --------------------------------------------------------------------
 
 	/**
-	 * Get File Directory Preferences
+	 * Get File
 	 */
-	function get_filedir_prefs($filedir = 'all')
+	function get_file($file_path)
 	{
-		if (! isset($this->cache['filedir_prefs'][$filedir]))
+		if (! isset($this->cache['files'][$file_path]))
 		{
-			// enforce access permissions for non-Super Admins, except on front-end pages
-			if (REQ != 'PAGE')
+			if (! class_exists('Assets_file'))
 			{
-				$group = $this->EE->session->userdata('group_id');
+				require_once PATH_THIRD.'assets/models/file.php';
+			}
 
-				if ($group != 1)
+			$this->cache['files'][$file_path] = new Assets_file($file_path);
+		}
+
+		return $this->cache['files'][$file_path];
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Get Denied Upload Directories
+	 */
+	function get_denied_filedirs()
+	{
+		if (! isset($this->cache['denied_filedirs']))
+		{
+			$denied = array();
+
+			$group = $this->EE->session->userdata('group_id');
+
+			if ($group != 1)
+			{
+				$no_access = $this->EE->db->select('upload_id')
+				                          ->where('member_group', $group)
+				                          ->get('upload_no_access');
+
+				if ($no_access->num_rows() > 0)
 				{
-					$no_access = $this->EE->db->select('upload_id')
-					                          ->where('member_group', $group)
-					                          ->get('upload_no_access');
-
-					if ($no_access->num_rows() > 0)
+					foreach ($no_access->result() as $result)
 					{
-						$denied = array();
-
-						foreach ($no_access->result() as $result)
-						{
-							$denied[] = $result->upload_id;
-						}
-
-						$this->EE->db->where_not_in('id', $denied);
+						$denied[] = $result->upload_id;
 					}
 				}
 			}
 
-			// limit to a single upload directory?
-			if ($filedir && $filedir !== 'all')
+			$this->cache['denied_filedirs'] = $denied;
+		}
+
+		return $this->cache['denied_filedirs'];
+	}
+
+	/**
+	 * Get File Directory Preferences
+	 */
+	function get_filedir_prefs($filedirs = 'all', $site_id = NULL)
+	{
+		// -------------------------------------------
+		//  Figure out what we already have cached
+		// -------------------------------------------
+
+		if ($filedirs == 'all')
+		{
+			$run_query = ! isset($this->cache['filedir_prefs']['all']);
+		}
+		else
+		{
+			if (($return_single = ! is_array($filedirs)))
 			{
-				$this->EE->db->where('id', $filedir);
+				$filedirs = array($filedirs);
+			}
+
+			// figure out which of these we don't already have cached
+			foreach ($filedirs as $filedir)
+			{
+				if (! isset($this->cache['filedir_prefs'][$filedir]))
+				{
+					$not_cached[] = $filedir;
+				}
+			}
+
+			$run_query = isset($not_cached);
+		}
+
+		// -------------------------------------------
+		//  Query and cache the remaining filedirs
+		// -------------------------------------------
+
+		if ($run_query)
+		{
+			// enforce access permissions for non-Super Admins, except on front-end pages
+			if (REQ != 'PAGE' && ($denied = $this->get_denied_filedirs()))
+			{
+				$this->EE->db->where_not_in('id', $denied);
+			}
+
+			if ($filedirs != 'all')
+			{
+				// limit to specific upload directories
+				$this->EE->db->where_in('id', $filedirs);
 			}
 			else
 			{
+				// limit to upload directories from the current site, except on front-end pages
+				if (REQ != 'PAGE')
+				{
+					if (! $site_id)
+					{
+						$site_id = $this->EE->config->item('site_id');
+					}
+
+					$this->EE->db->where('site_id', $site_id);
+				}
+
 				// order by name
 				$upload_prefs = $this->EE->db->order_by('name');
 			}
 
-			// limit to upload directories from the current site, except on front-end pages
-			if (REQ != 'PAGE')
+			// run the query
+			$query = $this->EE->db->get('upload_prefs')->result();
+
+			// grab the upload pref overrides once here
+			$overrides = $this->EE->config->item('upload_preferences');
+
+			// cache the results
+			foreach ($query as $filedir)
 			{
-				$this->EE->db->where('site_id', $this->EE->config->item('site_id'));
+				// is this filedir's prefs overridden in config.php?
+				if ($overrides && isset($overrides[$filedir->id]))
+				{
+					foreach ($overrides[$filedir->id] as $pref => $value)
+					{
+						$filedir->$pref = $value;
+					}
+				}
+
+				if (REQ != 'CP')
+				{
+					// relative paths are always relative to the system directory,
+					// but Assets' AJAX functions are loaded via the site URL
+					// so attempt to turn relative paths into absolute paths
+					if (! preg_match('/^(\/|\\\|[a-zA-Z]+:)/', $filedir->server_path))
+					{
+						// if the CP is masked, there's no way for us to determine the path to the CP's entry point
+						// so people with relative upload directory paths _and_ masked CPs will have to point us in the right direction
+						if ($cp_path = $this->EE->config->item('assets_cp_path'))
+						{
+							$filedir->server_path = rtrim($cp_path, '/').'/'.$filedir->server_path;
+						}
+						else
+						{
+							$filedir->server_path = SYSDIR.'/'.$filedir->server_path;
+						}
+					}
+				}
+
+				$this->cache['filedir_prefs'][$filedir->id] = $filedir;
 			}
 
-			$this->cache['filedir_prefs'][$filedir] = $this->cache['filedir_prefs'][$filedir] = $this->EE->db->get('upload_prefs');
-
-			if ($filedir == 'all')
+			if ($filedirs == 'all')
 			{
-				// fill up the cache
-				foreach ($this->cache['filedir_prefs'][$filedir]->result() as $filedir_prefs)
-				{
-					$this->cache['filedir_prefs'][$filedir_prefs->id] = $this->cache['filedir_prefs'][$filedir];
-				}
+				$this->cache['filedir_prefs']['all'] = $query;
 			}
 		}
 
-		return $this->cache['filedir_prefs'][$filedir];
+		// -------------------------------------------
+		//  Sort and return the upload prefs
+		// -------------------------------------------
+
+		if ($filedirs == 'all')
+		{
+			return $this->cache['filedir_prefs']['all'];
+		}
+
+		if ($return_single)
+		{
+			return isset($this->cache['filedir_prefs'][$filedirs[0]]) ? $this->cache['filedir_prefs'][$filedirs[0]] : FALSE;
+		}
+
+		$r = array();
+
+		foreach ($filedirs as $filedir)
+		{
+			if (isset($this->cache['filedir_prefs'][$filedir]))
+			{
+				$r[] = $this->cache['filedir_prefs'][$filedir];
+				$sort_names[] = strtolower($this->cache['filedir_prefs'][$filedir]->name);
+			}
+		}
+
+		if ($r)
+		{
+			array_multisort($sort_names, SORT_ASC, SORT_STRING, $r);
+		}
+
+		return $r;
 	}
 
 	/**
-	 * Get Filedir Server Path
+	 * Is a Folder?
 	 */
-	function get_server_path($filedir)
+	function is_folder($path)
 	{
-		$server_path = $filedir->server_path;
-
-		if (REQ != 'CP')
-		{
-			if (! preg_match('/^(\/|\\\|[a-zA-Z]+:)/', $server_path)) $server_path = SYSDIR.'/'.$server_path;
-		}
-
-		return $server_path;
+		return (file_exists($path) && is_dir($path));
 	}
 
 	/**
@@ -250,24 +405,21 @@ class Assets_helper {
 	 */
 	function get_subfolders($folder)
 	{
-		// make sure the parent folder has a trailing slash
-		if (substr($folder, -1) != '/') $folder .= '/';
-
 		$subfolders = array();
 
-		if (is_dir($folder) && ($handle = opendir($folder)))
+		// make sure the folder path has a trailing slash
+		$folder = rtrim($folder, '/') . '/';
+
+		if ($this->is_folder($folder) && ($files = scandir($folder)))
 		{
-			while (($file = readdir($handle)) !== FALSE)
+			foreach ($files as $file)
 			{
-				// ignore relative dirs, hidden files, and the _thumb(s) folder
-				if (substr($file, 0, 1) == '.' || $file == '_thumb' || $file == '_thumbs') continue;
-
-				$path = $folder . $file;
-
-				if (is_dir($path)) $subfolders[] = array($file, $path.'/');
+				// only include actual folders, except those that begin with "_"
+				if (is_dir($folder.$file) && strncmp($file, '.', 1) != 0 && strncmp($file, '_', 1) != 0)
+				{
+					$subfolders[] = $file;
+				}
 			}
-
-			closedir($handle);
 		}
 
 		return $subfolders;
@@ -282,12 +434,12 @@ class Assets_helper {
 
 		$filedirs = $this->get_filedir_prefs();
 
-		foreach ($filedirs->result() as $filedir)
+		foreach ($filedirs as $filedir)
 		{
 			$tag_path = "{filedir_{$filedir->id}}";
 			$folders[] = $tag_path;
 
-			$this->get_all_subfolders($folders, $tag_path, $this->get_server_path($filedir));
+			$this->get_all_subfolders($folders, $tag_path, $filedir->server_path);
 		}
 
 		return $folders;
@@ -296,96 +448,89 @@ class Assets_helper {
 	/**
 	 * Get All Subfolders
 	 */
-	function get_all_subfolders(&$folders, $tag_path, $real_path)
+	function get_all_subfolders(&$folders, $tag_path, $server_path)
 	{
-		$subfolders = $this->get_subfolders($real_path);
+		$subfolders = $this->get_subfolders($server_path);
 
-		foreach ($subfolders as $folder)
+		foreach ($subfolders as $subfolder)
 		{
-			$folder_tag_path = $tag_path.$folder[0].'/';
-			$folder_real_path = $real_path.$folder[0].'/';
+			$folder_tag_path = $tag_path.$subfolder.'/';
+			$folder_server_path = $server_path.$subfolder.'/';
 
 			// add this subfolder
 			$folders[] = $folder_tag_path;
 
 			// add any sub-subfolders
-			$this->get_all_subfolders($folders, $folder_tag_path, $folder_real_path);
+			$this->get_all_subfolders($folders, $folder_tag_path, $folder_server_path);
 		}
 	}
 
 	/**
-	 * Get Files
+	 * Get Files in Folder
 	 */
 	function get_files_in_folder($folder)
 	{
-		$files = array();
+		$r = array();
 
-		if (is_dir($folder) && ($handle = opendir($folder)))
+		if ($this->is_folder($folder) && ($files = scandir($folder)))
 		{
-			while (($file = readdir($handle)) !== FALSE)
+			foreach ($files as $file)
 			{
-				// ignore hidden files
-				if (substr($file, 0, 1) == '.') continue;
-
-				$path = $folder . $file;
-
-				// ignore folders
-				if (is_dir($path)) continue;
-
-				$files[] = $file;
+				// only include non-hidden files
+				if (! is_dir($folder.$file) && strncmp($file, '.', 1) != 0)
+				{
+					$r[] = $file;
+				}
 			}
-
-			closedir($handle);
 		}
 
-		return $files;
+		return $r;
 	}
 
 	// --------------------------------------------------------------------
 
 	/**
-	 * Prepare File for View
-	 *
-	 * Make sure we know everything about a file we need
-	 * before spitting out its HTML in the view
+	 * Sort Files
 	 */
-	function prep_file_for_view(&$file)
+	function sort_files(&$files, $orderby, $sort)
 	{
-		if (is_string($file))
+		// ignore if no files
+		if (! $files) return;
+
+		if (! in_array($orderby, array('name', 'folder', 'date', 'file_size'))) $orderby = 'name';
+		if (! in_array($sort, array('asc', 'desc'))) $sort = 'asc';
+
+		foreach ($files as &$file)
 		{
-			$file = array('file_path' => $file);
+			$sort_names[] = strtolower($file->filename());
+			$sort_folders[] = $file->folder();
+			if ($orderby == 'file_size') $sort_sizes[] = $file->size();
+			else if ($orderby == 'date') $sort_dates[] = $file->date_modified();
 		}
 
-		if (! isset($file['full_path']) && ! isset($file['folder']))
-		{
-			$this->parse_filedir_path($file['file_path'], $filedir, $subpath);
+		$SORT = ($sort == 'asc') ? SORT_ASC : SORT_DESC;
 
-			$file['filedir_id']   = $filedir->id;
-			$file['filedir_path'] = $this->get_server_path($filedir);
-			$file['filedir_url']  = $filedir->url;
-			$file['full_path']    = $this->get_server_path($filedir) . $subpath;
-			$file['folder']       = $filedir->name . ($subpath ? '/'.$subpath : '');
-			$file['subpath']      = $subpath;
-		}
-
-		if (! isset($file['file_name']))
+		switch ($orderby)
 		{
-			$file['file_name'] = basename($file['full_path']);
-		}
+			case 'name':
+				// sort by name, then folder
+				array_multisort($sort_names, $SORT, SORT_STRING, $sort_folders, SORT_ASC, SORT_STRING, $files);
+				break;
 
-		if (! isset($file['file_size']))
-		{
-			$file['file_size'] = filesize($file['full_path']);
-		}
+			case 'folder':
+				// sort by folder, then name
+				array_multisort($sort_folders, $SORT, SORT_STRING, $sort_names, SORT_ASC, SORT_STRING, $files);
+				break;
 
-		if (! isset($file['date']))
-		{
-			$file['date'] = filemtime($file['full_path']);
-		}
+			case 'date':
+				// sort by date, then name, then folder
+				array_multisort($sort_dates, $SORT, SORT_NUMERIC, $sort_names, SORT_ASC, SORT_STRING, $sort_folders, SORT_ASC, SORT_STRING, $files);
+				break;
 
-		if (! isset($file['url']))
-		{
-			$file['url'] = $file['filedir_url'] . $file['subpath'] . $file['file_name'];
+			case 'file_size':
+				// sort by size, then name, then folder
+				array_multisort($sort_sizes, $SORT, SORT_NUMERIC, $sort_names, SORT_ASC, SORT_STRING, $sort_folders, SORT_ASC, SORT_STRING, $files);
+				break;
 		}
 	}
 
@@ -442,7 +587,7 @@ class Assets_helper {
 		if (preg_match('/^\{filedir_(\d+)\}?(.*)/', $path, $match))
 		{
 			// is this a valid file directory?
-			if ($filedir = $this->get_filedir_prefs($match[1])->row())
+			if ($filedir = $this->get_filedir_prefs($match[1]))
 			{
 				$subpath = ltrim($match[2], '/');
 			}
@@ -460,7 +605,7 @@ class Assets_helper {
 		$this->parse_filedir_path($file_path, $filedir, $subpath);
 		if (! $filedir || ! $subpath) return FALSE;
 
-		$full_path = $this->get_server_path($filedir) . $subpath;
+		$full_path = $filedir->server_path . $subpath;
 
 		// does the file exist, and it actually a file?
 		return (file_exists($full_path) && is_file($full_path)) ? $full_path : FALSE;
@@ -470,11 +615,11 @@ class Assets_helper {
 	var $file_kinds = array(
 		'access'      => array('adp','accdb','mdb'),
 		'audio'       => array('wav','aif','aiff','aifc','m4a','wma','mp3','aac','oga'),
-		'excel'       => array('xls'),
+		'excel'       => array('xls', 'xlsx'),
 		'flash'       => array('fla','swf'),
 		'html'        => array('html','htm'),
 		'illustrator' => array('ai'),
-		'image'       => array('jpg','jpeg','tiff','tif','png','gif','bmp','webp'),
+		'image'       => array('jpg','jpeg','jpe','tiff','tif','png','gif','bmp','webp'),
 		'pdf'         => array('pdf'),
 		'photoshop'   => array('psd','psb'),
 		'php'         => array('php'),
@@ -528,4 +673,23 @@ class Assets_helper {
 
 	}
 
+}
+
+// -----------------------------------------------------------------------
+//  Keep a single instance of the Assets helper
+// -----------------------------------------------------------------------
+
+/**
+ * Get Assets Helper
+ */
+function get_assets_helper()
+{
+	global $assets_helper;
+
+	if (! $assets_helper)
+	{
+		$assets_helper = new Assets_helper;
+	}
+
+	return $assets_helper;
 }

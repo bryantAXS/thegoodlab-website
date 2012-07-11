@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -21,7 +21,7 @@
  * @package		CodeIgniter
  * @subpackage	Helpers
  * @category	Helpers
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/helpers/url_helper.html
  */
 
@@ -529,11 +529,26 @@ if ( ! function_exists('url_title'))
  */
 if ( ! function_exists('redirect'))
 {
-	function redirect($uri = '', $method = 'location', $http_response_code = 302)
+	function redirect($uri = '', $method = 'auto', $http_response_code = 302)
 	{
+		// Remove hard line breaks and carriage returns
+		$uri = str_replace(array("\n", "\r"), '', $uri);
+
+		// Remove any and all line breaks
+		while (stripos($uri, '%0d') !== FALSE OR stripos($uri, '%0a') !== FALSE)
+		{
+			$uri = str_ireplace(array('%0d', '%0a'), '', $uri);
+		}
+
 		if ( ! preg_match('#^https?://#i', $uri))
 		{
 			$uri = site_url($uri);
+		}
+
+		// IIS environment likely? Use 'refresh' for better compatibility
+		if (DIRECTORY_SEPARATOR != '/' && $method == 'auto')
+		{
+			$method = 'refresh';
 		}
 
 		switch($method)

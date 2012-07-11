@@ -98,6 +98,13 @@ Assets.ThumbView = Assets.Class({
 	},
 
 	/**
+	 * Get Scrollpane
+	 */
+	getScrollpane: function() {
+		return this.$scrollpane;
+	},
+
+	/**
 	 * Set Drag Wrapper
 	 */
 	setDragWrapper: function(file) {

@@ -9,51 +9,66 @@ window.Wygwam;
  */
 Wygwam = function(id, config, defer) {
 
-	config = (Wygwam.configs[config] || Wygwam.configs['default']);
+	this.id = id;
+	this.config = (Wygwam.configs[config] || Wygwam.configs['default']);
+	this.defer = defer;
 
-	if (! defer) {
-		CKEDITOR.replace(id, config);
+	if (this.defer) {
+		this.showIframe();
+	} else {
+		this.initCKEditor();
 	}
-	else {
-		var width = (config.width ? config.width.toString() : '100%'),
-			height = (config.height ? config.height.toString() : '200');
+};
+
+
+Wygwam.prototype = {
+
+	/**
+	 * Show Iframe
+	 */
+	showIframe: function() {
+		var width = (this.config.width ? this.config.width.toString() : '100%'),
+			height = (this.config.height ? this.config.height.toString() : '200'),
+			css = (this.config.contentsCss ? this.config.contentsCss : Wygwam.themeUrl+'lib/ckeditor/contents.css'),
+			$textarea = $('#'+this.id).hide();
 
 		if (width.match(/\d$/)) width += 'px';
 		if (height.match(/\d$/)) height += 'px';
 
-		var css = (config.contentsCss ? config.contentsCss : Wygwam.themeUrl+'lib/ckeditor/contents.css'),
-			html = '<link rel="stylesheet" type="text/css" href="'+css+'" />'
-			     + '<style type="text/css">* { cursor: pointer !important; }</style>';
+		this.$iframe = $('<iframe class="wygwam" style="width:'+width+'; height:'+height+';" frameborder="0" />').insertAfter($textarea);
 
-		var $textarea = $('#'+id).hide();
+		var iDoc = this.$iframe[0].contentWindow.document,
+			html = '<html>'
+			     +   '<head>'
+			     +     '<link rel="stylesheet" type="text/css" href="'+css+'" />'
+			     +     '<style type="text/css">* { cursor: pointer !important; }</style>'
+			     +   '</head>'
+			     +   '<body>'
+			     +     $textarea.val()
+			     +   '</body>'
+			     + '</html>';
 
-		html += $textarea.val();
+		iDoc.open();
+		iDoc.write(html);
+		iDoc.close();
 
-		Wygwam.defers[id] = {
-			config: config,
-			html: html
-		};
+		$(iDoc).click($.proxy(this, 'initCKEditor'));
+	},
 
-		var src = Wygwam.themeUrl+'scripts/defer.html?'+id,
-			$iframe = $('<iframe class="wygwam" style="width:'+width+'; height:'+height+';" frameborder="0" src="'+src+'" />').insertAfter($textarea);
+	/**
+	 * Init CKEditor
+	 */
+	initCKEditor: function() {
+		if (this.$iframe) {
+			this.$iframe.remove();
+		}
 
-		Wygwam.defers[id].$iframe = $iframe;
+		CKEDITOR.replace(this.id, this.config);
 	}
-};
+}
 
 
 Wygwam.configs = {};
-Wygwam.defers = {};
-
-
-/**
- * Initialize Deferred Field
- */
-Wygwam.initDeferedField = function(id) {
-	var data = Wygwam.defers[id];
-	data.$iframe.remove();
-	CKEDITOR.replace(id, data.config);
-};
 
 
 /**

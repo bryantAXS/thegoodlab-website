@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -21,7 +21,7 @@
  * @package		CodeIgniter
  * @subpackage	Libraries
  * @category	Image_lib
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/libraries/image_lib.html
  */
 class CI_Image_lib {
@@ -75,6 +75,7 @@ class CI_Image_lib {
 	var $error_msg			= array();
 	var $wm_use_drop_shadow	= FALSE;
 	var $wm_use_truetype	= FALSE;
+	var $wm_use_opacity		= FALSE;
 
 	/**
 	 * Constructor
@@ -146,7 +147,7 @@ class CI_Image_lib {
 		if ($this->source_image == '')
 		{
 			$this->set_error('imglib_source_image_required');
-			return FALSE;	
+			return FALSE;
 		}
 
 		/*
@@ -189,7 +190,7 @@ class CI_Image_lib {
 		// Set the Image Properties
 		if ( ! $this->get_image_properties($this->source_folder.$this->source_image))
 		{
-			return FALSE;	
+			return FALSE;
 		}
 
 		/*
@@ -284,16 +285,22 @@ class CI_Image_lib {
 		 *
 		 */
 		if ($this->width == '')
+		{
 			$this->width = $this->orig_width;
+		}
 
 		if ($this->height == '')
+		{
 			$this->height = $this->orig_height;
+		}
 
 		// Set the quality
 		$this->quality = trim(str_replace("%", "", $this->quality));
 
 		if ($this->quality == '' OR $this->quality == 0 OR ! is_numeric($this->quality))
+		{
 			$this->quality = 90;
+		}
 
 		// Set the x/y coordinates
 		$this->x_axis = ($this->x_axis == '' OR ! is_numeric($this->x_axis)) ? 0 : $this->x_axis;
@@ -319,6 +326,11 @@ class CI_Image_lib {
 		if ($this->wm_overlay_path != '')
 		{
 			$this->wm_overlay_path = str_replace("\\", "/", realpath($this->wm_overlay_path));
+		}
+		
+		if (isset($props['wm_opacity']) AND $props['wm_opacity'] != 100)
+		{
+			$this->wm_use_opacity = TRUE;
 		}
 
 		if ($this->wm_shadow_color != '')
@@ -399,7 +411,7 @@ class CI_Image_lib {
 		if ($this->rotation_angle == '' OR ! in_array($this->rotation_angle, $degs))
 		{
 			$this->set_error('imglib_rotation_angle_required');
-			return FALSE;	
+			return FALSE;
 		}
 
 		// Reassign the width and height
@@ -512,14 +524,12 @@ class CI_Image_lib {
 		}
 
 		$dst_img = $create($this->width, $this->height);
-
-		if ($this->image_type == 3) // png we can actually preserve transparency
-		{
-			imagealphablending($dst_img, FALSE);
-			imagesavealpha($dst_img, TRUE);
-		}
+		
+		// Preserve alpha
+		$this->image_preserve_alpha($dst_img, $src_img);
 
 		$copy($dst_img, $src_img, 0, 0, $this->x_axis, $this->y_axis, $this->width, $this->height, $this->orig_width, $this->orig_height);
+		
 
 		//  Show the image
 		if ($this->dynamic_output == TRUE)
@@ -718,14 +728,16 @@ class CI_Image_lib {
 		}
 
 		// Set the background color
-		// This won't work with transparent PNG files so we are
-		// going to have to figure out how to determine the color
-		// of the alpha channel in a future release.
-
+		// Transparent PNGs will be able to retain their transparency,
+		// GIFs and JPEGs will have a white background
 		$white	= imagecolorallocate($src_img, 255, 255, 255);
 
 		//  Rotate it!
 		$dst_img = imagerotate($src_img, $this->rotation_angle, $white);
+		
+		// Preserve transparency
+		imagealphablending($dst_img, true); 
+		imagesavealpha($dst_img, true);
 
 		//  Save the Image
 		if ($this->dynamic_output == TRUE)
@@ -771,69 +783,96 @@ class CI_Image_lib {
 
 		$width  = $this->orig_width;
 		$height = $this->orig_height;
-
+		
+		$new_img = imagecreatetruecolor($width, $height);
+		
+		// Preserve alpha
+		$this->image_preserve_alpha($new_img, $src_img);
+		
+		$src_x = 0;
+		$src_y = 0;
+		$src_width = $width;
+		$src_height = $height;
+		
 		if ($this->rotation_angle == 'hor')
 		{
-			for ($i = 0; $i < $height; $i++)
-			{
-				$left  = 0;
-				$right = $width-1;
-
-				while ($left < $right)
-				{
-					$cl = imagecolorat($src_img, $left, $i);
-					$cr = imagecolorat($src_img, $right, $i);
-
-					imagesetpixel($src_img, $left, $i, $cr);
-					imagesetpixel($src_img, $right, $i, $cl);
-
-					$left++;
-					$right--;
-				}
-			}
+			$src_x = $width - 1;
+			$src_width = 0 - $width;
 		}
 		else
 		{
-			for ($i = 0; $i < $width; $i++)
-			{
-				$top = 0;
-				$bot = $height-1;
-
-				while ($top < $bot)
-				{
-					$ct = imagecolorat($src_img, $i, $top);
-					$cb = imagecolorat($src_img, $i, $bot);
-
-					imagesetpixel($src_img, $i, $top, $cb);
-					imagesetpixel($src_img, $i, $bot, $ct);
-
-					$top++;
-					$bot--;
-				}
-			}
+			$src_y = $height - 1;
+			$src_height = 0 - $height;
 		}
-
+		
+		imagecopyresampled($new_img, $src_img, 0, 0, $src_x, $src_y, $width, $height, $src_width, $src_height);
+		
 		//  Show the image
 		if ($this->dynamic_output == TRUE)
 		{
-			$this->image_display_gd($src_img);
+			$this->image_display_gd($new_img);
 		}
 		else
 		{
 			// Or save it
-			if ( ! $this->image_save_gd($src_img))
+			if ( ! $this->image_save_gd($new_img))
 			{
 				return FALSE;
 			}
 		}
 
 		//  Kill the file handles
-		imagedestroy($src_img);
+		imagedestroy($new_img);
 
 		// Set the file to 777
 		@chmod($this->full_dst_path, FILE_WRITE_MODE);
 
 		return TRUE;
+	}
+
+	// --------------------------------------------------------------------
+
+	/**
+	 * Preserves transparencies when working with GIFs and PNGs
+	 *
+	 * Provided a new image and source image resource, it works with those
+	 * already-allocated resources, so it returns void
+	 *
+	 * @access	public
+	 * @param	resource $new_img Destination image resource, will have alpha applied to this
+	 * @param	resource $src_img Source image resource for reference
+	 */
+	function image_preserve_alpha($new_img, $src_img)
+	{
+		// Preserve transparancies for GIFs and PNGs
+		if ($this->image_type == 1 || $this->image_type == 3)
+		{
+			$src_alpha_index = imagecolortransparent($src_img);
+			
+			if ($src_alpha_index >= 0)
+			{
+				// Get color at alpha index
+				$alpha_color = imagecolorsforindex($src_img, $src_alpha_index);
+
+				// Get new alpha index in new image resource
+				$alpha_index = imagecolorallocate($new_img, $alpha_color['red'], $alpha_color['green'], $alpha_color['blue']);
+				
+				// Set alpha color as background color and make it transparent
+				imagefill($new_img, 0, 0, $alpha_index);
+				imagecolortransparent($new_img, $alpha_index);
+			}
+			else if ($this->image_type == 3)
+			{
+				imagealphablending($new_img, false);
+				
+				// Create a new transparent color for image
+				$alpha_color = imagecolorallocatealpha($new_img, 0, 0, 0, 127);
+				
+				// Set alpha color as background color and save alpha state
+				imagefill($new_img, 0, 0, $alpha_color);
+				imagesavealpha($new_img, true);
+			}
+		}
 	}
 
 	// --------------------------------------------------------------------
@@ -894,29 +933,45 @@ class CI_Image_lib {
 		// we don't want the vertical offset to push it
 		// further down.  We want the reverse, so we'll
 		// invert the offset.  Same with the horizontal
-		// offset when the image is at the right
+		// offset when the image is at the right.
+		// We'll also make sure padding behaves as it
+		// does in CSS, i.e. padding is applied to top
+		// and left when aligned in top left, and
+		// applied bottom and right when aligned bottom
+		// right.
 
 		$this->wm_vrt_alignment = strtoupper(substr($this->wm_vrt_alignment, 0, 1));
 		$this->wm_hor_alignment = strtoupper(substr($this->wm_hor_alignment, 0, 1));
-
+		
+		$x_padding = $this->wm_padding;
+		$y_padding = $this->wm_padding;
+		
 		if ($this->wm_vrt_alignment == 'B')
+		{
 			$this->wm_vrt_offset = $this->wm_vrt_offset * -1;
+			$y_padding = $y_padding * -1;
+		}
 
 		if ($this->wm_hor_alignment == 'R')
+		{
 			$this->wm_hor_offset = $this->wm_hor_offset * -1;
+			$x_padding = $x_padding * -1;
+		}
 
 		//  Set the base x and y axis values
-		$x_axis = $this->wm_hor_offset + $this->wm_padding;
-		$y_axis = $this->wm_vrt_offset + $this->wm_padding;
+		$x_axis = $this->wm_hor_offset + $x_padding;
+		$y_axis = $this->wm_vrt_offset + $y_padding;
 
 		//  Set the vertical position
 		switch ($this->wm_vrt_alignment)
 		{
 			case 'T':
 				break;
-			case 'M':	$y_axis += ($this->orig_height / 2) - ($wm_height / 2);
+			case 'M':
+				$y_axis += ($this->orig_height / 2) - ($wm_height / 2);
 				break;
-			case 'B':	$y_axis += $this->orig_height - $wm_height;
+			case 'B':
+				$y_axis += $this->orig_height - $wm_height;
 				break;
 		}
 
@@ -925,9 +980,11 @@ class CI_Image_lib {
 		{
 			case 'L':
 				break;
-			case 'C':	$x_axis += ($this->orig_width / 2) - ($wm_width / 2);
+			case 'C':
+				$x_axis += ($this->orig_width / 2) - ($wm_width / 2);
 				break;
-			case 'R':	$x_axis += $this->orig_width - $wm_width;
+			case 'R':
+				$x_axis += $this->orig_width - $wm_width;
 				break;
 		}
 
@@ -940,9 +997,9 @@ class CI_Image_lib {
 		// Set RGB values for text and shadow
 		$rgba = imagecolorat($wm_img, $this->wm_x_transp, $this->wm_y_transp);
 		$alpha = ($rgba & 0x7F000000) >> 24;
-
+		
 		// make a best guess as to whether we're dealing with an image with alpha transparency or no/binary transparency
-		if ($alpha > 0)
+		if ( ! $this->wm_use_opacity AND $alpha > 0)
 		{
 			// copy the image directly, the image's alpha transparency being the sole determinant of blending
 			imagecopy($src_img, $wm_img, $x_axis, $y_axis, 0, 0, $wm_width, $wm_height);
@@ -953,7 +1010,7 @@ class CI_Image_lib {
 			imagecolortransparent($wm_img, imagecolorat($wm_img, $this->wm_x_transp, $this->wm_y_transp));
 			imagecopymerge($src_img, $wm_img, $x_axis, $y_axis, 0, 0, $wm_width, $wm_height, $this->wm_opacity);
 		}
-
+		
 		//  Output the image
 		if ($this->dynamic_output == TRUE)
 		{
@@ -1018,12 +1075,29 @@ class CI_Image_lib {
 		// further down.  We want the reverse, so we'll
 		// invert the offset.  Note: The horizontal
 		// offset flips itself automatically
+		// We'll also make sure padding behaves as it
+		// does in CSS, i.e. padding is applied to top
+		// and left when aligned in top left, and
+		// applied bottom and right when aligned bottom
+		// right.
+		
+		$this->wm_vrt_alignment = strtoupper(substr($this->wm_vrt_alignment, 0, 1));
+		$this->wm_hor_alignment = strtoupper(substr($this->wm_hor_alignment, 0, 1));
 
+		$x_padding = $this->wm_padding;
+		$y_padding = $this->wm_padding;
+		
 		if ($this->wm_vrt_alignment == 'B')
+		{
 			$this->wm_vrt_offset = $this->wm_vrt_offset * -1;
+			$y_padding = $y_padding * -1;
+		}
 
 		if ($this->wm_hor_alignment == 'R')
+		{
 			$this->wm_hor_offset = $this->wm_hor_offset * -1;
+			$x_padding = $x_padding * -1;
+		}
 
 		// Set font width and height
 		// These are calculated differently depending on
@@ -1031,7 +1105,9 @@ class CI_Image_lib {
 		if ($this->wm_use_truetype == TRUE)
 		{
 			if ($this->wm_font_size == '')
+			{
 				$this->wm_font_size = '17';
+			}
 
 			$fontwidth  = $this->wm_font_size-($this->wm_font_size/4);
 			$fontheight = $this->wm_font_size;
@@ -1044,23 +1120,22 @@ class CI_Image_lib {
 		}
 
 		// Set base X and Y axis values
-		$x_axis = $this->wm_hor_offset + $this->wm_padding;
-		$y_axis = $this->wm_vrt_offset + $this->wm_padding;
+		$x_axis = $this->wm_hor_offset + $x_padding;
+		$y_axis = $this->wm_vrt_offset + $y_padding;
 
 		// Set verticle alignment
 		if ($this->wm_use_drop_shadow == FALSE)
 			$this->wm_shadow_distance = 0;
 
-		$this->wm_vrt_alignment = strtoupper(substr($this->wm_vrt_alignment, 0, 1));
-		$this->wm_hor_alignment = strtoupper(substr($this->wm_hor_alignment, 0, 1));
-
 		switch ($this->wm_vrt_alignment)
 		{
-			case	 "T" :
+			case "T" :
 				break;
-			case "M":	$y_axis += ($this->orig_height/2)+($fontheight/2);
+			case "M":
+				$y_axis += ($this->orig_height/2)+($fontheight/2);
 				break;
-			case "B":	$y_axis += ($this->orig_height - $fontheight - $this->wm_shadow_distance - ($fontheight/2));
+			case "B":
+				$y_axis += ($this->orig_height - $fontheight - $this->wm_shadow_distance - ($fontheight/2));
 				break;
 		}
 
@@ -1073,14 +1148,17 @@ class CI_Image_lib {
 			case "L":
 				break;
 			case "R":
-						if ($this->wm_use_drop_shadow)
-							$x_shad += ($this->orig_width - $fontwidth*strlen($this->wm_text));
-							$x_axis += ($this->orig_width - $fontwidth*strlen($this->wm_text));
+				if ($this->wm_use_drop_shadow){
+					$x_shad += ($this->orig_width - $fontwidth*strlen($this->wm_text));
+				}
+				$x_axis += ($this->orig_width - $fontwidth*strlen($this->wm_text));
 				break;
 			case "C":
-						if ($this->wm_use_drop_shadow)
-							$x_shad += floor(($this->orig_width - $fontwidth*strlen($this->wm_text))/2);
-							$x_axis += floor(($this->orig_width  -$fontwidth*strlen($this->wm_text))/2);
+				if ($this->wm_use_drop_shadow)
+				{
+					$x_shad += floor(($this->orig_width - $fontwidth*strlen($this->wm_text))/2);
+				}
+				$x_axis += floor(($this->orig_width  -$fontwidth*strlen($this->wm_text))/2);
 				break;
 		}
 
@@ -1088,14 +1166,18 @@ class CI_Image_lib {
 		if ($this->wm_use_truetype)
 		{
 			if ($this->wm_use_drop_shadow)
+			{
 				imagettftext($src_img, $this->wm_font_size, 0, $x_shad, $y_shad, $drp_color, $this->wm_font_path, $this->wm_text);
-				imagettftext($src_img, $this->wm_font_size, 0, $x_axis, $y_axis, $txt_color, $this->wm_font_path, $this->wm_text);
+			}
+			imagettftext($src_img, $this->wm_font_size, 0, $x_axis, $y_axis, $txt_color, $this->wm_font_path, $this->wm_text);
 		}
 		else
 		{
 			if ($this->wm_use_drop_shadow)
+			{
 				imagestring($src_img, $this->wm_font_size, $x_shad, $y_shad, $this->wm_text, $drp_color);
-				imagestring($src_img, $this->wm_font_size, $x_axis, $y_axis, $this->wm_text, $txt_color);
+			}
+			imagestring($src_img, $this->wm_font_size, $x_axis, $y_axis, $this->wm_text, $txt_color);
 		}
 
 		//  Output the final image
@@ -1128,42 +1210,44 @@ class CI_Image_lib {
 	function image_create_gd($path = '', $image_type = '')
 	{
 		if ($path == '')
+		{
 			$path = $this->full_src_path;
+		}
 
 		if ($image_type == '')
+		{
 			$image_type = $this->image_type;
-
+		}
 
 		switch ($image_type)
 		{
-			case	 1 :
-						if ( ! function_exists('imagecreatefromgif'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
-							return FALSE;
-						}
+			case 1 :
+				if ( ! function_exists('imagecreatefromgif'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
+					return FALSE;
+				}
 
-						return imagecreatefromgif($path);
+				return imagecreatefromgif($path);
 				break;
 			case 2 :
-						if ( ! function_exists('imagecreatefromjpeg'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
-							return FALSE;
-						}
+				if ( ! function_exists('imagecreatefromjpeg'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
+					return FALSE;
+				}
 
-						return imagecreatefromjpeg($path);
+				return imagecreatefromjpeg($path);
 				break;
 			case 3 :
-						if ( ! function_exists('imagecreatefrompng'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
-							return FALSE;
-						}
+				if ( ! function_exists('imagecreatefrompng'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
+					return FALSE;
+				}
 
-						return imagecreatefrompng($path);
+				return imagecreatefrompng($path);
 				break;
-
 		}
 
 		$this->set_error(array('imglib_unsupported_imagecreate'));
@@ -1187,47 +1271,47 @@ class CI_Image_lib {
 		switch ($this->image_type)
 		{
 			case 1 :
-						if ( ! function_exists('imagegif'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
-							return FALSE;
-						}
+				if ( ! function_exists('imagegif'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_gif_not_supported'));
+					return FALSE;
+				}
 
-						if ( ! @imagegif($resource, $this->full_dst_path))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
+				if ( ! @imagegif($resource, $this->full_dst_path))
+				{
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
 				break;
 			case 2	:
-						if ( ! function_exists('imagejpeg'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
-							return FALSE;
-						}
+				if ( ! function_exists('imagejpeg'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_jpg_not_supported'));
+					return FALSE;
+				}
 
-						if ( ! @imagejpeg($resource, $this->full_dst_path, $this->quality))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
+				if ( ! @imagejpeg($resource, $this->full_dst_path, $this->quality))
+				{
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
 				break;
 			case 3	:
-						if ( ! function_exists('imagepng'))
-						{
-							$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
-							return FALSE;
-						}
+				if ( ! function_exists('imagepng'))
+				{
+					$this->set_error(array('imglib_unsupported_imagecreate', 'imglib_png_not_supported'));
+					return FALSE;
+				}
 
-						if ( ! @imagepng($resource, $this->full_dst_path))
-						{
-							$this->set_error('imglib_save_failed');
-							return FALSE;
-						}
+				if ( ! @imagepng($resource, $this->full_dst_path))
+				{
+					$this->set_error('imglib_save_failed');
+					return FALSE;
+				}
 				break;
 			default		:
-							$this->set_error(array('imglib_unsupported_imagecreate'));
-							return FALSE;
+				$this->set_error(array('imglib_unsupported_imagecreate'));
+				return FALSE;
 				break;
 		}
 
@@ -1252,13 +1336,17 @@ class CI_Image_lib {
 
 		switch ($this->image_type)
 		{
-			case 1		:	imagegif($resource);
+			case 1:
+				imagegif($resource);
 				break;
-			case 2		:	imagejpeg($resource, '', $this->quality);
+			case 2:
+				imagejpeg($resource, '', $this->quality);
 				break;
-			case 3		:	imagepng($resource);
+			case 3:
+				imagepng($resource);
 				break;
-			default		:	echo 'Unable to display the image';
+			default:
+				echo 'Unable to display the image';
 				break;
 		}
 	}
@@ -1281,10 +1369,14 @@ class CI_Image_lib {
 	function image_reproportion()
 	{
 		if ( ! is_numeric($this->width) OR ! is_numeric($this->height) OR $this->width == 0 OR $this->height == 0)
+		{
 			return;
+		}
 
 		if ( ! is_numeric($this->orig_width) OR ! is_numeric($this->orig_height) OR $this->orig_width == 0 OR $this->orig_height == 0)
+		{
 			return;
+		}
 
 		$new_width	= ceil($this->orig_width*$this->height/$this->orig_height);
 		$new_height	= ceil($this->width*$this->orig_height/$this->orig_width);
@@ -1326,7 +1418,9 @@ class CI_Image_lib {
 		// find a way to determine this using IM or NetPBM
 
 		if ($path == '')
+		{
 			$path = $this->full_src_path;
+		}
 
 		if ( ! file_exists($path))
 		{
@@ -1392,7 +1486,9 @@ class CI_Image_lib {
 		foreach ($allowed as $item)
 		{
 			if ( ! isset($vals[$item]) OR $vals[$item] == '')
+			{
 				$vals[$item] = 0;
+			}
 		}
 
 		if ($vals['width'] == 0 OR $vals['height'] == 0)
@@ -1496,7 +1592,6 @@ class CI_Image_lib {
 		{
 			foreach ($msg as $val)
 			{
-
 				$msg = ($CI->lang->line($val) == FALSE) ? $val : $CI->lang->line($val);
 				$this->error_msg[] = $msg;
 				log_message('error', $msg);

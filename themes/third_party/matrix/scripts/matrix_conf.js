@@ -298,7 +298,7 @@ MatrixConf.Col = function(field, index, id, type){
 
 		obj.dom.$inputs.bind('keydown.matrix-tabcontrol', function(event) {
 			// was this a tab?
-			if (! event.metaKey && event.keyCode == 9) {
+			if (! event.metaKey && ! event.ctrlKey && event.keyCode == 9) {
 				// get the index of this input
 				var inputIndex = $.inArray(this, obj.dom.$inputs);
 

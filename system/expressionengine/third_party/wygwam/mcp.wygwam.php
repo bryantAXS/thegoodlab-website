@@ -55,27 +55,14 @@ class Wygwam_mcp {
 	 */
 	function index()
 	{
+		$this->EE->load->library('table');
+
 		$this->_set_page_title();
 
 		$vars['base'] = $this->base;
 
-		// configs
-		$this->EE->db->select('config_id, config_name');
-		$this->EE->db->order_by('config_name');
-		$query = $this->EE->db->get('wygwam_configs');
-		$vars['configs'] = $query->result_array();
-
-		// settings
-		$query = $this->EE->db->select('settings')
-		                      ->where('name', 'wygwam')
-		                      ->get('fieldtypes');
-
-		$settings = unserialize(base64_decode($query->row('settings')));
-
-		$vars['license_key'] = isset($settings['license_key']) ? $settings['license_key'] : '';
-		$vars['file_browser'] = isset($settings['file_browser']) ? $settings['file_browser'] : 'ee';
-
-		$this->EE->load->library('table');
+		// add the global settings to the vars
+		$vars = array_merge($vars, $this->helper->get_global_settings());
 
 		return $this->EE->load->view('index', $vars, TRUE);
 	}

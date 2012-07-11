@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Model
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Channel_model extends CI_Model {
@@ -36,6 +36,10 @@ class Channel_model extends CI_Model {
 		if (( $site_id === NULL OR ! is_numeric($site_id)) && $site_id != 'all')
 		{
 			$site_id = $this->config->item('site_id');
+		}
+		elseif ($site_id === 'all')
+		{
+			$this->db->order_by('site_id');
 		}
 
 		// If the user is restricted to specific channels, add that to the query
@@ -207,6 +211,9 @@ class Channel_model extends CI_Model {
 	 */
 	function get_channel_categories($cat_group, $additional_fields = array(), $additional_where = array())
 	{
+		$this->load->library('logger');
+		$this->logger->deprecated('2.3', 'Category_model::get_channel_categories()');
+		
 		$this->load->model('category_model');
 		return $this->category_model->get_channel_categories($cat_group, $additional_fields, $additional_where);
 	}
@@ -244,15 +251,26 @@ class Channel_model extends CI_Model {
 		{
 			$this->db->where('author_id', $this->session->userdata['member_id']);
 		}
-
-		$q = $this->db->get($table, 1);
-
+		
+		if ($allowed_channels = $this->session->userdata('assigned_channels'))
+		{
+			// Only return an entry from a channel the user has access to
+			$this->db->where_in('channel_id', array_keys($allowed_channels));
+		}
+		// Return FALSE if user does not have access to any channels
+		else
+		{
+			return FALSE;
+		}
+		
+		$entry = $this->db->get($table, 1);
+		
 		// Return the result if we found anything
-		if ($q->num_rows() > 0)
+		if ($entry->num_rows() > 0)
 		{
 			reset($fields);  // Needed due to a 5.2.1 bug (#40705)
 
-			return (count($fields) > 1) ? $q->row_array() : $q->row(current($fields));
+			return (count($fields) > 1) ? $entry->row_array() : $entry->row(current($fields));
 		}
 		
 		return FALSE;

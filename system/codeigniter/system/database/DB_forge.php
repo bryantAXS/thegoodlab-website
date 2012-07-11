@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -19,7 +19,7 @@
  * Database Utility Class
  *
  * @category	Database
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/database/
  */
 class CI_DB_forge {
@@ -193,7 +193,7 @@ class CI_DB_forge {
 		$sql = $this->_create_table($this->db->dbprefix.$table, $this->fields, $this->primary_keys, $this->keys, $if_not_exists);
 
 		// Update the db data cache
-		if ( ! array_search($this->db->dbprefix.$table, $this->db->data_cache['table_names']))
+		if ( ! array_search($this->db->dbprefix.$table, $this->db->list_tables()))
 		{
 			$this->db->data_cache['table_names'][] = $this->db->dbprefix.$table;
 		}

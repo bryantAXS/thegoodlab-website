@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Core
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class EE_Extensions {  
@@ -151,7 +151,6 @@ class EE_Extensions {
 		if ($this->in_progress == $which) return;
 		
 		$this->in_progress = $which;
-		$this->EE->load->library('security');
 		$this->EE->load->library('addons');
 		$this->EE->addons->is_package('');
 		
@@ -186,7 +185,7 @@ class EE_Extensions {
 				$name = $this->EE->security->sanitize_filename(strtolower(substr($class, 0, -4))); // remove '_ext' suffix
 				
 				$path = $this->EE->addons->_packages[$name]['extension']['path'];
-				$extension_path = $path.'/ext.'.$name.'.php';
+				$extension_path = $this->EE->functions->remove_double_slashes($path.'/ext.'.$name.'.php');
 
 				if (file_exists($extension_path))
 				{

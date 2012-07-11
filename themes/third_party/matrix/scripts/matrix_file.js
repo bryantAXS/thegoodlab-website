@@ -65,8 +65,8 @@ Matrix.bind('file', 'display', function(cell){
 	if (cell.settings.ee22plus) {
 
 		$.ee_filebrowser.add_trigger($addBtn, id, {
-			content_type: cell.settings.content_type,
-			directory:    cell.settings.directory
+			content_type: (cell.settings.content_type ? cell.settings.content_type : 'any'),
+			directory:    (cell.settings.directory ? cell.settings.directory : 'all')
 		}, function(file, field){
 			cell.selectFile(file.upload_location_id, file.file_name, file.thumb);
 		});

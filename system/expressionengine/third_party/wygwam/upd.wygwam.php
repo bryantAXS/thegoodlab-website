@@ -20,7 +20,7 @@ class Wygwam_upd {
 	/**
 	 * Constructor
 	 */
-	function Wygwam_upd()
+	function __construct()
 	{
 		$this->EE =& get_instance();
 

@@ -66,14 +66,14 @@ function CheckAuthentication()
 // LicenseKey : Paste your license key here. If left blank, CKFinder will be
 // fully functional, in demo mode.
 $config['LicenseName'] = 'Wygwam';
-$config['LicenseKey'] = 'BS3Q-HBBM-BM9V-U33C-ELGV-CLS9-PT51';
+$config['LicenseKey'] = 'EAA8-H6WK-NK57-M2SU-J4FQ-ES8U-VXU3';
 
 /*
  Uncomment lines below to enable PHP error reporting and displaying PHP errors.
  Do not do this on a production server. Might be helpful when debugging why CKFinder does not work as expected.
 */
-//error_reporting(E_ALL);
-//ini_set('display_errors', 1);
+// error_reporting(E_ALL);
+// ini_set('display_errors', 1);
 
 /*
 To make it easy to configure CKFinder, the $baseUrl and $baseDir can be used.
@@ -286,6 +286,13 @@ checked, not only the last part. In this way, uploading foo.php.rar would be
 denied, because "php" is on the denied extensions list.
 */
 $config['CheckDoubleExtension'] = true;
+
+/*
+Increases the security on an IIS web server.
+If enabled, CKFinder will disallow creating folders and uploading files whose names contain characters
+that are not safe under an IIS web server.
+*/
+$config['DisallowUnsafeCharacters'] = true;
 
 /*
 If you have iconv enabled (visit http://php.net/iconv for more information),

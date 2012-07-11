@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Core
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 
@@ -143,7 +143,17 @@ class Auth {
 
 		$not_allowed_groups = array_merge($not_allowed_groups, $always_disallowed);
 
-		if ( ! $this->_retrieve_http_basic())
+		$authed = $this->_retrieve_http_basic();
+
+		if ($authed !== FALSE)
+		{
+			if (in_array($authed->member('group_id'), $not_allowed_groups))
+			{
+				$authed = FALSE;
+			}
+		}
+
+		if ($authed === FALSE)
 		{
 			@header('WWW-Authenticate: Basic realm="'.$realm.'"');
 			$this->EE->output->set_status_header(401);
@@ -185,7 +195,7 @@ class Auth {
 	 */
 	public function verify()
 	{
-		$username = $this->EE->input->post('username');
+		$username = (string) $this->EE->input->post('username');
 
 		// No username/password?  Bounce them...
 		if ( ! $username)
@@ -246,7 +256,7 @@ class Auth {
 		//  Check credentials
 		// ----------------------------------------------------------------
 
-		$password = $this->EE->input->post('password');
+		$password = (string) $this->EE->input->post('password');
 		$incoming = $this->EE->auth->authenticate_username($username, $password);
 
 		// Not even close
@@ -399,6 +409,16 @@ class Auth {
 			return FALSE;
 		}
 		
+		// remove old remember me's and sessions, so that
+		// changing your password effectively logs out people
+		// using the old one.
+		$this->EE->remember->delete_others();
+		
+		$this->EE->db->where('member_id', (int) $member_id);
+		$this->EE->db->where('session_id !=', $this->EE->session->userdata('session_id'));
+		$this->EE->db->delete('sessions');
+		
+		// update password in db
 		$this->EE->db->where('member_id', (int) $member_id);
 		$this->EE->db->update('members', $hashed_pair);
 		
@@ -522,7 +542,7 @@ class Auth {
 		{
 			if ( isset($_SERVER['HTTP_AUTHORIZATION']) && substr($_SERVER['HTTP_AUTHORIZATION'], 0, 6) == 'Basic ')
 			{
-				list($user, $pass) = explode(':', base64_decode(substr($HTTP_AUTHORIZATION, 6)));
+				list($user, $pass) = explode(':', base64_decode(substr($_SERVER['HTTP_AUTHORIZATION'], 6)));
 			}
 			elseif ( ! empty($_ENV) && isset($_ENV['HTTP_AUTHORIZATION']) && substr($_ENV['HTTP_AUTHORIZATION'], 0, 6) == 'Basic ')
 			{
@@ -560,7 +580,7 @@ class Auth {
 			return FALSE;	
 		}
 
-		return ($this->authenticate_username($user, $pass)) ? TRUE : FALSE;
+		return $this->authenticate_username($user, $pass);
 	}
 }
 // END Auth class
@@ -572,6 +592,7 @@ class Auth_result {
 	private $member;
 	private $session_id;
 	private $remember_me = 0;
+	private $anon = FALSE;
 	private $EE;
 	
 	/**
@@ -702,7 +723,19 @@ class Auth_result {
 	{
 		$this->remember_me = $expire;
 	}
+
+	// --------------------------------------------------------------------
 	
+	/**
+	 * Anon setter
+	 *
+	 * @access	public
+	 */
+	function anon($anon)
+	{
+		$this->anon = $anon;
+	}
+
 	// --------------------------------------------------------------------
 	
 	/**
@@ -714,41 +747,8 @@ class Auth_result {
 	 */
 	public function start_session($cp_sess = FALSE)
 	{
-		$remember = '';
 		$multi = $this->session_id ? TRUE : FALSE;
 		$sess_type = $cp_sess ? 'admin_session_type' : 'user_session_type';
-		
-		if ($this->EE->config->item($sess_type) != 's')
-		{
-			$expire = $this->remember_me;
-			
-			$this->EE->functions->set_cookie(
-				$this->EE->session->c_anon, 1, $expire
-			);
-			$this->EE->functions->set_cookie(
-				$this->EE->session->c_expire, time()+$expire, $expire
-			);
-			
-			// (un)set remember me
-			if ($expire)
-			{
-				$remember = $this->EE->functions->random('unique', 32);
-				
-				$this->EE->functions->set_cookie(
-					$this->EE->session->c_remember, $remember, $expire
-				);
-			}
-			else
-			{
-				$this->EE->functions->set_cookie($this->EE->session->c_remember);
-			}
-		}		
-		
-		// update the remember me column
-		$this->EE->db->where('member_id', $this->member('member_id'));
-		$this->EE->db->update('members', array(
-			'remember_me' => $remember
-		));
 		
 		if ($multi)
 		{
@@ -765,8 +765,35 @@ class Auth_result {
 		{
 			// Create a new session
 			$this->session_id = $this->EE->session->create_new_session(
-				$this->member('member_id'), $cp_sess
+				$this->member('member_id'),
+				$cp_sess
 			);
+		}
+		
+		
+		if ($this->EE->config->item($sess_type) != 's')
+		{
+			$expire = $this->remember_me;
+			
+			if ($this->anon)
+			{
+				$this->EE->functions->set_cookie($this->EE->session->c_anon, 1, $expire);
+			}
+			else
+			{
+				// Unset the anon cookie
+				$this->EE->functions->set_cookie($this->EE->session->c_anon);				
+			}
+			
+			// (un)set remember me
+			if ($expire)
+			{
+				$this->EE->remember->create($expire);
+			}
+			else
+			{
+				$this->EE->remember->delete();
+			}
 		}
 		
 		if ($cp_sess === TRUE)

@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Fieldtypes
  * @category	Fieldtypes
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Rel_ft extends EE_Fieldtype {
@@ -98,7 +98,7 @@ class Rel_ft extends EE_Fieldtype {
 				$field_options[$relrow['entry_id']] = $relrow['title'];
 			}
 
-			return form_dropdown($this->field_name, $field_options, $data);
+			return form_dropdown($this->field_name, $field_options, $data, 'id="field_id_'.$this->field_id.'"');
 		}
 	}
 	

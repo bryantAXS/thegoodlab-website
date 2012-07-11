@@ -6,8 +6,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -22,7 +22,7 @@
  * @package		ExpressionEngine
  * @subpackage	Control Panel
  * @category	Control Panel
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Content_publish extends CI_Controller {
@@ -45,7 +45,7 @@ class Content_publish extends CI_Controller {
 	{
 		parent::__construct();
 
-		if ( ! $this->cp->allowed_group('can_access_content'))
+		if ( ! $this->cp->allowed_group('can_access_content', 'can_access_publish'))
 		{
 			show_error(lang('unauthorized_access'));
 		}
@@ -126,7 +126,6 @@ class Content_publish extends CI_Controller {
 	public function entry_form()
 	{
 		$this->load->library('form_validation');
-		$this->load->helper('form');
 		
 		$entry_id	= (int) $this->input->get_post('entry_id');
 		$channel_id	= (int) $this->input->get_post('channel_id');
@@ -263,14 +262,15 @@ class Content_publish extends CI_Controller {
 		$this->load->library('filemanager');
 		$this->load->helper('snippets');
 		
-		$this->filemanager->filebrowser('C=content_publish&M=filemanager_actions');
+		$this->load->library('file_field');
+		$this->file_field->browser();
 		
 		$this->cp->add_js_script(array(
-			'ui'		=> array('datepicker', 'resizable', 'draggable', 'droppable'),
-			'plugin'	=> array('markitup', 'toolbox.expose', 'overlay', 'tmpl', 'ee_url_title'),
-			'file'		=> array('json2', 'cp/publish', 'cp/publish_tabs', 'cp/global')
+			'ui'	 => array('datepicker', 'resizable', 'draggable', 'droppable'),
+			'plugin' => array('markitup', 'toolbox.expose', 'overlay', 'tmpl', 'ee_url_title'),
+			'file'	=> array('json2', 'cp/publish', 'cp/publish_tabs')
 		));
-		
+
 		if ($this->session->userdata('group_id') == 1)
 		{
 			$this->cp->add_js_script(array('file' => 'cp/publish_admin'));
@@ -309,6 +309,8 @@ class Content_publish extends CI_Controller {
 			'field_list'		=> $field_list,
 			'layout_styles'		=> $layout_styles,
 			'field_output'		=> $field_output,
+			'layout_group'	=> (is_numeric($this->input->get_post('layout_preview'))) ?
+				$this->input->get_post('layout_preview') : $this->session->userdata('group_id'),
 			
 			'spell_enabled'		=> TRUE,
 			'smileys_enabled'	=> $this->_smileys_enabled,
@@ -329,7 +331,7 @@ class Content_publish extends CI_Controller {
 				'filter'			=> $this->input->get_post('filter')
 			),
 			
-			'preview_url' => $preview_url
+			'preview_url'	=> $preview_url
 		);
 
 		$this->cp->set_breadcrumb(BASE.AMP.'C=content_publish', lang('publish'));
@@ -652,7 +654,7 @@ class Content_publish extends CI_Controller {
 
 				if (isset($resrow['field_dt_'.$expl['1']]))
 				{
-					if ($resrow[$key] > 0)
+					if ($resrow[$key] != 0)
 					{
 						$localize = TRUE;
 						$date = $resrow[$key];
@@ -679,11 +681,12 @@ class Content_publish extends CI_Controller {
 			}
 		}
 		
+		$publish_another_link = BASE.AMP.'C=content_publish'.AMP.'M=entry_form'.AMP.'channel_id='.$channel_id;
 		
 		// Ugh, we just overwrite? Strong typing please!!
 		if ($show_edit_link)
 		{
-			$show_edit_link = BASE.AMP.'C=content_publish'.AMP.'M=entry_form'.AMP.'channel_id='.$channel_id.AMP.'entry_id='.$entry_id;
+			$show_edit_link = $publish_another_link.AMP.'entry_id='.$entry_id;
 		}
 		
 		
@@ -741,6 +744,7 @@ class Content_publish extends CI_Controller {
 			'filter_link'			=> $filter_link,
 			'live_look_link'		=> $live_look_link,
 			'show_edit_link'		=> $show_edit_link,
+			'publish_another_link'	=> $publish_another_link,
 			'comment_count'			=> $comment_count,
 			'show_comments_link'	=> $show_comments_link,
 			
@@ -810,7 +814,6 @@ class Content_publish extends CI_Controller {
 		$this->api->instantiate('channel_categories');
 		
 		$this->load->model('category_model');
-		$this->load->helper('form');
 		
 		$query = $this->category_model->get_categories($group_id, FALSE);
 		$this->api_channel_categories->category_tree($group_id, '', $query->row('sort_order'));
@@ -1155,6 +1158,9 @@ class Content_publish extends CI_Controller {
 				if ($vquery->num_rows() === 1)
 				{
 					$vdata = unserialize($vquery->row('version_data'));
+					
+					// Legacy fix for revisions where the entry_id in the array was saved as 0
+					$vdata['entry_id'] = $entry_id;
 					
 					$result = array_merge($result, $vdata);
 				}
@@ -2029,12 +2035,15 @@ class Content_publish extends CI_Controller {
 		
 		$qry = $this->db->select('username, screen_name')
 						->get_where('members', array('member_id' => (int) $author_id));
-			
-		$author = ($qry->row('screen_name')  == '') ? $qry->row('username') : $qry->row('screen_name');
-		$menu_author_options[$author_id] = $author;
+		
+		if ($qry->num_rows() > 0)
+		{
+			$menu_author_options[$author_id] = ($qry->row('screen_name')  == '')
+				? $qry->row('username') : $qry->row('screen_name');
+		}
 		
 		// Next we'll gather all the authors that are allowed to be in this list
-		$author_list = $this->member_model->get_authors_simple();
+		$author_list = $this->member_model->get_authors();
 
 		$channel_id = (isset($entry_data['channel_id'])) ? $entry_data['channel_id'] : $this->input->get('channel_id');
 
@@ -2354,6 +2363,13 @@ class Content_publish extends CI_Controller {
 				foreach ($v as $val)
 				{
 					$settings[$val['field_id']] = $val;
+
+					// So 3rd party module tab fields get their data on autosave
+					if (isset($entry_data[$val['field_id']]))
+					{
+						$settings[$val['field_id']]['field_data'] = $entry_data[$val['field_id']];
+					}
+					
 					$this->_tab_labels[$tab]	= lang($tab);
 					$this->_module_tabs[$tab][] = array(
 													'id' 	=> $val['field_id'],
@@ -2542,8 +2558,6 @@ class Content_publish extends CI_Controller {
 					$this->javascript->set_global('filebrowser.image_tag', '<img src="[![Link:!:http://]!]" alt="[![Alternative text]!]" />');			
 		}
 		
-		$this->javascript->set_global('p.image_tag', 'foo you!');
-
 		$markItUp = $markItUp_writemode = array(
 			'nameSpace'		=> "html",
 			'onShiftEnter'	=> array('keepDefault' => FALSE, 'replaceWith' => "<br />\n"),
@@ -2592,9 +2606,9 @@ class Content_publish extends CI_Controller {
 	 */
 	private function _setup_file_list()
 	{
-		$this->load->model('tools_model');
+		$this->load->model('file_upload_preferences_model');
 		
-		$upload_directories = $this->tools_model->get_upload_preferences($this->session->userdata('group_id'));
+		$upload_directories = $this->file_upload_preferences_model->get_file_upload_preferences($this->session->userdata('group_id'));
 	
 		$this->_file_manager = array(
 			'file_list'						=> array(),
@@ -2607,13 +2621,13 @@ class Content_publish extends CI_Controller {
 							'file_properties'
 						);
 	
-		foreach($upload_directories->result() as $row)
+		foreach($upload_directories as $row)
 		{
-			$this->_file_manager['upload_directories'][$row->id] = $row->name;
+			$this->_file_manager['upload_directories'][$row['id']] = $row['name'];
 
 			foreach($fm_opts as $prop)
 			{
-				$this->_file_manager['file_list'][$row->id][$prop] = $row->$prop;
+				$this->_file_manager['file_list'][$row['id']][$prop] = $row[$prop];
 			}
 		}
 	}

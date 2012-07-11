@@ -20,6 +20,7 @@ Matrix.bind('date', 'display', function(cell){
 	var time = " \'"+hours+':'+minutes+meridiem+"\'";
 
 	$input.datepicker({
+		constrainInput: false,
 		dateFormat: $.datepicker.W3C + time,
 		defaultDate: new Date(cell.settings.defaultDate)
 	});

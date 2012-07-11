@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Core
  * @category	Core
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class EE_Typography extends CI_Typography {
@@ -374,7 +374,7 @@ class EE_Typography extends CI_Typography {
 		$str = $this->format_html($str);
 
 		//  Auto-link URLs and email addresses
-		if ($this->auto_links == 'y' AND $this->html_format != 'none')
+		if ($this->auto_links == 'y')
 		{
 			$str = $this->auto_linker($str);
 		}
@@ -406,7 +406,7 @@ class EE_Typography extends CI_Typography {
 		{
 			case 'none';
 				break;
-			case 'xhtml'	: $str = $this->xhtml_typography($str);
+			case 'xhtml'	: $str = $this->auto_typography($str);
 				break;
 			case 'lite'		: $str = $this->format_characters($str);  // Used with channel entry titles
 				break;
@@ -584,16 +584,6 @@ class EE_Typography extends CI_Typography {
 			}
 		}
 
-		// Convert codeblock division used with code tag
-
-		if (count($this->code_chunks) > 0)
-		{
-			foreach ($this->code_chunks as $key => $val)
-			{
-				$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>', '[div class="codeblock"]{'.$key.'yH45k02wsSdrp}[/div]', $str);
-			}
- 		}
-
 		// Convert anchors to BBCode
         // We do this to prevent allowed HTML from getting converted in the next step
         // Old method would only convert links that had href= as the first tag attribute
@@ -660,10 +650,7 @@ class EE_Typography extends CI_Typography {
 		// where the inner url was valid, but did not exactly match the other:
 		// [url=http://www.iblamepaul.com]www.iblamepaul.com[/url] ;) -pk
 		
-		if (strpos($str, 'http') !== FALSE)
-		{
-			$str = preg_replace_callback("#(^|\s|\(|..\])((http(s?)://)|(www\.))(\w+[^\s\)\<\[]+)(.{0,6})#im", array(&$this, 'auto_linker_callback'), $str);
-		}
+		$str = preg_replace_callback("#(^|\s|\(|..\])((http(s?)://)|(www\.))(\w+[^\s\)\<\[]+)(.{0,6})#im", array(&$this, 'auto_linker_callback'), $str);
 		
 		// Auto link email
 		if (strpos($str, '@') !== FALSE)
@@ -741,7 +728,7 @@ class EE_Typography extends CI_Typography {
         /**  Remap some deprecated tags with valid counterparts
         /** -------------------------------------*/
 		
-		$str = str_replace(array('[strike]', '[/strike]', '[u]', '[/u]'), array('[del]', '[/del]', '[em]', '[/em]'), $str);
+		$str = str_ireplace(array('[strike]', '[/strike]', '[u]', '[/u]'), array('[del]', '[/del]', '[em]', '[/em]'), $str);
 		
 		/** -------------------------------------
 		/**  Decode BBCode array map 
@@ -749,7 +736,7 @@ class EE_Typography extends CI_Typography {
 				
 		foreach($this->safe_decode as $key => $val)
 		{
-			$str = str_replace(array('['.$key.']', '[/'.$key.']'),	array('<'.$val.'>', '</'.$val.'>'),	$str);
+			$str = str_ireplace(array('['.$key.']', '[/'.$key.']'),	array('<'.$val.'>', '</'.$val.'>'),	$str);
 		}
 		
 		/** -------------------------------------
@@ -800,7 +787,7 @@ class EE_Typography extends CI_Typography {
 		/**  Convert [url] tags to links 
 		/** -------------------------------------*/
 		
-		if (strpos($str, '[url') !== FALSE)
+		if (stripos($str, '[url') !== FALSE)
 		{			
 			$bounce	= ((REQ == 'CP' && $this->EE->input->get('M') != 'send_email') OR $this->EE->config->item('redirect_submitted_links') == 'y') ? $this->EE->functions->fetch_site_index().QUERY_MARKER.'URL=' : '';
 
@@ -902,7 +889,7 @@ class EE_Typography extends CI_Typography {
 		/** -------------------------------------*/
 		// [img] and [/img]
 		
-		if (strpos($str, '[img]') !== FALSE)
+		if (stripos($str, '[img]') !== FALSE)
 		{
 			$bad_things	 = array("'",'"', ';', '[', '(', ')', '!', '*', '>', '<', "\t", "\r", "\n", 'document.cookie');
 
@@ -951,7 +938,7 @@ class EE_Typography extends CI_Typography {
 
 		// [quote author="Brett" date="11231189803874"]...[/quote]
 		
-		if (strpos($str, '[quote') !== FALSE)
+		if (stripos($str, '[quote') !== FALSE)
 		{
 			$str = preg_replace('/\[quote\s+(author=".*?"\s+date=".*?")\]/si', '<blockquote \\1>', $str);
 		}
@@ -1170,7 +1157,7 @@ class EE_Typography extends CI_Typography {
 	 * Colorize code strings
 	 */
 	public function text_highlight($str)
-	{		
+	{	
 		// No [code] tags?  No reason to live.  Goodbye cruel world...
 		
 		if ( ! preg_match_all("/\[code\](.+?)\[\/code\]/si", $str, $matches))
@@ -1221,7 +1208,9 @@ class EE_Typography extends CI_Typography {
 						
 			$this->code_chunks[$this->code_counter] = $temp;
 
-			$str = str_replace($matches['0'][$i], '<div class="codeblock">{'.$this->code_counter.'yH45k02wsSdrp}</div>', $str);
+			// Go directly to BB code to avoid extra replace and 
+			// prevent 'convert to entities' from converting the div tag
+			$str = str_replace($matches['0'][$i], '[div class="codeblock"]{'.$this->code_counter.'yH45k02wsSdrp}[/div]', $str);
 			
 			$this->code_counter++;
 		}		
@@ -1252,7 +1241,10 @@ class EE_Typography extends CI_Typography {
 	 * @deprecated in 2.1.5 and will be removed at a later date.
 	 */
     function xhtml_typography($str)
-    {  		
+    {
+		$this->EE->load->library('logger');
+		$this->EE->logger->deprecated('2.1.5', 'EE_Typography::auto_typography()');
+		
 		return $this->auto_typography($str);
     }
 
@@ -1293,7 +1285,7 @@ class EE_Typography extends CI_Typography {
 			$bit[] .= " ".ord(substr($email, $i, 1));
 		}
 		
-		$temp	= array();
+		$temp = array();
 		
 		if ($anchor == TRUE)
 		{		
@@ -1331,36 +1323,48 @@ class EE_Typography extends CI_Typography {
 		}
 		
 		$bit = array_reverse($bit);
-		$span_id = 'eeEncEmail_'.$this->EE->functions->random('alpha', 10);
+		$span_marker = 'data-eeEncEmail_'.$this->EE->functions->random('alpha', 10);
 
 		ob_start();
-		
-?>
-<span id='<?php echo $span_id; ?>'>.<?php echo $this->EE->lang->line('encoded_email'); ?></span><script type="text/javascript">
-/*<![CDATA[*/
-var l=new Array();
-var output = '';
-<?php
-	
-	$i = 0;
-	foreach ($bit as $val)
-	{
-?>l[<?php echo $i++; ?>]='<?php echo $val; ?>';<?php
-	}
-?>
 
-for (var i = l.length-1; i >= 0; i=i-1){ 
-if (l[i].substring(0, 1) == ' ') output += "&#"+unescape(l[i].substring(1))+";"; 
-else output += unescape(l[i]);
+/* CAREFUL
+ *
+ * This javascript currently breaks in the forum if it outputs curly brackets. 
+ * Test if you change it.
+ * 
+ * Leave the comments in the while (--j >= 0) loop. They make sure that when 
+ * the line breaks are removed EE doesn't see {if...
+ *
+ * Regex speed hat tip: http://blog.stevenlevithan.com/archives/faster-trim-javascript
+*/ ?>
+
+<span <?php echo $span_marker; ?>='1'>.<?php echo lang('encoded_email'); ?></span><script type="text/javascript">
+/*<![CDATA[*/
+var out = '',
+	el = document.getElementsByTagName('span'),
+	l = ['<?php echo implode("','", $bit)?>'],
+	i = l.length,
+	j = el.length;
+
+while (--i >= 0)
+{
+	out += unescape(l[i].replace(/^\s\s*/, '&#'));
 }
-document.getElementById('<?php echo $span_id; ?>').innerHTML = output;
+
+while (--j >= 0)
+{/**/
+	if (el[j].getAttribute('<?php echo $span_marker ?>'))
+	{
+		el[j].innerHTML = out;
+	}
+}
 /*]]>*/
 </script><?php
 
 		$buffer = ob_get_contents();
 		ob_end_clean(); 
 
-		return str_replace("\n", '', $buffer);		
+		return str_replace(array("\n", "\t"), '', $buffer);		
 	}
 	
 	// --------------------------------------------------------------------
@@ -1476,6 +1480,8 @@ document.getElementById('<?php echo $span_id; ?>').innerHTML = output;
 				{
 					// First line takes care of the line break that might be there, which should
 					// be a line break because it is just a simple break from the [code] tag.
+
+					// Note: [div class="codeblock"] has been converted to <div class="codeblock"> at this pont
 					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>'."\n<br />", '</p><div class="codeblock">'.$val.'</div><p>', $str);
 					$str = str_replace('<div class="codeblock">{'.$key.'yH45k02wsSdrp}</div>', '</p><div class="codeblock">'.$val.'</div><p>', $str);
 				}

@@ -13,6 +13,8 @@ var onDisplay = function(cell){
 		config = Wygwam.matrixColConfigs[cell.col.id],
 		id = cell.field.id+'_'+cell.row.id+'_'+cell.col.id+'_'+Math.floor(Math.random()*100000000);
 
+	id = id.replace(/\[/, '_').replace(/\]/, '');
+
 	$textarea.attr('id', id);
 
 	new Wygwam(id, config[0], config[1], cell);

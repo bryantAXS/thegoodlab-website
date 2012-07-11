@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Fieldtypes
  * @category	Fieldtypes
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Select_ft extends EE_Fieldtype {
@@ -73,15 +73,21 @@ class Select_ft extends EE_Fieldtype {
 	{
 		$text_direction = ($this->settings['field_text_direction'] == 'rtl') ? 'rtl' : 'ltr';
 		$field_options = $this->_get_field_options($data);
+		$field_id = (ctype_digit($this->field_id)) ? 'field_id_'.$this->field_id : $this->field_id;
 		
-		return form_dropdown($this->field_name, $field_options, $data, 'dir="'.$text_direction.'" id="'.$this->field_id.'"');
-		
+		return form_dropdown($this->field_name, $field_options, $data, 'dir="'.$text_direction.'" id="'.$field_id.'"');
 	}
 	
 	// --------------------------------------------------------------------
 	
 	function replace_tag($data, $params = '', $tagdata = '')
 	{
+		// Experimental parameter, do not use
+		if (isset($params['raw_output']) && $params['raw_output'] == 'yes')
+		{
+			return $this->EE->functions->encode_ee_tags($data);
+		}
+
 		return $this->EE->typography->parse_type(
 			$this->EE->functions->encode_ee_tags($data),
 			array(

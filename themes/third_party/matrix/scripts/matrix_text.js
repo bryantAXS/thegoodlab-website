@@ -109,7 +109,7 @@ Matrix.bind('text', 'display', function(cell){
 
 		if (updateHeight) {
 			updateTextHeight(true);
-			interval = setInterval(updateTextHeight, 1);
+			interval = setInterval(updateTextHeight, 100);
 		}
 
 		setTimeout(function(){
@@ -160,7 +160,7 @@ Matrix.bind('text', 'display', function(cell){
 		$textarea.keypress(function(event) {
 			var keyCode = event.keyCode ? event.keyCode : event.charCode;
 
-			if (! event.metaKey && (
+			if (! event.metaKey && ! event.ctrlKey && (
 				(settings.multiline != 'y' && keyCode == 13)
 				|| (settings.spaces != 'y' && keyCode == 32)
 				|| (settings.content == 'integer' && $.inArray(keyCode, integerKeyCodes) == -1)

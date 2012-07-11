@@ -4,8 +4,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -20,7 +20,7 @@
  * @package		ExpressionEngine
  * @subpackage	Modules
  * @category	Modules
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Pages_tab {
@@ -74,6 +74,16 @@ class Pages_tab {
 		if ($pages_uri == '')
 		{
 			$this->EE->javascript->set_global('publish.pages.pagesUri', lang('example_uri'));
+			
+			$qry = $this->EE->db->select('configuration_value')
+								->where('configuration_name', 'template_channel_'.$channel_id)
+								->where('site_id', (int) $site_id)
+								->get('pages_configuration');
+			
+			if ($qry->num_rows() > 0)
+			{
+				$pages_template_id = (int) $qry->row('configuration_value');
+			}
 		}
 		else
 		{
@@ -224,7 +234,7 @@ class Pages_tab {
 				                    str_replace($this->EE->config->item('site_url'), '',
 				                                $mod_data['pages_uri']));
 				
-				$page = '/' . ltrim($page, '/');
+				$page = '/' . trim($page, '/');
 				
 				$site_pages[$site_id]['uris'][$params['entry_id']] = $page;
 				$site_pages[$site_id]['templates'][$params['entry_id']] = preg_replace("#[^0-9]+$#i", '',

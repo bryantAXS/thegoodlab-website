@@ -5,8 +5,8 @@
  * An open source application development framework for PHP 5.1.6 or newer
  *
  * @package		CodeIgniter
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2008 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2008 - 2012, EllisLab, Inc.
  * @license		http://codeigniter.com/user_guide/license.html
  * @link		http://codeigniter.com
  * @since		Version 1.0
@@ -23,7 +23,7 @@
  * @package		CodeIgniter
  * @subpackage	Drivers
  * @category	Database
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://codeigniter.com/user_guide/database/
  */
 class CI_DB_active_record extends CI_DB_driver {
@@ -841,9 +841,11 @@ class CI_DB_active_record extends CI_DB_driver {
 	 * @access	public
 	 * @param	string
 	 * @param	string	direction: asc or desc
+	 * @param	boolean	escape: Tells _protect_identifiers() whether
+	 * 			we are escaping what appear to be escapable values
 	 * @return	object
 	 */
-	function order_by($orderby, $direction = '')
+	function order_by($orderby, $direction = '', $escape = NULL)
 	{
 		if (strtolower($direction) == 'random')
 		{
@@ -864,7 +866,7 @@ class CI_DB_active_record extends CI_DB_driver {
 				$part = trim($part);
 				if ( ! in_array($part, $this->ar_aliased_tables))
 				{
-					$part = $this->_protect_identifiers(trim($part));
+					$part = $this->_protect_identifiers(trim($part), FALSE, $escape);
 				}
 
 				$temp[] = $part;

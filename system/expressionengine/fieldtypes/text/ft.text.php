@@ -3,8 +3,8 @@
  * ExpressionEngine - by EllisLab
  *
  * @package		ExpressionEngine
- * @author		ExpressionEngine Dev Team
- * @copyright	Copyright (c) 2003 - 2011, EllisLab, Inc.
+ * @author		EllisLab Dev Team
+ * @copyright	Copyright (c) 2003 - 2012, EllisLab, Inc.
  * @license		http://expressionengine.com/user_guide/license.html
  * @link		http://expressionengine.com
  * @since		Version 2.0
@@ -19,7 +19,7 @@
  * @package		ExpressionEngine
  * @subpackage	Fieldtypes
  * @category	Fieldtypes
- * @author		ExpressionEngine Dev Team
+ * @author		EllisLab Dev Team
  * @link		http://expressionengine.com
  */
 class Text_ft extends EE_Fieldtype {
@@ -98,22 +98,33 @@ class Text_ft extends EE_Fieldtype {
 	{
 		$type = (isset($this->settings['field_content_type'])) ? $this->settings['field_content_type'] : 'all';
 		
-		$data = $this->_format_number($data, $type);
-		
-		return form_input(array(
+		$field = array(
 			'name'		=> $this->field_name,
 			'id'		=> $this->field_name,
-			'value'		=> $data,
+			'value'		=> $this->_format_number($data, $type),
 			'dir'		=> $this->settings['field_text_direction'],
-			'maxlength'	=> $this->settings['field_maxl'], 
 			'field_content_type' => $type
-		));
+		);
+
+		// maxlength attribute should only appear if its value is > 0
+		if ($this->settings['field_maxl'])
+		{
+			$field['maxlength'] = $this->settings['field_maxl'];
+		}
+
+		return form_input($field);
 	}
 	
 	// --------------------------------------------------------------------
 	
 	function replace_tag($data, $params = '', $tagdata = '')
 	{
+		// Experimental parameter, do not use
+		if (isset($params['raw_output']) && $params['raw_output'] == 'yes')
+		{
+			return $this->EE->functions->encode_ee_tags($data);
+		}
+
 		$type		= isset($this->settings['field_content_type']) ? $this->settings['field_content_type'] : 'all';
 		$decimals	= isset($params['decimal_place']) ? (int) $params['decimal_place'] : FALSE;
 		
@@ -151,16 +162,16 @@ class Text_ft extends EE_Fieldtype {
 		$field_content_options = array('all' => lang('all'), 'numeric' => lang('type_numeric'), 'integer' => lang('type_integer'), 'decimal' => lang('type_decimal'));
 		
 		$this->EE->table->add_row(
-			lang('field_max_length', 'field_max1'),
-			form_input(array('id'=>'field_maxl','name'=>'field_maxl', 'size'=>4,'value'=>$field_maxl))
+			lang('field_max_length', $prefix.'field_max_length'),
+			form_input(array('id'=>$prefix.'field_max_length','name'=>'field_maxl', 'size'=>4,'value'=>$field_maxl))
 		);
 
 		$this->field_formatting_row($data, $prefix);
 		$this->text_direction_row($data, $prefix);
 
 		$this->EE->table->add_row(
-			lang('field_content_text', 'field_content_text'),
-			form_dropdown('text_field_content_type', $field_content_options, $data['field_content_type'], 'id="text_field_content_type"').$extra
+			lang('field_content_text', $prefix.'field_content_type'),
+			form_dropdown('text_field_content_type', $field_content_options, $data['field_content_type'], 'id="'.$prefix.'field_content_type"').$extra
 		);
 
 		$this->field_show_smileys_row($data, $prefix);

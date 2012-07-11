@@ -1,15 +1,24 @@
 <?php
-	foreach ($folders as $folder):
+	if (isset($folders) && $folders):
 
-		if (! file_exists($folder[1]) || ! is_dir($folder[1])) continue;
+		// -------------------------------------------
+		//  Sort folders alphabetically
+		// -------------------------------------------
 
-		$id = (isset($folder[2]) && $folder[2]) ? $folder[2] : $id_prefix.$folder[0].'/';
+		foreach ($folders as $folder)
+		{
+			$sort_names[] = strtolower($folder['name']);
+		}
 
-		$padding = 20 + (18 * $depth);
+		array_multisort($sort_names, SORT_ASC, SORT_STRING, $folders);
+
+
+		foreach ($folders as $folder):
 ?>
 	<li class="assets-fm-folder">
-		<a data-id="<?=$id?>" style="padding-left: <?=$padding?>px"><span class="assets-fm-icon"></span><?=$folder[0]?>  </a>
+		<a data-path="<?=$folder['path']?>" style="padding-left: <?=(20 + (18 * $depth))?>px"><span class="assets-fm-icon"></span><?=$folder['name']?>  </a>
 	</li>
 <?php
-	endforeach
+		endforeach;
+	endif;
 ?>

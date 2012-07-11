@@ -197,6 +197,8 @@ Assets.Drag = Assets.Class({
 		// put the target item in the front of the list
 		this.$draggees = $([ this.target ].concat(this.$draggees.not(this.target).toArray()));
 
+		this.draggeeDisplay = this.$draggees.css('display');
+
 		for (var i = 0; i < this.$draggees.length; i++) {
 			// create the helper
 			var $draggee = $(this.$draggees[i]),
@@ -540,8 +542,8 @@ Assets.Sort = Assets.Class({
 		}
 
 		// "show" the drag items, but make them invisible
-		this.drag.$draggees.show().css({
-			display: 'block',
+		this.drag.$draggees.css({
+			display:    this.drag.draggeeDisplay,
 			visibility: 'hidden'
 		});
 

@@ -1,55 +1,67 @@
-<div class="assets-filename"><div class=" assets-<?=$kind?>"><?=$file_name?></div></div>
+<div class="assets-filename"><div class=" assets-<?=$file->kind()?>"><?=$file->filename()?></div></div>
 
 <div class="assets-filedata">
 	<table cellspacing="0" cellpadding="0" border="0">
 		<tr class="assets-fileinfo">
 			<th scope="row"><?=lang('size')?></th>
-			<td><?=$file_size?></td>
+			<td><?=$helper->format_filesize($file->size())?></td>
 		</tr>
 		<tr class="assets-fileinfo">
 			<th scope="row"><?=lang('kind')?></th>
-			<td><?=ucfirst(lang($kind))?></td>
+			<td><?=ucfirst(lang($file->kind()))?></td>
 		</tr>
-	<?php if ($kind == 'image'): ?>
+	<?php if ($file->kind() == 'image'): ?>
 		<tr class="assets-fileinfo">
 			<th scope="row"><?=lang('image_size')?></th>
-			<td><?=$image_size?></td>
+			<td><?=$file->width().' &times; '.$file->height()?></td>
 		</tr>
 	<?php endif ?>
 
 		<tr class="assets-spacer"><th></th><td></td></tr>
 
-		<tr class="assets-title assets-odd">
+		<tr>
 			<th scope="row"><?=lang('title')?></th>
-			<td><textarea rows="1"><?=$title?></textarea></td>
+			<td><textarea name="title" rows="1" data-maxl="100"><?=$file->row('title')?></textarea></td>
 		</tr>
-		<tr class="assets-date">
+		<tr>
 			<th scope="row"><?=lang('date')?></th>
-			<td><input type="text" value="<?=$date?>" /></td>
+			<td><input name="date" type="text" data-type="date" <?php if ($file->row('date')): ?>data-default-date="<?=$this->localize->set_localized_time($file->row('date')) * 1000?>" value="<?=$this->localize->set_human_time($file->row('date'))?>"<?php endif ?> /></td>
 		</tr>
-		<tr class="assets-alt_text assets-odd">
+		<tr>
 			<th scope="row"><?=lang('alt_text')?></th>
-			<td><textarea rows="1"><?=$alt_text?></textarea></td>
+			<td><textarea name="alt_text" rows="1" data-maxl="255"><?=$file->row('alt_text')?></textarea></td>
 		</tr>
-		<tr class="assets-caption">
+		<tr>
 			<th scope="row"><?=lang('caption')?></th>
-			<td><textarea rows="1"><?=$caption?></textarea></td>
+			<td><textarea name="caption" rows="1" data-maxl="255"><?=$file->row('caption')?></textarea></td>
 		</tr>
-		<tr class="assets-desc assets-odd">
+		<tr>
 			<th scope="row"><?=lang('description')?></th>
-			<td><textarea rows="1"><?=$desc?></textarea></td>
+			<td><textarea name="desc" rows="1" data-maxl="65535" data-multiline="1"><?=$file->row('desc')?></textarea></td>
 		</tr>
-		<tr class="assets-author">
+		<tr>
 			<th scope="row"><?=lang($author_lang)?></th>
-			<td><textarea rows="1"><?=$author?></textarea></td>
+			<td><textarea name="author" rows="1" data-maxl="255"><?=$file->row('author')?></textarea></td>
 		</tr>
-		<tr class="assets-location assets-odd">
+		<tr>
 			<th scope="row"><?=lang('location')?></th>
-			<td><textarea rows="1"><?=$location?></textarea></td>
+			<td><textarea name="location" rows="1" data-maxl="255"><?=$file->row('location')?></textarea></td>
 		</tr>
-		<tr class="assets-keywords">
+		<tr>
 			<th scope="row"><?=lang('keywords')?></th>
-			<td><textarea rows="1"><?=$keywords?></textarea></td>
+			<td><textarea name="keywords" rows="1" data-maxl="65535" data-multiline="1"><?=$file->row('keywords')?></textarea></td>
 		</tr>
+<?php
+	// -------------------------------------------
+	//  'assets_meta_add_row' hook
+	//   - Allows extensions to add extra metadata rows to the file properties HUD
+	// 
+		if ($this->extensions->active_hook('assets_file_meta_add_row'))
+		{
+			echo $this->extensions->call('assets_file_meta_add_row', $file);
+		}
+	// 
+	// -------------------------------------------
+?>
 	</table>
 </div>
