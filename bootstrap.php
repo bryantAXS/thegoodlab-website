@@ -152,13 +152,13 @@ else {
     $upload_preferences = array(
         1 => array(                                             // ID of upload destination
             'name'        => 'Uploads',                         // Display name in control panel
-            'server_path' => '/var/www/thegoodlab.com/current/content/uploads/Images', // Server path to upload directory
-            'url'         => 'http://www.thegoodlab.com/content/uploads/Images'              // URL of upload directory
+            'server_path' => '/var/www/thegoodlab.com/current/content/uploads/Images/', // Server path to upload directory
+            'url'         => 'http://www.thegoodlab.com/content/uploads/Images/'              // URL of upload directory
         )
         ,2 => array(                                             // ID of upload destination
             'name'        => 'Screenshots',                         // Display name in control panel
-            'server_path' => '/var/www/thegoodlab.com/current/content/uploads/Screenshots', // Server path to upload directory
-            'url'         => 'http://www.thegoodlab.com/content/uploads/Screenshots'              // URL of upload directory
+            'server_path' => '/var/www/thegoodlab.com/current/content/uploads/Screenshots/', // Server path to upload directory
+            'url'         => 'http://www.thegoodlab.com/content/uploads/Screenshots/'              // URL of upload directory
         )
     );
 }
