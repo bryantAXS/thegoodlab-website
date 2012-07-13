@@ -83,6 +83,11 @@ if (NSM_ENV == 'local') {
             'server_path' => '/Users/bryanthughes/Sites/thegoodlab.com/content/uploads/', // Server path to upload directory
             'url'         => 'http://thegoodlab.local/content/uploads/'              // URL of upload directory
         )
+        ,2 => array(                                             // ID of upload destination
+            'name'        => 'Screenshots',                         // Display name in control panel
+            'server_path' => '/Users/bryanthughes/Sites/thegoodlab.com/content/uploads/Screenshots/', // Server path to upload directory
+            'url'         => 'http://thegoodlab.local/content/uploads/Screenshots/'              // URL of upload directory
+        )
     );
 
 }
@@ -346,7 +351,7 @@ if(isset($config)) {
         'ce_image_quality' => 100,
         'ce_image_disable_xss_check' => 'yes',
 
-        'ce_cache_drivers' => NSM_ENV == 'm' ? 'dummy' : 'file|db',
+        'ce_cache_drivers' => NSM_ENV == 'local' ? 'dummy' : 'file|db',
         'ce_cache_seconds' => '300',
         'ce_cache_trim' => 'yes',
         'ce_cache_id' => 'page',
