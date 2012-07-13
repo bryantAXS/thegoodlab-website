@@ -2,14 +2,13 @@
 
   {exp:ce_cache:it id='work' tags="work"}
 
-  {exp:channel:entries
-    channel="work"
+  {exp:low_reorder:entries 
     disable="categories|category_fields|member_data|trackbacks"
     limit="3"
     pagination="bottom"
-    sort="asc"
-  }
-  
+    set="1"}
+  <!-- channel variables here -->
+
   <div class='work-container {if count == 1}first{/if}'>
     <div class='section-title-container has-layout'>
       <h2>{title}</h2>
@@ -72,7 +71,7 @@
   </div>
   {/paginate}
 
-  {/exp:channel:entries}
+  {/exp:low_reorder:entries}
 
   {/exp:ce_cache:it}
 
