@@ -5,7 +5,7 @@ AddType text/x-component .htc
   RewriteEngine On
   RewriteBase /
 
-  RewriteCond $1 !^(index\.php|images|assets|css|content|system|cromelogs|templates|themes|crossdomain\.xml|robots\.txt|admin\.php|sitemap\.xml|human\.txt)
+  RewriteCond $1 !^(index\.php|googlec7a0cb7cd3902a4c\.html|images|assets|css|content|system|cromelogs|templates|themes|crossdomain\.xml|robots\.txt|admin\.php|sitemap\.xml|human\.txt)
 	RewriteRule ^(.*)$ index.php/$1
 
   #RewriteCond $1 ^(weblog|member|search|Forum_Name|home|work|about|contact|articles|404|lib|P[0-9]{2,8}) [NC] 
