@@ -60,10 +60,16 @@
         <tr>
           <td><textarea name='comment'></textarea></td>
         </tr>
-        
+
         <tr>
-          <td><input class='green-button' name='submit' value='Submit' type='submit' /></td>
+          <td id='comment-footer'>
+            <div class='follow-up-container'>
+              <label> Notify of follow-up comments?</label><input type="checkbox" name="notify_me" value="yes" {notify_me} />
+            </div>
+            <input id='comment-submit' class='green-button' name='submit' value='Submit' type='submit' />
+          </td>
         </tr>
+
       </tbody>
     </table>
   </div><!-- comment-form-container -->
